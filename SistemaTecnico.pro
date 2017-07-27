@@ -13,9 +13,19 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindowtecnico.cpp
+        mainwindowtecnico.cpp \
+    datamanager.cpp \
+    proceduravoto.cpp \
+    schedavoto.cpp \
+    sessionevoto.cpp \
+    candidato.cpp
 
-HEADERS  += mainwindowtecnico.h
+HEADERS  += mainwindowtecnico.h \
+    datamanager.h \
+    proceduravoto.h \
+    schedavoto.h \
+    sessionevoto.h \
+    candidato.h
 
 FORMS += \
     mainwindowtecnico.ui
