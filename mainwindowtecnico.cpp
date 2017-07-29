@@ -1,7 +1,11 @@
 #include "mainwindowtecnico.h"
 #include "ui_mainwindowtecnico.h"
+#include <iostream>
+#include <string>
+#include <vector>
+#include <QMessageBox>
 
-
+using namespace std;
 
 MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
     QMainWindow(parent),
@@ -9,6 +13,7 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::loginUrna);
+    on_pushButton_addSchedaVoto_clicked();
 
     ui->lineEdit_password_tecnico->setEchoMode(QLineEdit::Password);
     ui->lineEdit_new_password->setEchoMode(QLineEdit::Password);
@@ -24,6 +29,8 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
     QObject::connect(model,SIGNAL(wrongSUpass()),this,SLOT(suPassErrorMessage()),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(tecnicoPassChanged()),this,SLOT(tecnicoPassAggiornata()),Qt::QueuedConnection);
 
+    //qRegisterMetaType< SchedaVoto >( "SchedaVoto" );
+    QObject::connect(this,SIGNAL(schedaPronta(SchedaVoto*)),model,SLOT(storeScheda(SchedaVoto*)),Qt::QueuedConnection);
 }
 
 
@@ -191,9 +198,202 @@ void MainWindowTecnico::on_pushButton_back_scelta_op_2_clicked()
 void MainWindowTecnico::on_pushButton_annulla_scheda_clicked()
 {
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::sceltaOperazione);
+    cout << "annullamento operazione: cancello la nuova scheda di voto" << endl;
+    delete nuovaScheda;
 }
 
 void MainWindowTecnico::on_pushButton_clicked()
 {
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::sceltaOperazione);
 }
+
+void MainWindowTecnico::on_pushButton_addSchedaVoto_clicked()
+{
+    ui->lineEdit_nominativo->hide();
+    ui->label_lista_gruppi_1->hide();
+    ui->comboBox_seleziona_gruppo->hide();
+    ui->pushButton_annulla_aggiungi->hide();
+    ui->pushButton_conferma_aggiungi->hide();
+
+    ui->stackedWidget->setCurrentIndex(InterfacceTecnico::creazioneSchede);
+
+    nuovaScheda = new SchedaVoto();
+
+//    uint row = ui->tableWidget_lista_procedure->currentRow();
+//    uint idProceduraVoto = ui->tableWidget_lista_procedure->item(row,1)->text().toUInt();
+   nuovaScheda->setIdProceduraVoto(1);
+}
+
+void MainWindowTecnico::on_pushButton_aggiungi_candidato_clicked()
+{
+    ui->pushButton_completa_scheda->setEnabled(false);
+    ui->pushButton_rimuovi_candidato->setEnabled(false);
+    ui->pushButton_rimuovi_gruppo->setEnabled(false);
+    ui->pushButton_aggiungi_gruppo->setEnabled(false);
+    ui->pushButton_aggiungi_candidato->setEnabled(false);
+
+    nuovaScheda->setModalitaAdd(SchedaVoto::modoAdd::candidato);
+
+    ui->comboBox_seleziona_gruppo->clear();
+
+    //vector < Associazione > associazioniCorrenti = seggio->getListAssociazioni();
+    std::vector <std::string> listAs_g = nuovaScheda->getListAs_g();
+    for(unsigned i=0; i< listAs_g.size(); ++i){
+        QString str = QString::fromStdString(listAs_g[i]);
+
+
+        ui->comboBox_seleziona_gruppo->addItem(str);
+        //}
+    }
+
+
+
+    //mostra area aggiunzione candidato
+    ui->lineEdit_nominativo->setPlaceholderText("inserisci nominativo candidato");
+    ui->lineEdit_nominativo->show();
+    ui->label_lista_gruppi_1->show();
+    ui->comboBox_seleziona_gruppo->show();
+    ui->pushButton_annulla_aggiungi->show();
+    ui->pushButton_conferma_aggiungi->show();
+
+}
+
+void MainWindowTecnico::on_pushButton_aggiungi_gruppo_clicked()
+{
+    ui->pushButton_completa_scheda->setEnabled(false);
+    ui->pushButton_rimuovi_candidato->setEnabled(false);
+    ui->pushButton_rimuovi_gruppo->setEnabled(false);
+    ui->pushButton_aggiungi_gruppo->setEnabled(false);
+    ui->pushButton_aggiungi_candidato->setEnabled(false);
+
+    nuovaScheda->setModalitaAdd(SchedaVoto::modoAdd::associazione_gruppo);
+    //mostra area aggiunzione associazione_gruppo
+    ui->lineEdit_nominativo->setPlaceholderText("inserisci nominativo gruppo/associazione studentesca");
+    ui->lineEdit_nominativo->show();
+    ui->pushButton_conferma_aggiungi->show();
+    ui->pushButton_annulla_aggiungi->show();
+
+
+}
+
+void MainWindowTecnico::on_pushButton_conferma_aggiungi_clicked()
+{
+    uint mod = nuovaScheda->getModalitaAdd();
+    QString nominativo = ui->lineEdit_nominativo->text();
+    std::string strNominativo = nominativo.toStdString();
+    if (nominativo == ""){
+        std::cerr << "Il campo nominativo non può essere vuoto" << std::endl;
+        return;
+    }
+    if(mod == SchedaVoto::modoAdd::candidato){
+
+
+        std::string as_g = ui->comboBox_seleziona_gruppo->currentText().toStdString();
+
+        nuovaScheda->addCandidato(strNominativo,as_g);
+        ui->comboBox_seleziona_candidato->addItem(nominativo);
+    }
+    else{
+        //modo: associazione_gruppo
+        //std::string as_g = ui->lineEdit_nominativo->text().toStdString();
+        nuovaScheda->addAs_g(strNominativo);
+        ui->comboBox_seleziona_gruppo_2->addItem(nominativo);
+    }
+
+    hideBoxAggiungi();
+    ui->pushButton_aggiungi_gruppo->setEnabled(true);
+    ui->pushButton_aggiungi_candidato->setEnabled(true);
+
+}
+
+void MainWindowTecnico::on_pushButton_completa_scheda_clicked()
+{
+    uint numPref = ui->spinBox_numero_preferenze->text().toUInt();
+    nuovaScheda->setNumPreferenze(numPref);
+    if(nuovaScheda->getListCandidati().size()>1){
+        emit schedaPronta(nuovaScheda);
+    }
+    else{
+        QMessageBox::information(this,"Error Message","Inserire almeno due candidati prima di completare la scheda");
+    }
+
+}
+
+void MainWindowTecnico::on_pushButton_rimuovi_candidato_clicked()
+{
+    if(ui->comboBox_seleziona_candidato->currentText()!=""){
+    QString entry = ui->comboBox_seleziona_candidato->currentText();
+    vector <Candidato> listCandidati = nuovaScheda->getListCandidati();;
+    uint index;
+    for (uint i = 0; i < listCandidati.size(); i++){
+        if((listCandidati[i].getNominativo()) == entry.toStdString()){
+            index = i;
+            break;
+        }
+    }
+    nuovaScheda->removeCandidato(index);
+    ui->comboBox_seleziona_candidato->removeItem(index);
+    }
+    else{
+        QMessageBox msb;
+        msb.setText("Nulla da eliminare");
+        msb.exec();
+    }
+}
+
+void MainWindowTecnico::on_pushButton_rimuovi_gruppo_clicked()
+{
+    if(ui->comboBox_seleziona_gruppo_2->currentText()!=""){
+    QString entry = ui->comboBox_seleziona_gruppo_2->currentText();
+    vector <std::string> listAs_g = nuovaScheda->getListAs_g();;
+    uint index;
+    for (uint i = 0; i < listAs_g.size(); i++){
+        if((listAs_g[i]) == entry.toStdString()){
+            index = i;
+            break;
+        }
+    }
+    nuovaScheda->removeAs_g(index);
+    ui->comboBox_seleziona_gruppo_2->removeItem(index);
+
+    //aggiornamento comboBoxListaCandidati
+    ui->comboBox_seleziona_candidato->clear();
+
+
+    std::vector <Candidato> listCandidati = nuovaScheda->getListCandidati();
+    for(unsigned i=0; i< listCandidati.size(); ++i){
+        QString str = QString::fromStdString(listCandidati[i].getNominativo());
+
+
+        ui->comboBox_seleziona_candidato->addItem(str);
+
+    }
+
+    }
+    else{
+        QMessageBox msb;
+        msb.setText("Nulla da eliminare");
+        msb.exec();
+    }
+}
+
+void MainWindowTecnico::on_pushButton_annulla_aggiungi_clicked()
+{
+    hideBoxAggiungi();
+}
+
+void MainWindowTecnico::hideBoxAggiungi(){
+    ui->lineEdit_nominativo->hide();
+    ui->label_lista_gruppi_1->hide();
+    ui->comboBox_seleziona_gruppo->hide();
+    ui->pushButton_annulla_aggiungi->hide();
+    ui->pushButton_conferma_aggiungi->hide();
+    ui->lineEdit_nominativo->setText("");
+
+    ui->pushButton_completa_scheda->setEnabled(true);
+    ui->pushButton_rimuovi_candidato->setEnabled(true);
+    ui->pushButton_rimuovi_gruppo->setEnabled(true);
+    ui->pushButton_aggiungi_gruppo->setEnabled(true);
+    ui->pushButton_aggiungi_candidato->setEnabled(true);
+}
+

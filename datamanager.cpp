@@ -1,9 +1,13 @@
 #include "datamanager.h"
+#include "schedavoto.h"
+
 
 DataManager::DataManager(QObject *parent) : QObject(parent)
 {
     tecnicoPass= "tecnico";
     suPass = "admin";
+
+    //qRegisterMetaType<SchedaVoto>("SchedaVoto");
 }
 
 void DataManager::checkPassTecnico(QString pass)
@@ -26,5 +30,10 @@ void DataManager::tryChangeTecnicoPass(QString su_pass, QString newTecnicoPass)
     else{
         emit wrongSUpass();
     }
+}
+
+void DataManager::storeScheda(SchedaVoto *scheda)
+{
+    scheda->getIdProceduraVoto();
 }
 

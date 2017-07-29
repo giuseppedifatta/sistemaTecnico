@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>978</width>
+    <width>983</width>
     <height>600</height>
    </rect>
   </property>
@@ -20,30 +20,48 @@ background-color: rgb(49, 149, 255);
 
 .QPushButton {
 background-color:rgb(146, 134, 134);
-background-color: rgb(148, 140, 140);
-font-size: 24px bold sans serif;
+font-size: 22px bold sans serif;
 text-align:center;
 vertical-align:middle;
 min-height:60px;
 color:black;
 }
+.QPushButton:disabled{
+background-color: rgb(49, 149, 255);
+font-size: 22px bold sans serif;
+text-align:center;
+vertical-align:middle;
+min-height:60px;
+color: rgb(108, 108, 108);
+
+}
 
 .QLabel {
 color: white;
-font-size: 22px bold sans serif;
+font-size: 20px bold sans serif;
 }
 
 .QLineEdit{
-font-size: 24px bold sans serif;
+font:18px bold sans serif;
 background-color: white;
+}
+
+.QComboBox{
+font:18px bold sans serif;
 }</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="currentIndex">
-       <number>8</number>
+       <number>6</number>
       </property>
       <widget class="QWidget" name="login_urna_page">
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -422,7 +440,7 @@ background-color: white;
           <item row="0" column="0">
            <widget class="QLabel" name="label_durata">
             <property name="text">
-             <string>Durata</string>
+             <string>Durata Procedura</string>
             </property>
            </widget>
           </item>
@@ -565,20 +583,69 @@ background-color: white;
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_back_scelta_op_2">
-          <property name="text">
-           <string>Indietro</string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_7">
+          <item>
+           <widget class="QPushButton" name="pushButton_back_scelta_op_2">
+            <property name="text">
+             <string>Indietro</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_removeProcedura">
+            <property name="text">
+             <string>Elimina Procedura</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_addSchedaVoto">
+            <property name="text">
+             <string>Aggiungi Scheda</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_printSessionKeys">
+            <property name="text">
+             <string>Stampa Chiavi Sessione</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
       <widget class="QWidget" name="creazione_schede_voto_page">
        <layout class="QVBoxLayout" name="verticalLayout_9">
+        <property name="spacing">
+         <number>25</number>
+        </property>
         <item>
          <layout class="QFormLayout" name="formLayout_5">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetDefaultConstraint</enum>
+          </property>
+          <property name="fieldGrowthPolicy">
+           <enum>QFormLayout::ExpandingFieldsGrow</enum>
+          </property>
+          <property name="rowWrapPolicy">
+           <enum>QFormLayout::DontWrapRows</enum>
+          </property>
+          <property name="labelAlignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+          </property>
+          <property name="formAlignment">
+           <set>Qt::AlignHCenter|Qt::AlignTop</set>
+          </property>
           <item row="0" column="0">
            <widget class="QLabel" name="label_id_scheda">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>ID scheda di voto:</string>
             </property>
@@ -586,60 +653,191 @@ background-color: white;
           </item>
           <item row="0" column="1">
            <widget class="QLabel" name="label_numero_scheda">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>SCHEDA #XX</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QSpinBox" name="spinBox_numero_preferenze"/>
-          </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_numero_preferenze">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>Numero preferenze</string>
             </property>
            </widget>
           </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="spinBox_numero_preferenze">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QGroupBox" name="groupBox">
+            <property name="title">
+             <string>Tassonomia elettorato Attivo</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QCheckBox" name="checkBox">
+            <property name="text">
+             <string>CheckBox</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QCheckBox" name="checkBox_2">
+            <property name="text">
+             <string>CheckBox</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QCheckBox" name="checkBox_3">
+            <property name="text">
+             <string>CheckBox</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item>
-         <layout class="QGridLayout" name="gridLayout_4" columnstretch="1,1">
+         <layout class="QGridLayout" name="gridLayout_4" rowstretch="1,1" columnstretch="0,0" rowminimumheight="1,1">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetMaximumSize</enum>
+          </property>
+          <property name="horizontalSpacing">
+           <number>5</number>
+          </property>
+          <property name="verticalSpacing">
+           <number>25</number>
+          </property>
           <item row="0" column="0">
            <widget class="QPushButton" name="pushButton_aggiungi_gruppo">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>Aggiungi Gruppo/Associazione Studentesca</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QPushButton" name="pushButton_aggiungi_candidato">
-            <property name="text">
-             <string>Aggiungi Candidato</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="1" rowspan="2">
-           <layout class="QFormLayout" name="formLayout_7">
-            <item row="0" column="0" colspan="2">
-             <widget class="QLineEdit" name="lineEdit_nominativo"/>
-            </item>
-            <item row="2" column="0" colspan="2">
-             <widget class="QPushButton" name="pushButton_conferma_aggiungi">
-              <property name="text">
-               <string>Conferma</string>
+           <layout class="QVBoxLayout" name="verticalLayout_11" stretch="1,1,1">
+            <item>
+             <widget class="QLineEdit" name="lineEdit_nominativo">
+              <property name="placeholderText">
+               <string/>
               </property>
              </widget>
             </item>
-            <item row="1" column="0" colspan="2">
-             <widget class="QComboBox" name="comboBox_seleziona_gruppo"/>
+            <item>
+             <layout class="QFormLayout" name="formLayout_7">
+              <property name="rowWrapPolicy">
+               <enum>QFormLayout::WrapAllRows</enum>
+              </property>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_lista_gruppi_1">
+                <property name="text">
+                 <string>Seleziona gruppo/associazione studentesca</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QComboBox" name="comboBox_seleziona_gruppo">
+                <property name="statusTip">
+                 <string/>
+                </property>
+                <property name="accessibleDescription">
+                 <string/>
+                </property>
+                <property name="currentText">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_8">
+              <item>
+               <widget class="QPushButton" name="pushButton_annulla_aggiungi">
+                <property name="text">
+                 <string>Annulla</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_conferma_aggiungi">
+                <property name="text">
+                 <string>Conferma</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
+          </item>
+          <item row="1" column="0">
+           <widget class="QPushButton" name="pushButton_aggiungi_candidato">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="layoutDirection">
+             <enum>Qt::LeftToRight</enum>
+            </property>
+            <property name="text">
+             <string>Aggiungi Candidato</string>
+            </property>
+            <property name="autoDefault">
+             <bool>false</bool>
+            </property>
+            <property name="default">
+             <bool>false</bool>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
         <item>
-         <layout class="QGridLayout" name="gridLayout_5">
+         <layout class="QGridLayout" name="gridLayout_5" columnstretch="0,1">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetMaximumSize</enum>
+          </property>
+          <property name="horizontalSpacing">
+           <number>5</number>
+          </property>
+          <property name="verticalSpacing">
+           <number>25</number>
+          </property>
           <item row="0" column="1">
            <widget class="QPushButton" name="pushButton_rimuovi_candidato">
             <property name="text">
@@ -660,7 +858,7 @@ background-color: white;
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QComboBox" name="comboBox_selezionata_candidato"/>
+             <widget class="QComboBox" name="comboBox_seleziona_candidato"/>
             </item>
            </layout>
           </item>
@@ -677,7 +875,7 @@ background-color: white;
              <enum>QFormLayout::WrapAllRows</enum>
             </property>
             <item row="0" column="0">
-             <widget class="QLabel" name="label_lista_gruppi">
+             <widget class="QLabel" name="label_lista_gruppi_2">
               <property name="text">
                <string>Lista Gruppi/Associazioni Studentesche inseriti</string>
               </property>
@@ -691,7 +889,10 @@ background-color: white;
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="1,1">
+          <property name="spacing">
+           <number>50</number>
+          </property>
           <item>
            <widget class="QPushButton" name="pushButton_annulla_scheda">
             <property name="text">

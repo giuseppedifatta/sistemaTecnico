@@ -4,6 +4,12 @@
 #include <QMainWindow>
 
 #include "datamanager.h"
+#include "proceduravoto.h"
+#include "schedavoto.h"
+#include "sessionevoto.h"
+#include "candidato.h"
+
+
 
 namespace Ui {
 class MainWindowTecnico;
@@ -15,6 +21,7 @@ class MainWindowTecnico : public QMainWindow
 signals:
     void tecnicoPass(QString pass);
     void changeTecnicoPass(QString su_pass,QString newTecnicoPass);
+    void schedaPronta(SchedaVoto *nuovaScheda);
 public slots:
     void showViewSceltaOperazione();
     void passwordErrorMessage();
@@ -59,10 +66,33 @@ private slots:
 
     void on_pushButton_clicked();
 
+    void on_pushButton_addSchedaVoto_clicked();
+
+    void on_pushButton_aggiungi_candidato_clicked();
+
+    void on_pushButton_aggiungi_gruppo_clicked();
+
+    void on_pushButton_conferma_aggiungi_clicked();
+
+    void on_pushButton_completa_scheda_clicked();
+
+    void on_pushButton_rimuovi_candidato_clicked();
+
+    void on_pushButton_annulla_aggiungi_clicked();
+
+    void on_pushButton_rimuovi_gruppo_clicked();
+
 private:
     Ui::MainWindowTecnico *ui;
 
     DataManager *model;
+
+    Candidato *nuovoCandidato;
+    ProceduraVoto *nuovaProcedura;
+    SessioneVoto *nuovaSessione;
+    SchedaVoto *nuovaScheda;
+
+
     enum InterfacceTecnico{
         loginUrna,
         loginTecnicoPassword,
@@ -76,6 +106,7 @@ private:
         aggiuntaTokenSeggio
     };
 
+    void hideBoxAggiungi();
 };
 
 #endif // MAINWINDOWTECNICO_H

@@ -7,7 +7,7 @@
 class Candidato
 {
 public:
-    Candidato();
+    Candidato(std::string nominativo, std::string as_g);
     std::string getNominativo() const;
     void setNominativo(const std::string &value);
 

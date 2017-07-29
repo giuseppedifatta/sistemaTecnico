@@ -3,18 +3,28 @@
 #include <vector>
 #include <string>
 #include "candidato.h"
+#include <QtCore>
 
-class SchedaVoto
-{
+class SchedaVoto{
+    //la scheda di voto viene costruita e riempita tramite l'interfaccia grafica,
+    //ma memorizzata sul model solo una volta che sarà cliccato il tasto di completamento della scheda,
+    //diversamente i dati inseriti verranno scartati
 public:
+    //SchedaVoto();
     SchedaVoto();
 
-private:
-    unsigned int id;
-    unsigned int numPreferenze;
-    std::vector <std::string> as_g;
-    std::vector <Candidato> candidati;
-    std::vector <unsigned int> classiElettoratoAttivo;
+    unsigned int getId() const;
+    void setId(unsigned int value);
+
+    unsigned int getNumPreferenze() const;
+    void setNumPreferenze(unsigned int value);
+    void addAs_g(std::string as_g);
+    void removeAs_g(uint index);
+    void addCandidato(std::string candidato, std::string as_g);
+    void removeCandidato(uint index);
+
+    unsigned int getModalitaAdd() const;
+    void setModalitaAdd(unsigned int value);
 
     enum tipologieElettoratoAttivo{
         studente,
@@ -23,15 +33,45 @@ private:
         senatoAccademico
     };
 
+    enum modoAdd{
+        candidato,
+        associazione_gruppo
+    };
+
     //e se fosse il sistema a decidere le tipologie di elettorato attivo?
     //basandosi sulla tipologia di elettorato Passivo
     enum tipologieElettoratoPassivo{
-        rettore,
-        senatoAccademico,
-        consiglioCDL
+        SA,
+        CdA,
+        CSU
     };
+
+
+
+    std::vector<std::string> getListAs_g() const;
+
+    std::vector<Candidato> getListCandidati() const;
+
+    unsigned int getIdProceduraVoto() const;
+    void setIdProceduraVoto(unsigned int value);
+
+private:
+    unsigned int idProceduraVoto;
+    unsigned int id;
+    unsigned int numPreferenze;
+    unsigned int modalitaAdd;
+
+    //AssociazioneStudentesca_Gruppo
+    std::vector<std::string> listAs_g;
+
+    std::vector <Candidato> listCandidati;
+
+    std::vector <unsigned int> classiElettoratoAttivo;
+
+
 
 
 };
 
+Q_DECLARE_METATYPE(SchedaVoto);
 #endif // SCHEDAVOTO_H

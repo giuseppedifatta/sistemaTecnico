@@ -2,6 +2,7 @@
 #define DATAMANAGER_H
 
 #include <QObject>
+#include <schedavoto.h>
 
 class DataManager : public QObject
 {
@@ -19,6 +20,7 @@ signals:
 public slots:
     void checkPassTecnico(QString pass);
     void tryChangeTecnicoPass(QString su_pass, QString newTecnicoPas);
+    void storeScheda(SchedaVoto* scheda);
 
 private:
     QString tecnicoPass;

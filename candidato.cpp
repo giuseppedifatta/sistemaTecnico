@@ -1,8 +1,9 @@
 #include "candidato.h"
 
-Candidato::Candidato()
+Candidato::Candidato(std::__cxx11::string nominativo, std::__cxx11::string as_g)
 {
-
+    this->nominativo=nominativo;
+    this->as_g=as_g;
 }
 
 std::string Candidato::getNominativo() const
