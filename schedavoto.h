@@ -73,5 +73,5 @@ private:
 
 };
 
-Q_DECLARE_METATYPE(SchedaVoto);
+Q_DECLARE_METATYPE(SchedaVoto)
 #endif // SCHEDAVOTO_H

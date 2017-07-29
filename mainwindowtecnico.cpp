@@ -13,7 +13,7 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::loginUrna);
-    on_pushButton_addSchedaVoto_clicked();
+    //on_pushButton_addSchedaVoto_clicked();
 
     ui->lineEdit_password_tecnico->setEchoMode(QLineEdit::Password);
     ui->lineEdit_new_password->setEchoMode(QLineEdit::Password);

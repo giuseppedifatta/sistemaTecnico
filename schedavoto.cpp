@@ -1,5 +1,6 @@
 #include "schedavoto.h"
-
+#include <iostream>
+using namespace std;
 SchedaVoto::SchedaVoto()
 {
     modalitaAdd=SchedaVoto::modoAdd::candidato;
@@ -38,7 +39,10 @@ void SchedaVoto::removeAs_g(uint index)
     std::string gruppo = this->listAs_g.at(index);
     for (uint i = 0; i < listCandidati.size(); i++){
         if(listCandidati[i].getAs_g() == gruppo){
+            cout << listCandidati[i].getAs_g();
             removeCandidato(i);
+            i--;
+            //riprendi la scansione dall'elemento precedente, poichè il vettore avrà un elemento in meno
         }
     }
 
@@ -54,7 +58,9 @@ void SchedaVoto::addCandidato(std::string candidato, std::string as_g)
 
 void SchedaVoto::removeCandidato(uint index)
 {
-   this->listCandidati.erase(listCandidati.begin()+index);
+    std::string s = listCandidati.at(index).getNominativo();
+    cout << "Rimuovo il candidato: " << s << endl;
+    this->listCandidati.erase(listCandidati.begin()+index);
 }
 
 unsigned int SchedaVoto::getModalitaAdd() const
