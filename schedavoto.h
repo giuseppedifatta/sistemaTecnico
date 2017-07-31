@@ -20,7 +20,7 @@ public:
     void setNumPreferenze(unsigned int value);
     void addAs_g(std::string as_g);
     void removeAs_g(uint index);
-    void addCandidato(std::string candidato, std::string as_g);
+
     void removeCandidato(uint index);
 
     unsigned int getModalitaAdd() const;
@@ -55,6 +55,7 @@ public:
     unsigned int getIdProceduraVoto() const;
     void setIdProceduraVoto(unsigned int value);
 
+    void addCandidato(std::string lista, std::string nome, std::string cognome, std::string data, std::string luogo);
 private:
     unsigned int idProceduraVoto;
     unsigned int id;

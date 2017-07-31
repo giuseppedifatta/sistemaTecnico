@@ -27,6 +27,7 @@ public slots:
     void passwordErrorMessage();
     void suPassErrorMessage();
     void tecnicoPassAggiornata();
+    void messageStoredSchedaVoto();
 public:
     explicit MainWindowTecnico(QWidget *parent = 0);
     ~MainWindowTecnico();
@@ -70,7 +71,7 @@ private slots:
 
     void on_pushButton_aggiungi_candidato_clicked();
 
-    void on_pushButton_aggiungi_gruppo_clicked();
+    void on_pushButton_aggiungi_lista_clicked();
 
     void on_pushButton_conferma_aggiungi_clicked();
 
@@ -81,6 +82,8 @@ private slots:
     void on_pushButton_annulla_aggiungi_clicked();
 
     void on_pushButton_rimuovi_gruppo_clicked();
+
+    void on_lineEdit_nome_textChanged(const QString &arg1);
 
 private:
     Ui::MainWindowTecnico *ui;

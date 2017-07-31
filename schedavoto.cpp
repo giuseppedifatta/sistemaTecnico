@@ -41,17 +41,18 @@ void SchedaVoto::removeAs_g(uint index)
         if(listCandidati[i].getAs_g() == gruppo){
             cout << listCandidati[i].getAs_g();
             removeCandidato(i);
+            //riprendi la scansione dall'elemento precedente, poichè il vettore avrà un elemento in meno dopo la rimozione dell'elemento di posizione i
             i--;
-            //riprendi la scansione dall'elemento precedente, poichè il vettore avrà un elemento in meno
+
         }
     }
 
     this->listAs_g.erase(listAs_g.begin()+index);
 }
 
-void SchedaVoto::addCandidato(std::string candidato, std::string as_g)
+void SchedaVoto::addCandidato(std::string nome, std::string lista = "", std::string cognome ="", std::string data ="", std::string luogo="")
 {
-    Candidato c(candidato,as_g);
+    Candidato c(nome,lista);
     this->listCandidati.push_back(c);
 
 }

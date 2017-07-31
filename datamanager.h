@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <schedavoto.h>
+#include <tinyxml2.h>
 
 class DataManager : public QObject
 {
@@ -15,7 +16,7 @@ signals:
     void wrongTecnicoPass();
     void tecnicoPassChanged();
     void wrongSUpass();
-
+    void storedSchedaVoto();
 
 public slots:
     void checkPassTecnico(QString pass);
