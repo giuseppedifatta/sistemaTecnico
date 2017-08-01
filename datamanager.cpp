@@ -42,7 +42,7 @@ void DataManager::tryChangeTecnicoPass(QString su_pass, QString newTecnicoPass)
 void DataManager::storeScheda(SchedaVoto *scheda)
 {
     // estrazione dati dall'oggetto di tipo scheda voto, e generazione del file XML, con conseguente memorizzazione su database
-    uint idProceduraVoto = scheda->getIdProceduraVoto();
+
     XMLDocument xmlDoc;
     XMLNode * pRoot = xmlDoc.NewElement("SchedaVoto");
     xmlDoc.InsertFirstChild(pRoot);
@@ -50,14 +50,45 @@ void DataManager::storeScheda(SchedaVoto *scheda)
 //    std::ostringstream s;
 //    s << idProceduraVoto;
 //    const std::string i_as_string(s.str());
+
+    uint idScheda = 1;
+    pElement = xmlDoc.NewElement("idScheda");
+    pElement->SetText(idScheda);
+    pRoot->InsertEndChild(pElement);
+
+    uint idProceduraVoto = scheda->getIdProceduraVoto();
     pElement = xmlDoc.NewElement("idProcedura");
     pElement->SetText(idProceduraVoto);
     pRoot->InsertEndChild(pElement);
+
+    uint tipoElezione = scheda->getTipoElezione();
     pElement = xmlDoc.NewElement("tipologiaElezione");
-    pElement->SetText(idProceduraVoto);
+    pElement->SetText(tipoElezione);
     pRoot->InsertEndChild(pElement);
 
-    XMLError eResult = xmlDoc.SaveFile("schedaVoto.xml");
+    uint numPref = scheda->getNumPreferenze();
+    pElement = xmlDoc.NewElement("numeroPreferenze");
+    pElement->SetText(numPref);
+    pRoot->InsertEndChild(pElement);
+
+
+    XMLElement *pCandidati = xmlDoc.NewElement("candidati");
+    pRoot->InsertEndChild(pCandidati);
+
+    XMLElement *pCandidato;
+    vector <Candidato> listCandidati = scheda->getListCandidati();
+    for(uint index = 0; index < listCandidati.size(); index ++ ){
+        pCandidato = xmlDoc.NewElement("candidato");
+        pCandidato->SetText(listCandidati.at(index).getNome().c_str());
+
+        //aggiungo il candidato all'insieme dei candidati
+        pCandidati->InsertEndChild(pCandidato);
+    }
+
+
+
+    string nomeFile = "schedaVoto"+to_string(idScheda)+".xml";
+    XMLError eResult = xmlDoc.SaveFile(nomeFile.c_str());
     if (eResult != XML_SUCCESS) {
         printf("XMLError: %i\n", eResult);
     }

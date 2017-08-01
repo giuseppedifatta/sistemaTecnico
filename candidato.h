@@ -3,20 +3,36 @@
 
 
 #include <string>
-
+using namespace std;
 class Candidato
 {
 public:
-    Candidato(std::string nominativo, std::string as_g);
-    std::string getNominativo() const;
-    void setNominativo(const std::string &value);
+    Candidato(string nome, string lista, string cognome,string data, string luogo);
+    string getNominativo() const;
+    void setNominativo(const string &value);
 
-    std::string getAs_g() const;
-    void setAs_g(const std::string &value);
+    string getLista() const;
+    void setLista(const string &value);
+
+    string getNome() const;
+    void setNome(const string &value);
+
+    string getCognome() const;
+    void setCognome(const string &value);
+
+    string getLuogoNascita() const;
+    void setLuogoNascita(const string &value);
+
+    string getDataNascita() const;
+    void setDataNascita(const string &value);
 
 private:
-    std::string as_g;
-    std::string nominativo;
+    string lista;
+    string nome;
+    string cognome;
+    string luogoNascita;
+    string dataNascita;
+
 
 };
 

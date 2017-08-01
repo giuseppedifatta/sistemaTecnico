@@ -85,6 +85,9 @@ private slots:
 
     void on_lineEdit_nome_textChanged(const QString &arg1);
 
+    void on_lineEdit_nuova_lista_textChanged(const QString &arg1);
+
+
 private:
     Ui::MainWindowTecnico *ui;
 
@@ -108,6 +111,7 @@ private:
         creazioneSeggio,
         aggiuntaTokenSeggio
     };
+
 
     void hideBoxAggiungi();
 };

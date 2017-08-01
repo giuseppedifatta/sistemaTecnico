@@ -18,8 +18,8 @@ public:
 
     unsigned int getNumPreferenze() const;
     void setNumPreferenze(unsigned int value);
-    void addAs_g(std::string as_g);
-    void removeAs_g(uint index);
+    void addLista(std::string lista);
+    void removeLista(uint index);
 
     void removeCandidato(uint index);
 
@@ -35,20 +35,21 @@ public:
 
     enum modoAdd{
         candidato,
-        associazione_gruppo
+        lista
     };
 
     //e se fosse il sistema a decidere le tipologie di elettorato attivo?
     //basandosi sulla tipologia di elettorato Passivo
-    enum tipologieElettoratoPassivo{
-        SA,
-        CdA,
-        CSU
+    enum tipologieElezioni{
+        SA, //Senato Accademico
+        CA, //Consiglio di Amministrazione
+        TA, //Rappresentanti del Personale Tecnico Amministrativo
+        CCDS, //Consiglio di Corso di Studio
+        CI, //Consiglio di Interclasse
+        CD, //Consiglio di Dipartimento
+
     };
 
-
-
-    std::vector<std::string> getListAs_g() const;
 
     std::vector<Candidato> getListCandidati() const;
 
@@ -56,6 +57,12 @@ public:
     void setIdProceduraVoto(unsigned int value);
 
     void addCandidato(std::string lista, std::string nome, std::string cognome, std::string data, std::string luogo);
+    std::vector<std::string> getListListe() const;
+    void setListListe(const std::vector<std::string> &value);
+
+    unsigned int getTipoElezione() const;
+    void setTipoElezione(unsigned int value);
+
 private:
     unsigned int idProceduraVoto;
     unsigned int id;
@@ -63,11 +70,11 @@ private:
     unsigned int modalitaAdd;
 
     //AssociazioneStudentesca_Gruppo
-    std::vector<std::string> listAs_g;
+    std::vector<std::string> listListe;
 
     std::vector <Candidato> listCandidati;
 
-    std::vector <unsigned int> classiElettoratoAttivo;
+    unsigned int tipoElezione;
 
 
 

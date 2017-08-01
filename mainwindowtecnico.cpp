@@ -226,6 +226,13 @@ void MainWindowTecnico::on_pushButton_addSchedaVoto_clicked()
     ui->pushButton_annulla_aggiungi->hide();
     ui->pushButton_conferma_aggiungi->hide();
 
+
+
+    ui->comboBox_tipo_elezione->clear();
+    QStringList strList;
+    strList << "Senato Accademico" << "Consiglio di Amministrazione" << "Rappresentanti del Personale T.A." << "Consiglio di Corso di Studio" << "Consiglio di Interclasse" << "Consiglio di Dipartimento" ;
+    ui->comboBox_tipo_elezione->addItems(strList);
+
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::creazioneSchede);
 
     nuovaScheda = new SchedaVoto();
@@ -242,15 +249,16 @@ void MainWindowTecnico::on_pushButton_aggiungi_candidato_clicked()
     ui->pushButton_rimuovi_gruppo->setEnabled(false);
     ui->pushButton_aggiungi_lista->setEnabled(false);
     ui->pushButton_aggiungi_candidato->setEnabled(false);
+    ui->pushButton_conferma_aggiungi->setEnabled(false);
 
     nuovaScheda->setModalitaAdd(SchedaVoto::modoAdd::candidato);
 
     ui->comboBox_seleziona_lista_1->clear();
 
-    //vector < Associazione > associazioniCorrenti = seggio->getListAssociazioni();
-    vector <string> listAs_g = nuovaScheda->getListAs_g();
-    for(unsigned i=0; i< listAs_g.size(); ++i){
-        QString str = QString::fromStdString(listAs_g[i]);
+
+    vector <string> listListe = nuovaScheda->getListListe();
+    for(unsigned i=0; i< listListe.size(); ++i){
+        QString str = QString::fromStdString(listListe.at(i));
 
 
         ui->comboBox_seleziona_lista_1->addItem(str);
@@ -273,8 +281,9 @@ void MainWindowTecnico::on_pushButton_aggiungi_lista_clicked()
     ui->pushButton_rimuovi_gruppo->setEnabled(false);
     ui->pushButton_aggiungi_lista->setEnabled(false);
     ui->pushButton_aggiungi_candidato->setEnabled(false);
+    ui->pushButton_conferma_aggiungi->setEnabled(false);
 
-    nuovaScheda->setModalitaAdd(SchedaVoto::modoAdd::associazione_gruppo);
+    nuovaScheda->setModalitaAdd(SchedaVoto::modoAdd::lista);
     //mostra area aggiunzione associazione_gruppo
     ui->formWidget_lista->show();
     ui->pushButton_conferma_aggiungi->show();
@@ -325,7 +334,7 @@ void MainWindowTecnico::on_pushButton_conferma_aggiungi_clicked()
         //modo: aggiungi lista
         QString lista = ui->lineEdit_nuova_lista->text();
         string strLista = lista.toStdString();
-        nuovaScheda->addAs_g(strLista);
+        nuovaScheda->addLista(strLista);
         ui->comboBox_seleziona_lista_2->addItem(lista);
         hideBoxAggiungi();
     }
@@ -333,11 +342,12 @@ void MainWindowTecnico::on_pushButton_conferma_aggiungi_clicked()
 }
 
 
-
 void MainWindowTecnico::on_pushButton_completa_scheda_clicked()
 {
     uint numPref = ui->spinBox_numero_preferenze->text().toUInt();
     nuovaScheda->setNumPreferenze(numPref);
+    nuovaScheda->setTipoElezione(ui->comboBox_tipo_elezione->currentIndex());
+
     if(nuovaScheda->getListCandidati().size()>1){
         emit schedaPronta(nuovaScheda);
         cout << "emesso il segnale di scheda pronta" << endl;
@@ -374,7 +384,7 @@ void MainWindowTecnico::on_pushButton_rimuovi_gruppo_clicked()
 {
     if(ui->comboBox_seleziona_lista_2->currentText()!=""){
         QString entry = ui->comboBox_seleziona_lista_2->currentText();
-        vector <string> listAs_g = nuovaScheda->getListAs_g();;
+        vector <string> listAs_g = nuovaScheda->getListListe();;
         uint index;
         for (uint i = 0; i < listAs_g.size(); i++){
             if((listAs_g[i]) == entry.toStdString()){
@@ -382,7 +392,7 @@ void MainWindowTecnico::on_pushButton_rimuovi_gruppo_clicked()
                 break;
             }
         }
-        nuovaScheda->removeAs_g(index);
+        nuovaScheda->removeLista(index);
         ui->comboBox_seleziona_lista_2->removeItem(index);
 
         //aggiornamento comboBoxListaCandidati
@@ -391,7 +401,7 @@ void MainWindowTecnico::on_pushButton_rimuovi_gruppo_clicked()
 
         vector <Candidato> listCandidati = nuovaScheda->getListCandidati();
         for(unsigned i=0; i< listCandidati.size(); ++i){
-            QString str = QString::fromStdString(listCandidati[i].getNominativo());
+            QString str = QString::fromStdString(listCandidati[i].getNome());
 
 
             ui->comboBox_seleziona_candidato->addItem(str);
@@ -442,3 +452,16 @@ void MainWindowTecnico::on_lineEdit_nome_textChanged(const QString &arg1)
 
     }
 }
+
+void MainWindowTecnico::on_lineEdit_nuova_lista_textChanged(const QString &arg1)
+{
+    if(arg1==""){
+        ui->pushButton_conferma_aggiungi->setEnabled(false);
+    }
+    else{
+        ui->pushButton_conferma_aggiungi->setEnabled(true);
+
+    }
+}
+
+

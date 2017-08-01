@@ -1,28 +1,62 @@
 #include "candidato.h"
 
-Candidato::Candidato(std::__cxx11::string nominativo, std::__cxx11::string as_g)
+Candidato::Candidato(std::__cxx11::string nome, std::__cxx11::string lista, string cognome, string data, string luogo)
 {
-    this->nominativo=nominativo;
-    this->as_g=as_g;
+    this->nome = nome;
+    this->cognome = cognome;
+    this->dataNascita = data;
+    this->luogoNascita = luogo;
+    this->lista = lista;
 }
 
-std::string Candidato::getNominativo() const
+
+std::string Candidato::getLista() const
 {
-    return nominativo;
+    return lista;
 }
 
-void Candidato::setNominativo(const std::string &value)
+void Candidato::setLista(const std::string &value)
 {
-    nominativo = value;
+    lista = value;
 }
 
-std::string Candidato::getAs_g() const
+string Candidato::getNome() const
 {
-    return as_g;
+    return nome;
 }
 
-void Candidato::setAs_g(const std::string &value)
+void Candidato::setNome(const string &value)
 {
-    as_g = value;
+    nome = value;
+}
+
+string Candidato::getCognome() const
+{
+    return cognome;
+}
+
+void Candidato::setCognome(const string &value)
+{
+    cognome = value;
+}
+
+string Candidato::getLuogoNascita() const
+{
+    return luogoNascita;
+}
+
+void Candidato::setLuogoNascita(const string &value)
+{
+    luogoNascita = value;
+}
+
+string Candidato::getDataNascita() const
+{
+    return dataNascita;
+}
+
+void Candidato::setDataNascita(const string &value)
+{
+    dataNascita = value;
 }
 
