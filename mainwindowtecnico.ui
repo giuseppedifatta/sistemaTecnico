@@ -74,7 +74,7 @@ background-color: rgb(49, 149, 255);
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>7</number>
       </property>
       <widget class="QWidget" name="login_urna_page">
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -867,7 +867,7 @@ background-color: rgb(49, 149, 255);
              <widget class="QWidget" name="formWidget_candidato" native="true">
               <layout class="QFormLayout" name="formLayout_7">
                <item row="0" column="0">
-                <widget class="QLabel" name="label__nome">
+                <widget class="QLabel" name="label__nome_c">
                  <property name="text">
                   <string>Nome</string>
                  </property>
@@ -881,42 +881,42 @@ background-color: rgb(49, 149, 255);
                 </widget>
                </item>
                <item row="1" column="0">
-                <widget class="QLabel" name="label_13">
+                <widget class="QLabel" name="label_cognome_c">
                  <property name="text">
                   <string>Cognome</string>
                  </property>
                 </widget>
                </item>
                <item row="1" column="1">
-                <widget class="QLineEdit" name="lineEdit_cognome">
+                <widget class="QLineEdit" name="lineEdit_cognome_c">
                  <property name="placeholderText">
                   <string>Inserire cognome candidato</string>
                  </property>
                 </widget>
                </item>
                <item row="2" column="0">
-                <widget class="QLabel" name="label_12">
+                <widget class="QLabel" name="label_data_nascita_c">
                  <property name="text">
                   <string>Data di nascita</string>
                  </property>
                 </widget>
                </item>
                <item row="3" column="0">
-                <widget class="QLabel" name="label_8">
+                <widget class="QLabel" name="label_luogo_nascita_c">
                  <property name="text">
                   <string>Luogo di nascita</string>
                  </property>
                 </widget>
                </item>
                <item row="3" column="1">
-                <widget class="QLineEdit" name="lineEdit_luogo_nascita">
+                <widget class="QLineEdit" name="lineEdit_luogo_nascita_c">
                  <property name="placeholderText">
                   <string>Inserire luogo di nascita</string>
                  </property>
                 </widget>
                </item>
                <item row="4" column="0">
-                <widget class="QLabel" name="label_7">
+                <widget class="QLabel" name="label_seleziona_lista">
                  <property name="text">
                   <string>Seleziona una lista</string>
                  </property>
@@ -1094,64 +1094,67 @@ background-color: rgb(49, 149, 255);
        <layout class="QVBoxLayout" name="verticalLayout_10">
         <item>
          <layout class="QFormLayout" name="formLayout_9">
+          <property name="verticalSpacing">
+           <number>15</number>
+          </property>
           <item row="0" column="0">
-           <widget class="QLabel" name="label">
+           <widget class="QLabel" name="label_nome_rp">
             <property name="text">
              <string>Nome</string>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_2">
+           <widget class="QLabel" name="label_cognome_rp">
             <property name="text">
              <string>Cognome</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_3">
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_userid_rp">
             <property name="text">
              <string>userID</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_4">
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_password_rp">
             <property name="text">
              <string>password</string>
             </property>
            </widget>
           </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_5">
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_ripeti_password_rp">
             <property name="text">
              <string>ripeti password</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="lineEdit">
+           <widget class="QLineEdit" name="lineEdit_nome_rp">
             <property name="placeholderText">
              <string>Inserire nome RP</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLineEdit" name="lineEdit_2">
+           <widget class="QLineEdit" name="lineEdit_cognome_rp">
             <property name="placeholderText">
              <string>Inserire cognome RP</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
-           <widget class="QLineEdit" name="lineEdit_4">
+          <item row="5" column="1">
+           <widget class="QLineEdit" name="lineEdit_password_rp">
             <property name="placeholderText">
              <string>Digitare password RP</string>
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
-           <widget class="QLineEdit" name="lineEdit_5">
+          <item row="6" column="1">
+           <widget class="QLineEdit" name="lineEdit_ripeti_password_rp">
             <property name="text">
              <string/>
             </property>
@@ -1160,10 +1163,34 @@ background-color: rgb(49, 149, 255);
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QLabel" name="label_6">
+          <item row="4" column="1">
+           <widget class="QLabel" name="label_userid_message">
             <property name="text">
-             <string>ID RP generato dal sistema - o matricola RP da inserire</string>
+             <string>generato dal sistema a termine della registrazione</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_luogo_nascita_rp">
+            <property name="text">
+             <string>Luogo di nascita</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_data_nascita">
+            <property name="text">
+             <string>Data di nascita</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="lineEdit_luogo_nascita_rp"/>
+          </item>
+          <item row="3" column="1">
+           <widget class="QDateTimeEdit" name="dateTimeEdit_data_nascita_rp">
+            <property name="calendarPopup">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -1172,14 +1199,14 @@ background-color: rgb(49, 149, 255);
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_6">
           <item>
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="pushButton_annulla_rp">
             <property name="text">
              <string>Annulla</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_2">
+           <widget class="QPushButton" name="pushButton_completa_reg_rp">
             <property name="text">
              <string>Completa registrazione</string>
             </property>
