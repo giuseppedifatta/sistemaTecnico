@@ -1,6 +1,7 @@
 #ifndef RESPONSABILEPROCEDIMENTO_H
 #define RESPONSABILEPROCEDIMENTO_H
 
+#include <QtCore>
 #include <string>
 using namespace std;
 class ResponsabileProcedimento
@@ -39,5 +40,5 @@ private:
     string dataNascita;
     uint idRP;
 };
-
+Q_DECLARE_METATYPE(ResponsabileProcedimento)
 #endif // RESPONSABILEPROCEDIMENTO_H

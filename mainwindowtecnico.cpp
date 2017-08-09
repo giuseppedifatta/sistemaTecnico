@@ -32,6 +32,7 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
     //qRegisterMetaType< SchedaVoto >( "SchedaVoto" );
     QObject::connect(this,SIGNAL(schedaPronta(SchedaVoto*)),model,SLOT(storeScheda(SchedaVoto*)),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(storedSchedaVoto()),this,SLOT(messageStoredSchedaVoto()),Qt::QueuedConnection);
+    //inserire le 4 connect per la memorizzazione della procedura sul db e la regitrazione del tecnico
 }
 
 
@@ -139,10 +140,24 @@ void MainWindowTecnico::messageStoredSchedaVoto()
     QMessageBox::information(this,"Success","La scheda di voto è stata correttamente memorizzata nella procedura di voto selezionata.");
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::visualizzaProcedure);
     delete nuovaScheda;
-    ui->comboBox_seleziona_candidato->clear();
-    ui->comboBox_seleziona_lista_1->clear();
-    ui->comboBox_seleziona_lista_2->clear();
-    ui->spinBox_numero_preferenze->setValue(1);
+
+    pulisciInterfacciaCreazioneScheda();
+}
+
+void MainWindowTecnico::messageStoredProcedura()
+{
+    QMessageBox::information(this,"Success","La procedura è stata correttamente salvata.");
+    delete nuovaProcedura;
+    ui->stackedWidget->setCurrentIndex(InterfacceTecnico::sceltaOperazione);
+    pulisciInterfacciaCreazioneProcedura();
+}
+
+void MainWindowTecnico::messageRegisteredRP()
+{
+    QMessageBox::information(this,"Success","Il Responsabile di Procedimento è stato correttamente registrato.");
+    delete nuovoRP;
+    ui->stackedWidget->setCurrentIndex(InterfacceTecnico::sceltaOperazione);
+    pulisciInterfacciaCreazioneRP();
 }
 
 void MainWindowTecnico::on_pushButton_back_to_login_urna_2_clicked()
@@ -174,15 +189,17 @@ void MainWindowTecnico::on_pushButton_crea_procedura_clicked()
     ui->timeEdit_apertura_sessione->setEnabled(false);
     ui->timeEdit_chiusura_sessione->setEnabled(false);
     ui->pushButton_aggiungi_sessione->setEnabled(false);
+    ui->pushButton_elimina_sessione->setEnabled(false);
 
     nuovaProcedura = new ProceduraVoto();
-    QDateTime d(QDateTime::currentDateTime().date().addDays(1));
-    ui->dateTimeEdit_data_ora_inizio->setMinimumDateTime(d);
+    QDateTime tomorrow(QDateTime::currentDateTime().date().addDays(1));
+    ui->dateTimeEdit_data_ora_inizio->setMinimumDateTime(tomorrow);
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::creazioneProcedura);
 }
 
 void MainWindowTecnico::on_pushButton_registra_RP_clicked()
 {
+    nuovoRP = new ResponsabileProcedimento();
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::registrazioneRP);
 }
 
@@ -201,10 +218,23 @@ void MainWindowTecnico::on_pushButton_crea_seggio_clicked()
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::creazioneSeggio);
 }
 
-void MainWindowTecnico::on_pushButton_back_scelta_op_clicked()
+void MainWindowTecnico::on_pushButton_annulla_procedura_clicked()
 {
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::sceltaOperazione);
     delete nuovaProcedura;
+    pulisciInterfacciaCreazioneProcedura();
+
+}
+void MainWindowTecnico::pulisciInterfacciaCreazioneProcedura(){
+    ui->comboBox_sessioni_inserite->clear();
+    intervalliSessioni.clear();
+    ui->dateEdit_data_sessione->clear();
+    ui->lineEdit_descrizione_procedura->clear();
+    ui->spinBox_numero_schede->clear();
+    ui->dateTimeEdit_data_ora_inizio->clear();
+    ui->dateTimeEdit_data_ora_termine->clear();
+    ui->timeEdit_apertura_sessione->clear();
+    ui->timeEdit_chiusura_sessione->clear();
 }
 
 void MainWindowTecnico::on_pushButton_salva_procedura_clicked()
@@ -243,7 +273,7 @@ void MainWindowTecnico::on_pushButton_salva_procedura_clicked()
     emit proceduraPronta(nuovaProcedura);
 }
 
-void MainWindowTecnico::on_pushButton_back_scelta_op_2_clicked()
+void MainWindowTecnico::on_pushButton_back_scelta_op_clicked()
 {
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::sceltaOperazione);
 }
@@ -253,6 +283,17 @@ void MainWindowTecnico::on_pushButton_annulla_scheda_clicked()
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::sceltaOperazione);
     cout << "annullamento operazione: cancello la nuova scheda di voto" << endl;
     delete nuovaScheda;
+    pulisciInterfacciaCreazioneScheda();
+}
+
+void MainWindowTecnico::pulisciInterfacciaCreazioneScheda(){
+    hideBoxAggiungi();
+    ui->comboBox_seleziona_candidato->clear();
+    ui->comboBox_seleziona_lista_1->clear();
+    ui->comboBox_seleziona_lista_2->clear();
+    ui->comboBox_tipo_elezione->clear();
+    ui->spinBox_numero_preferenze->clear();
+
 }
 
 void MainWindowTecnico::on_pushButton_clicked()
@@ -358,15 +399,15 @@ void MainWindowTecnico::on_pushButton_conferma_aggiungi_clicked()
                 return;
             }
         }
-        QString nome = ui->lineEdit_nome->text();
+        QString nome = ui->lineEdit_nome_c->text();
         string strNome = nome.toStdString();
-        QString cognome = ui->lineEdit_cognome->text();
+        QString cognome = ui->lineEdit_cognome_c->text();
         string strCognome = cognome.toStdString();
-        QDate dataNascita = ui->dateEdit_data_nascita->date();
+        QDate dataNascita = ui->dateEdit_data_nascita_c->date();
         string dateUTC = dataNascita.toString("yyyy/MM/dd").toStdString();
         cout << dateUTC << endl;
         //QDate date = QDate::fromString(&dateUTC,"yyyy/MM/dd");
-        QString luogoNascita = ui->lineEdit_luogo_nascita->text();
+        QString luogoNascita = ui->lineEdit_luogo_nascita_c->text();
         string strLuogo = luogoNascita.toStdString();
 
         nuovaScheda->addCandidato(strNome,strLista,strCognome,dateUTC,strLuogo);
@@ -468,12 +509,13 @@ void MainWindowTecnico::on_pushButton_annulla_aggiungi_clicked()
 void MainWindowTecnico::hideBoxAggiungi(){
     ui->formWidget_lista->hide();
     ui->lineEdit_nuova_lista->clear();
+
     ui->formWidget_candidato->hide();
-    ui->lineEdit_nome->clear();
-    ui->lineEdit_cognome->clear();
+    ui->lineEdit_nome_c->clear();
+    ui->lineEdit_cognome_c->clear();
     QDate resetDate = QDate::currentDate();
-    ui->dateEdit_data_nascita->setDate(resetDate);
-    ui->lineEdit_luogo_nascita->clear();
+    ui->dateEdit_data_nascita_c->setDate(resetDate);
+    ui->lineEdit_luogo_nascita_c->clear();
     ui->pushButton_annulla_aggiungi->hide();
     ui->pushButton_conferma_aggiungi->hide();
 
@@ -546,6 +588,7 @@ void MainWindowTecnico::on_pushButton_memorizza_periodo_procedura_clicked()
         nuovaProcedura->resetSessioni();
         intervalliSessioni.clear();
         ui->comboBox_sessioni_inserite->clear();
+        ui->pushButton_elimina_sessione->setEnabled(false);
 
         //memorizza periodo procedura
         string strInizio= inizio.toString("yyyy/MM/dd hh:mm").toStdString();
@@ -603,6 +646,7 @@ void MainWindowTecnico::on_pushButton_aggiungi_sessione_clicked()
             return;
         }
     }
+
     nuovaSessione = new SessioneVoto();
     nuovaSessione->setData(dataSessione.toString("yyyy/MM/dd").toStdString());
     nuovaSessione->setOraApertura(oraApertura.toString("hh:mm").toStdString());
@@ -614,39 +658,40 @@ void MainWindowTecnico::on_pushButton_aggiungi_sessione_clicked()
 
     SessioniQt s(dtAperturaSessione,dtChiusuraSessione);
     if(intervalliSessioni.empty()){
-        intervalliSessioni.push_back(s);
+        //nel caso in cui sto inserendo la prima sessione, non sono necessari controlli di sovrapposizione
         nuovaProcedura->addSessione(nuovaSessione);
+        intervalliSessioni.push_back(s);
         ui->comboBox_sessioni_inserite->addItem(dtAperturaSessione.toString("yyyy/MM/dd hh:mm") + " - " + dtChiusuraSessione.toString("yyyy/MM/dd hh:mm"));
+        ui->pushButton_elimina_sessione->setEnabled(true);
     }
     else{
-        bool intersezioni = false;
+        bool sovrapposizione = false;
         for(uint i = 0; i < intervalliSessioni.size(); i++){
             bool type1 = (dtAperturaSessione >= intervalliSessioni.at(i).getInizio()) && (dtChiusuraSessione <= intervalliSessioni.at(i).getInizio()) ;
             bool type2 = (dtAperturaSessione >= intervalliSessioni.at(i).getFine()) && (dtChiusuraSessione <= intervalliSessioni.at(i).getFine());
             bool type3 = (dtAperturaSessione <= intervalliSessioni.at(i).getInizio()) && (dtChiusuraSessione >= intervalliSessioni.at(i).getFine());
             bool type4 = (dtAperturaSessione >= intervalliSessioni.at(i).getInizio()) && (dtChiusuraSessione <= intervalliSessioni.at(i).getFine());
             if(type1 || type2 || type3 ||type4){
-                cout << "intersezione sessioni rilevate" << endl;
-                intersezioni = true;
+                cout << "sovrapposizioni sessioni rilevate" << endl;
+                sovrapposizione = true;
                 break;
             }
         }
-        if (!intersezioni){
-            intervalliSessioni.push_back(s);
+        if (!sovrapposizione){
             nuovaProcedura->addSessione(nuovaSessione);
+            intervalliSessioni.push_back(s);
             ui->comboBox_sessioni_inserite->addItem(dtAperturaSessione.toString("yyyy/MM/dd hh:mm") + " - " + dtChiusuraSessione.toString("yyyy/MM/dd hh:mm"));
+            ui->pushButton_elimina_sessione->setEnabled(true);
         }
         else{
             QMessageBox msgBox(this);
             msgBox.setInformativeText("La sessione da inserire è sovrapposta ad altre sessioni già inserite");
             msgBox.exec();
-            return;
         }
 
     }
-
-
-
+    delete nuovaSessione;
+    return;
 }
 
 void MainWindowTecnico::on_dateTimeEdit_data_ora_inizio_dateTimeChanged(const QDateTime &dateTime)
@@ -665,4 +710,30 @@ void MainWindowTecnico::on_pushButton_elimina_sessione_clicked()
     ui->comboBox_sessioni_inserite->removeItem(index);
     intervalliSessioni.erase(intervalliSessioni.begin()+index);
     nuovaProcedura->removeSessioneByIndex(index);
+    if(intervalliSessioni.empty()){
+        ui->pushButton_elimina_sessione->setEnabled(false);
+    }
+}
+
+void MainWindowTecnico::on_pushButton_annulla_rp_clicked()
+{
+    delete nuovoRP;
+    ui->stackedWidget->setCurrentIndex(InterfacceTecnico::sceltaOperazione);
+    pulisciInterfacciaCreazioneRP();
+}
+void MainWindowTecnico::pulisciInterfacciaCreazioneRP(){
+    ui->lineEdit_nome_rp->clear();
+    ui->lineEdit_cognome_rp->clear();
+    ui->dateEdit_data_nascita_rp->clear();
+    ui->lineEdit_luogo_nascita_rp->clear();
+    ui->lineEdit_password_rp->clear();
+    ui->lineEdit_ripeti_password_rp->clear();
+}
+
+void MainWindowTecnico::on_pushButton_completa_reg_rp_clicked()
+{
+    //TODO estrarre dati schermata
+
+    //emetto il segnale di RP pronto alla memorizzazione
+    emit rpPronto(nuovoRP);
 }

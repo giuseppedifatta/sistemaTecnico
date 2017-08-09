@@ -10,6 +10,7 @@
 #include "sessionevoto.h"
 #include "candidato.h"
 #include "sessioniqt.h"
+#include "responsabileprocedimento.h"
 
 using namespace std;
 
@@ -25,12 +26,15 @@ signals:
     void changeTecnicoPass(QString su_pass,QString newTecnicoPass);
     void schedaPronta(SchedaVoto *nuovaScheda);
     void proceduraPronta(ProceduraVoto *nuovaProcedura);
+    void rpPronto(ResponsabileProcedimento *nuovoRP);
 public slots:
     void showViewSceltaOperazione();
     void passwordErrorMessage();
     void suPassErrorMessage();
     void tecnicoPassAggiornata();
     void messageStoredSchedaVoto();
+    void messageStoredProcedura();
+    void messageRegisteredRP();
 public:
     explicit MainWindowTecnico(QWidget *parent = 0);
     ~MainWindowTecnico();
@@ -64,7 +68,7 @@ private slots:
 
     void on_pushButton_salva_procedura_clicked();
 
-    void on_pushButton_back_scelta_op_2_clicked();
+    void on_pushButton_annulla_procedura_clicked();
 
     void on_pushButton_annulla_scheda_clicked();
 
@@ -102,15 +106,19 @@ private slots:
 
     void on_pushButton_elimina_sessione_clicked();
 
+    void on_pushButton_annulla_rp_clicked();
+
+    void on_pushButton_completa_reg_rp_clicked();
+
 private:
     Ui::MainWindowTecnico *ui;
 
     DataManager *model;
 
-    Candidato *nuovoCandidato;
     ProceduraVoto *nuovaProcedura;
     SessioneVoto *nuovaSessione;
     SchedaVoto *nuovaScheda;
+    ResponsabileProcedimento *nuovoRP;
 
 
     enum InterfacceTecnico{
@@ -127,7 +135,11 @@ private:
     };
 
     vector <SessioniQt> intervalliSessioni;
+
     void hideBoxAggiungi();
+    void pulisciInterfacciaCreazioneProcedura();
+    void pulisciInterfacciaCreazioneScheda();
+    void pulisciInterfacciaCreazioneRP();
 };
 
 #endif // MAINWINDOWTECNICO_H

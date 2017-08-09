@@ -611,7 +611,7 @@ background-color: rgb(49, 149, 255);
            <number>50</number>
           </property>
           <item>
-           <widget class="QPushButton" name="pushButton_back_scelta_op">
+           <widget class="QPushButton" name="pushButton_annulla_procedura">
             <property name="text">
              <string>Annulla</string>
             </property>
@@ -663,7 +663,7 @@ background-color: rgb(49, 149, 255);
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_7">
           <item>
-           <widget class="QPushButton" name="pushButton_back_scelta_op_2">
+           <widget class="QPushButton" name="pushButton_back_scelta_op">
             <property name="text">
              <string>Indietro</string>
             </property>
@@ -874,7 +874,7 @@ background-color: rgb(49, 149, 255);
                 </widget>
                </item>
                <item row="0" column="1">
-                <widget class="QLineEdit" name="lineEdit_nome">
+                <widget class="QLineEdit" name="lineEdit_nome_c">
                  <property name="placeholderText">
                   <string>Inserire nome candidato</string>
                  </property>
@@ -926,7 +926,7 @@ background-color: rgb(49, 149, 255);
                 <widget class="QComboBox" name="comboBox_seleziona_lista_1"/>
                </item>
                <item row="2" column="1">
-                <widget class="QDateEdit" name="dateEdit_data_nascita">
+                <widget class="QDateEdit" name="dateEdit_data_nascita_c">
                  <property name="time">
                   <time>
                    <hour>18</hour>
@@ -1188,7 +1188,7 @@ background-color: rgb(49, 149, 255);
            <widget class="QLineEdit" name="lineEdit_luogo_nascita_rp"/>
           </item>
           <item row="3" column="1">
-           <widget class="QDateTimeEdit" name="dateTimeEdit_data_nascita_rp">
+           <widget class="QDateEdit" name="dateEdit_data_nascita_rp">
             <property name="calendarPopup">
              <bool>true</bool>
             </property>
@@ -1224,16 +1224,7 @@ background-color: rgb(49, 149, 255);
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>903</width>
-     <height>25</height>
-    </rect>
-   </property>
-  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
