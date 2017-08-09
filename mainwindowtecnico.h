@@ -2,14 +2,16 @@
 #define MAINWINDOWTECNICO_H
 
 #include <QMainWindow>
+#include <vector>
 
 #include "datamanager.h"
 #include "proceduravoto.h"
 #include "schedavoto.h"
 #include "sessionevoto.h"
 #include "candidato.h"
+#include "sessioniqt.h"
 
-
+using namespace std;
 
 namespace Ui {
 class MainWindowTecnico;
@@ -22,6 +24,7 @@ signals:
     void tecnicoPass(QString pass);
     void changeTecnicoPass(QString su_pass,QString newTecnicoPass);
     void schedaPronta(SchedaVoto *nuovaScheda);
+    void proceduraPronta(ProceduraVoto *nuovaProcedura);
 public slots:
     void showViewSceltaOperazione();
     void passwordErrorMessage();
@@ -87,6 +90,17 @@ private slots:
 
     void on_lineEdit_nuova_lista_textChanged(const QString &arg1);
 
+    void on_lineEdit_descrizione_procedura_textChanged(const QString &arg1);
+
+    void on_pushButton_memorizza_periodo_procedura_clicked();
+
+    void on_pushButton_aggiungi_sessione_clicked();
+
+    void on_dateTimeEdit_data_ora_inizio_dateTimeChanged(const QDateTime &dateTime);
+
+    void on_timeEdit_apertura_sessione_timeChanged(const QTime &time);
+
+    void on_pushButton_elimina_sessione_clicked();
 
 private:
     Ui::MainWindowTecnico *ui;
@@ -112,7 +126,7 @@ private:
         aggiuntaTokenSeggio
     };
 
-
+    vector <SessioniQt> intervalliSessioni;
     void hideBoxAggiungi();
 };
 

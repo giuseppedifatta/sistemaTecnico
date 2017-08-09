@@ -18,14 +18,18 @@ SOURCES += main.cpp\
     proceduravoto.cpp \
     schedavoto.cpp \
     sessionevoto.cpp \
-    candidato.cpp
+    candidato.cpp \
+    sessioniqt.cpp \
+    responsabileprocedimento.cpp
 
 HEADERS  += mainwindowtecnico.h \
     datamanager.h \
     proceduravoto.h \
     schedavoto.h \
     sessionevoto.h \
-    candidato.h
+    candidato.h \
+    sessioniqt.h \
+    responsabileprocedimento.h
 
 FORMS += \
     mainwindowtecnico.ui

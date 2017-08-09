@@ -98,3 +98,13 @@ void DataManager::storeScheda(SchedaVoto *scheda)
 
 }
 
+void DataManager::storeRP(ResponsabileProcedimento *rp)
+{
+
+}
+
+void DataManager::storeProcedura(ProceduraVoto *procedura)
+{
+
+}
+

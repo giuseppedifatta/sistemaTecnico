@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>903</width>
-    <height>636</height>
+    <height>688</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -56,10 +56,15 @@ color: white;
 
 .QRadioButton{
 color: rgb(204, 43, 43);
-}</string>
+}
+
+.QMessageBox{
+background-color: rgb(49, 149, 255);
+}
+</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QHBoxLayout" name="horizontalLayout_11">
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="sizePolicy">
@@ -69,7 +74,7 @@ color: rgb(204, 43, 43);
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>6</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="login_urna_page">
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -400,6 +405,9 @@ color: rgb(204, 43, 43);
       </widget>
       <widget class="QWidget" name="creazione_procedura_page">
        <layout class="QVBoxLayout" name="verticalLayout_7">
+        <property name="spacing">
+         <number>15</number>
+        </property>
         <item>
          <layout class="QFormLayout" name="formLayout_3">
           <property name="sizeConstraint">
@@ -430,6 +438,15 @@ color: rgb(204, 43, 43);
           </item>
           <item row="1" column="1">
            <widget class="QSpinBox" name="spinBox_numero_schede">
+            <property name="maximumSize">
+             <size>
+              <width>60</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="mouseTracking">
+             <bool>false</bool>
+            </property>
             <property name="minimum">
              <number>1</number>
             </property>
@@ -442,20 +459,10 @@ color: rgb(204, 43, 43);
         </item>
         <item>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="2">
-           <widget class="QLabel" name="label_data_ora_fine">
+          <item row="3" column="0" colspan="3">
+           <widget class="QPushButton" name="pushButton_memorizza_periodo_procedura">
             <property name="text">
-             <string>Data e ora termine</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QDateTimeEdit" name="dateTimeEdit_data_ora_inizio"/>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_durata">
-            <property name="text">
-             <string>Durata Procedura</string>
+             <string>Memorizza periodo procedura</string>
             </property>
            </widget>
           </item>
@@ -466,13 +473,31 @@ color: rgb(204, 43, 43);
             </property>
            </widget>
           </item>
-          <item row="2" column="2">
-           <widget class="QDateTimeEdit" name="dateTimeEdit_data_ora_fine"/>
-          </item>
-          <item row="3" column="0" colspan="3">
-           <widget class="QPushButton" name="pushButton_memorizza_periodo_procedura">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_durata">
             <property name="text">
-             <string>Memorizza periodo procedura</string>
+             <string>Durata Procedura</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="label_data_ora_fine">
+            <property name="text">
+             <string>Data e ora termine</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QDateTimeEdit" name="dateTimeEdit_data_ora_termine">
+            <property name="calendarPopup">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QDateTimeEdit" name="dateTimeEdit_data_ora_inizio">
+            <property name="calendarPopup">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -480,8 +505,22 @@ color: rgb(204, 43, 43);
         </item>
         <item>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="1" column="1">
-           <widget class="QTimeEdit" name="timeEdit_apertura_sessione"/>
+          <item row="4" column="0" colspan="2">
+           <layout class="QFormLayout" name="formLayout_12">
+            <property name="rowWrapPolicy">
+             <enum>QFormLayout::WrapAllRows</enum>
+            </property>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_sessioni_inserite">
+              <property name="text">
+               <string>Sessioni inserite</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QComboBox" name="comboBox_sessioni_inserite"/>
+            </item>
+           </layout>
           </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_data_sessione">
@@ -490,8 +529,38 @@ color: rgb(204, 43, 43);
             </property>
            </widget>
           </item>
+          <item row="4" column="2">
+           <widget class="QPushButton" name="pushButton_elimina_sessione">
+            <property name="text">
+             <string>Elimina sessione</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="3">
+           <widget class="QPushButton" name="pushButton_aggiungi_sessione">
+            <property name="acceptDrops">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Aggiungi sessione</string>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
           <item row="1" column="2">
-           <widget class="QTimeEdit" name="timeEdit_chiusura_sessione"/>
+           <widget class="QTimeEdit" name="timeEdit_chiusura_sessione">
+            <property name="buttonSymbols">
+             <enum>QAbstractSpinBox::UpDownArrows</enum>
+            </property>
+            <property name="showGroupSeparator" stdset="0">
+             <bool>true</bool>
+            </property>
+            <property name="calendarPopup">
+             <bool>false</bool>
+            </property>
+           </widget>
           </item>
           <item row="0" column="1">
            <widget class="QLabel" name="label_ora_apertura">
@@ -508,20 +577,14 @@ color: rgb(204, 43, 43);
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QDateEdit" name="dateEdit_data_sessione"/>
-          </item>
-          <item row="2" column="0" colspan="3">
-           <widget class="QPushButton" name="pushButton_aggiungi_sessione">
-            <property name="acceptDrops">
-             <bool>false</bool>
-            </property>
-            <property name="text">
-             <string>Aggiungi sessione</string>
-            </property>
-            <property name="flat">
-             <bool>false</bool>
+           <widget class="QDateEdit" name="dateEdit_data_sessione">
+            <property name="calendarPopup">
+             <bool>true</bool>
             </property>
            </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QTimeEdit" name="timeEdit_apertura_sessione"/>
           </item>
          </layout>
         </item>
@@ -530,15 +593,15 @@ color: rgb(204, 43, 43);
           <property name="sizeConstraint">
            <enum>QLayout::SetMinimumSize</enum>
           </property>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="comboBox_idRP"/>
-          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_RP">
             <property name="text">
              <string>Responsabile Procedimento</string>
             </property>
            </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="comboBox_idRP"/>
           </item>
          </layout>
         </item>
@@ -831,6 +894,13 @@ color: rgb(204, 43, 43);
                  </property>
                 </widget>
                </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="label_12">
+                 <property name="text">
+                  <string>Data di nascita</string>
+                 </property>
+                </widget>
+               </item>
                <item row="3" column="0">
                 <widget class="QLabel" name="label_8">
                  <property name="text">
@@ -845,15 +915,25 @@ color: rgb(204, 43, 43);
                  </property>
                 </widget>
                </item>
-               <item row="2" column="0">
-                <widget class="QLabel" name="label_12">
+               <item row="4" column="0">
+                <widget class="QLabel" name="label_7">
                  <property name="text">
-                  <string>Data di nascita</string>
+                  <string>Seleziona una lista</string>
                  </property>
                 </widget>
                </item>
+               <item row="4" column="1">
+                <widget class="QComboBox" name="comboBox_seleziona_lista_1"/>
+               </item>
                <item row="2" column="1">
                 <widget class="QDateEdit" name="dateEdit_data_nascita">
+                 <property name="time">
+                  <time>
+                   <hour>18</hour>
+                   <minute>0</minute>
+                   <second>0</second>
+                  </time>
+                 </property>
                  <property name="minimumDate">
                   <date>
                    <year>1790</year>
@@ -865,16 +945,6 @@ color: rgb(204, 43, 43);
                   <bool>true</bool>
                  </property>
                 </widget>
-               </item>
-               <item row="4" column="0">
-                <widget class="QLabel" name="label_7">
-                 <property name="text">
-                  <string>Seleziona una lista</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="1">
-                <widget class="QComboBox" name="comboBox_seleziona_lista_1"/>
                </item>
               </layout>
              </widget>
@@ -1126,6 +1196,16 @@ color: rgb(204, 43, 43);
      </widget>
     </item>
    </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>903</width>
+     <height>25</height>
+    </rect>
+   </property>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

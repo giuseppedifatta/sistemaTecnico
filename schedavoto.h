@@ -10,7 +10,7 @@ class SchedaVoto{
     //ma memorizzata sul model solo una volta che sarà cliccato il tasto di completamento della scheda,
     //diversamente i dati inseriti verranno scartati
 public:
-    //SchedaVoto();
+
     SchedaVoto();
 
     unsigned int getId() const;
@@ -75,9 +75,6 @@ private:
     std::vector <Candidato> listCandidati;
 
     unsigned int tipoElezione;
-
-
-
 
 };
 

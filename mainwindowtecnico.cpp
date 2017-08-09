@@ -169,6 +169,15 @@ void MainWindowTecnico::on_pushButton_confirm_new_password_clicked()
 
 void MainWindowTecnico::on_pushButton_crea_procedura_clicked()
 {
+    ui->pushButton_salva_procedura->setEnabled(false);
+    ui->dateEdit_data_sessione->setEnabled(false);
+    ui->timeEdit_apertura_sessione->setEnabled(false);
+    ui->timeEdit_chiusura_sessione->setEnabled(false);
+    ui->pushButton_aggiungi_sessione->setEnabled(false);
+
+    nuovaProcedura = new ProceduraVoto();
+    QDateTime d(QDateTime::currentDateTime().date().addDays(1));
+    ui->dateTimeEdit_data_ora_inizio->setMinimumDateTime(d);
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::creazioneProcedura);
 }
 
@@ -195,11 +204,43 @@ void MainWindowTecnico::on_pushButton_crea_seggio_clicked()
 void MainWindowTecnico::on_pushButton_back_scelta_op_clicked()
 {
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::sceltaOperazione);
+    delete nuovaProcedura;
 }
 
 void MainWindowTecnico::on_pushButton_salva_procedura_clicked()
 {
-    //estrazione dati dalla schermata
+    //TODO estrazione dati dalla schermata: descrizione, numero schede, identificativo RP, sessioni
+    QString descrizione = ui->lineEdit_descrizione_procedura->text();
+    nuovaProcedura->setDescrizione(descrizione.toStdString());
+    int numSchede = ui->spinBox_numero_schede->value();
+    nuovaProcedura->setNumSchedeVoto(numSchede);
+    uint idRP;
+    if (ui->comboBox_idRP->currentText()==""){
+        QMessageBox msgBox(this);
+        msgBox.setInformativeText("Selezionare un Responsabile di Procedimento,se non è disponibile alcun Responsabile Procedimento registrarne uno al sistema.");
+        return;
+    }
+    else{
+        idRP = ui->comboBox_idRP->currentText().toUInt();
+        QString infoRP = QString::fromStdString(nuovaProcedura->getInfoRP(idRP));
+        QMessageBox msgBox(this);
+        msgBox.setInformativeText("Sta per essere creata la procedura: " + descrizione + ". /n Il responsabile di Procedimento è: " + infoRP);
+        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Abort);
+        int ret = msgBox.exec();
+        if(ret == QMessageBox::Abort){
+            return;
+        }
+    }
+
+    if(intervalliSessioni.empty()){
+        QMessageBox msgBox(this);
+        msgBox.setInformativeText("Inserire almeno una sessione di voto.");
+        return;
+    }
+
+
+    //emettere segnale che la procedura è pronta per la memorizzazione sul db
+    emit proceduraPronta(nuovaProcedura);
 }
 
 void MainWindowTecnico::on_pushButton_back_scelta_op_2_clicked()
@@ -321,11 +362,14 @@ void MainWindowTecnico::on_pushButton_conferma_aggiungi_clicked()
         string strNome = nome.toStdString();
         QString cognome = ui->lineEdit_cognome->text();
         string strCognome = cognome.toStdString();
-        QString dataNascita = ui->dateEdit_data_nascita->text();//->date();
-        string strData = dataNascita.toStdString();
-        QString luogoNascita = ui->lineEdit_luogo_nascita->text();//->date();
+        QDate dataNascita = ui->dateEdit_data_nascita->date();
+        string dateUTC = dataNascita.toString("yyyy/MM/dd").toStdString();
+        cout << dateUTC << endl;
+        //QDate date = QDate::fromString(&dateUTC,"yyyy/MM/dd");
+        QString luogoNascita = ui->lineEdit_luogo_nascita->text();
         string strLuogo = luogoNascita.toStdString();
-        nuovaScheda->addCandidato(strNome,strLista,strCognome,strData,strLuogo);
+
+        nuovaScheda->addCandidato(strNome,strLista,strCognome,dateUTC,strLuogo);
         ui->comboBox_seleziona_candidato->addItem(nome + " " + cognome);
 
         hideBoxAggiungi();
@@ -465,3 +509,160 @@ void MainWindowTecnico::on_lineEdit_nuova_lista_textChanged(const QString &arg1)
 }
 
 
+
+void MainWindowTecnico::on_lineEdit_descrizione_procedura_textChanged(const QString &arg1)
+{
+    if(arg1==""){
+        ui->pushButton_salva_procedura->setEnabled(false);
+    }
+    else{
+        ui->pushButton_salva_procedura->setEnabled(true);
+
+    }
+}
+
+void MainWindowTecnico::on_pushButton_memorizza_periodo_procedura_clicked()
+{
+    QDateTime inizio = ui->dateTimeEdit_data_ora_inizio->dateTime();
+    QDateTime termine = ui->dateTimeEdit_data_ora_termine->dateTime();
+
+    if(inizio < termine){
+        bool periodoMaiRegistratoPrima = nuovaProcedura->getData_ora_inizio()=="";
+        cout << periodoMaiRegistratoPrima << endl;
+        if( !periodoMaiRegistratoPrima &&
+                (nuovaProcedura->getData_ora_inizio()!=inizio.toString("yyyy/MM/dd hh:mm").toStdString() ||
+                 nuovaProcedura->getData_ora_termine()!=termine.toString("yyyy/MM/dd hh:mm").toStdString())){
+            QMessageBox msgBox(this);
+            msgBox.setInformativeText("Modificare il periodo della procedura? Le sessioni già inserite verranno rimosse ");
+            msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
+            msgBox.buttons().at(0)->setText("Conferma");
+            msgBox.buttons().at(1)->setText("Annulla");
+            int ret =msgBox.exec();
+            if(ret == QMessageBox::Cancel){
+                return;
+            }
+        }
+        //elimina eventuali sessioni memorizzate relative a precedenti periodi di procedura
+        nuovaProcedura->resetSessioni();
+        intervalliSessioni.clear();
+        ui->comboBox_sessioni_inserite->clear();
+
+        //memorizza periodo procedura
+        string strInizio= inizio.toString("yyyy/MM/dd hh:mm").toStdString();
+        cout << strInizio << endl;
+        nuovaProcedura->setData_ora_inizio(strInizio);
+        string strTermine= termine.toString("yyyy/MM/dd hh:mm").toStdString();
+        nuovaProcedura->setData_ora_termine(strTermine);
+
+        ui->dateEdit_data_sessione->setMinimumDate(inizio.date());
+        ui->dateEdit_data_sessione->setMaximumDate(termine.date());
+        ui->pushButton_aggiungi_sessione->setEnabled(true);
+        ui->dateEdit_data_sessione->setEnabled(true);
+        ui->timeEdit_apertura_sessione->setEnabled(true);
+        ui->timeEdit_chiusura_sessione->setEnabled(true);
+    }
+    else{
+        QMessageBox msgBox(this);
+        msgBox.setInformativeText("La data e ora di inizio procedura deve essere precedente alla data e ora di termine procedura.");
+        msgBox.exec();
+    }
+}
+
+void MainWindowTecnico::on_pushButton_aggiungi_sessione_clicked()
+{
+    QDate dataSessione = ui->dateEdit_data_sessione->date();
+    QTime oraApertura = ui->timeEdit_apertura_sessione->time();
+    QTime oraChiusura = ui->timeEdit_chiusura_sessione->time();
+    if(oraApertura>=oraChiusura){
+        QMessageBox msgBox(this);
+        msgBox.setInformativeText("L'ora di apertura sessione deve essere precedente all'ora di chiusura sessione.");
+        msgBox.exec();
+        return;
+    }
+
+    QDateTime data_ora_InizioProcedura = QDateTime::fromString(QString::fromStdString(nuovaProcedura->getData_ora_inizio()),"yyyy/MM/dd hh:mm");
+    QDateTime data_ora_TermineProcedura = QDateTime::fromString(QString::fromStdString(nuovaProcedura->getData_ora_termine()),"yyyy/MM/dd hh:mm");
+    QDate dataInizioProcedura = data_ora_InizioProcedura.date();
+    QDate dataTermineProcedura = data_ora_TermineProcedura.date();
+    QTime oraInizioProcedura = data_ora_InizioProcedura.time();
+    QTime oraTermineProcedura = data_ora_TermineProcedura.time();
+
+    if(dataSessione == dataInizioProcedura){
+        if(oraApertura < oraInizioProcedura){
+            QMessageBox msgBox(this);
+            msgBox.setInformativeText("L'ora di apertura sessione non può essere precedente all'ora di inizio procedura.");
+            msgBox.exec();
+            return;
+        }
+    }
+    if(dataSessione == dataTermineProcedura){
+        if(oraChiusura > oraTermineProcedura){
+            QMessageBox msgBox(this);
+            msgBox.setInformativeText("L'ora di chiusura sessione non può essere successiva all'ora di fine procedura.");
+            msgBox.exec();
+            return;
+        }
+    }
+    nuovaSessione = new SessioneVoto();
+    nuovaSessione->setData(dataSessione.toString("yyyy/MM/dd").toStdString());
+    nuovaSessione->setOraApertura(oraApertura.toString("hh:mm").toStdString());
+    nuovaSessione->setOraChiusura(oraChiusura.toString("hh:mm").toStdString());
+
+    QDateTime dtAperturaSessione = QDateTime(dataSessione,oraApertura);
+    QDateTime dtChiusuraSessione = QDateTime(dataSessione,oraChiusura);
+
+
+    SessioniQt s(dtAperturaSessione,dtChiusuraSessione);
+    if(intervalliSessioni.empty()){
+        intervalliSessioni.push_back(s);
+        nuovaProcedura->addSessione(nuovaSessione);
+        ui->comboBox_sessioni_inserite->addItem(dtAperturaSessione.toString("yyyy/MM/dd hh:mm") + " - " + dtChiusuraSessione.toString("yyyy/MM/dd hh:mm"));
+    }
+    else{
+        bool intersezioni = false;
+        for(uint i = 0; i < intervalliSessioni.size(); i++){
+            bool type1 = (dtAperturaSessione >= intervalliSessioni.at(i).getInizio()) && (dtChiusuraSessione <= intervalliSessioni.at(i).getInizio()) ;
+            bool type2 = (dtAperturaSessione >= intervalliSessioni.at(i).getFine()) && (dtChiusuraSessione <= intervalliSessioni.at(i).getFine());
+            bool type3 = (dtAperturaSessione <= intervalliSessioni.at(i).getInizio()) && (dtChiusuraSessione >= intervalliSessioni.at(i).getFine());
+            bool type4 = (dtAperturaSessione >= intervalliSessioni.at(i).getInizio()) && (dtChiusuraSessione <= intervalliSessioni.at(i).getFine());
+            if(type1 || type2 || type3 ||type4){
+                cout << "intersezione sessioni rilevate" << endl;
+                intersezioni = true;
+                break;
+            }
+        }
+        if (!intersezioni){
+            intervalliSessioni.push_back(s);
+            nuovaProcedura->addSessione(nuovaSessione);
+            ui->comboBox_sessioni_inserite->addItem(dtAperturaSessione.toString("yyyy/MM/dd hh:mm") + " - " + dtChiusuraSessione.toString("yyyy/MM/dd hh:mm"));
+        }
+        else{
+            QMessageBox msgBox(this);
+            msgBox.setInformativeText("La sessione da inserire è sovrapposta ad altre sessioni già inserite");
+            msgBox.exec();
+            return;
+        }
+
+    }
+
+
+
+}
+
+void MainWindowTecnico::on_dateTimeEdit_data_ora_inizio_dateTimeChanged(const QDateTime &dateTime)
+{
+    ui->dateTimeEdit_data_ora_termine->setMinimumDateTime(dateTime);
+}
+
+void MainWindowTecnico::on_timeEdit_apertura_sessione_timeChanged(const QTime &time)
+{
+    ui->timeEdit_chiusura_sessione->setMinimumTime(time);
+}
+
+void MainWindowTecnico::on_pushButton_elimina_sessione_clicked()
+{
+    int index = ui->comboBox_sessioni_inserite->currentIndex();
+    ui->comboBox_sessioni_inserite->removeItem(index);
+    intervalliSessioni.erase(intervalliSessioni.begin()+index);
+    nuovaProcedura->removeSessioneByIndex(index);
+}

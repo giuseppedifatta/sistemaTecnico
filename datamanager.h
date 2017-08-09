@@ -2,8 +2,11 @@
 #define DATAMANAGER_H
 
 #include <QObject>
-#include <schedavoto.h>
 #include <tinyxml2.h>
+
+#include "schedavoto.h"
+#include "proceduravoto.h"
+#include "responsabileprocedimento.h"
 
 class DataManager : public QObject
 {
@@ -22,6 +25,8 @@ public slots:
     void checkPassTecnico(QString pass);
     void tryChangeTecnicoPass(QString su_pass, QString newTecnicoPas);
     void storeScheda(SchedaVoto* scheda);
+    void storeRP(ResponsabileProcedimento* rp);
+    void storeProcedura(ProceduraVoto* procedura);
 
 private:
     QString tecnicoPass;
