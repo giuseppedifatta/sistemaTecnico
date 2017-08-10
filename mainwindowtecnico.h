@@ -27,6 +27,7 @@ signals:
     void schedaPronta(SchedaVoto *nuovaScheda);
     void proceduraPronta(ProceduraVoto *nuovaProcedura);
     void rpPronto(ResponsabileProcedimento *nuovoRP);
+    void needInfoRPS();
 public slots:
     void showViewSceltaOperazione();
     void passwordErrorMessage();
@@ -34,7 +35,8 @@ public slots:
     void tecnicoPassAggiornata();
     void messageStoredSchedaVoto();
     void messageStoredProcedura();
-    void messageRegisteredRP();
+    void messageRegisteredRP(QString userid);
+    void startCreationProcedura(vector <ResponsabileProcedimento> rps);
 public:
     explicit MainWindowTecnico(QWidget *parent = 0);
     ~MainWindowTecnico();
@@ -72,8 +74,6 @@ private slots:
 
     void on_pushButton_annulla_scheda_clicked();
 
-    void on_pushButton_clicked();
-
     void on_pushButton_addSchedaVoto_clicked();
 
     void on_pushButton_aggiungi_candidato_clicked();
@@ -90,7 +90,7 @@ private slots:
 
     void on_pushButton_rimuovi_gruppo_clicked();
 
-    void on_lineEdit_nome_textChanged(const QString &arg1);
+    void on_lineEdit_nome_c_textChanged(const QString &arg1);
 
     void on_lineEdit_nuova_lista_textChanged(const QString &arg1);
 
@@ -109,6 +109,14 @@ private slots:
     void on_pushButton_annulla_rp_clicked();
 
     void on_pushButton_completa_reg_rp_clicked();
+
+    void on_lineEdit_nome_rp_textChanged(const QString &arg1);
+
+    void on_lineEdit_cognome_rp_textChanged(const QString &arg1);
+
+    void on_lineEdit_password_rp_textChanged(const QString &arg1);
+
+    void on_lineEdit_ripeti_password_rp_textChanged(const QString &arg1);
 
 private:
     Ui::MainWindowTecnico *ui;

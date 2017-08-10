@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>903</width>
-    <height>688</height>
+    <width>807</width>
+    <height>685</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -74,7 +74,7 @@ background-color: rgb(49, 149, 255);
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>7</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="login_urna_page">
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -489,6 +489,9 @@ background-color: rgb(49, 149, 255);
           </item>
           <item row="2" column="2">
            <widget class="QDateTimeEdit" name="dateTimeEdit_data_ora_termine">
+            <property name="displayFormat">
+             <string>dd/MM/yyyy HH:mm</string>
+            </property>
             <property name="calendarPopup">
              <bool>true</bool>
             </property>
@@ -496,6 +499,9 @@ background-color: rgb(49, 149, 255);
           </item>
           <item row="2" column="1">
            <widget class="QDateTimeEdit" name="dateTimeEdit_data_ora_inizio">
+            <property name="displayFormat">
+             <string>dd/MM/yyyy HH:mm</string>
+            </property>
             <property name="calendarPopup">
              <bool>true</bool>
             </property>
@@ -578,6 +584,9 @@ background-color: rgb(49, 149, 255);
           </item>
           <item row="1" column="0">
            <widget class="QDateEdit" name="dateEdit_data_sessione">
+            <property name="displayFormat">
+             <string>dd/MM/yyyy</string>
+            </property>
             <property name="calendarPopup">
              <bool>true</bool>
             </property>
@@ -929,7 +938,7 @@ background-color: rgb(49, 149, 255);
                 <widget class="QDateEdit" name="dateEdit_data_nascita_c">
                  <property name="time">
                   <time>
-                   <hour>18</hour>
+                   <hour>0</hour>
                    <minute>0</minute>
                    <second>0</second>
                   </time>
@@ -940,6 +949,9 @@ background-color: rgb(49, 149, 255);
                    <month>9</month>
                    <day>14</day>
                   </date>
+                 </property>
+                 <property name="displayFormat">
+                  <string>dd/MM/yyyy</string>
                  </property>
                  <property name="calendarPopup">
                   <bool>true</bool>
@@ -1104,38 +1116,17 @@ background-color: rgb(49, 149, 255);
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_cognome_rp">
-            <property name="text">
-             <string>Cognome</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_userid_rp">
-            <property name="text">
-             <string>userID</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="label_password_rp">
-            <property name="text">
-             <string>password</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="label_ripeti_password_rp">
-            <property name="text">
-             <string>ripeti password</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="1">
            <widget class="QLineEdit" name="lineEdit_nome_rp">
             <property name="placeholderText">
              <string>Inserire nome RP</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_cognome_rp">
+            <property name="text">
+             <string>Cognome</string>
             </property>
            </widget>
           </item>
@@ -1146,10 +1137,72 @@ background-color: rgb(49, 149, 255);
             </property>
            </widget>
           </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_luogo_nascita_rp">
+            <property name="text">
+             <string>Luogo di nascita</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="lineEdit_luogo_nascita_rp">
+            <property name="placeholderText">
+             <string>Inserire luogo di nascita RP</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_data_nascita">
+            <property name="text">
+             <string>Data di nascita</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QDateEdit" name="dateEdit_data_nascita_rp">
+            <property name="contextMenuPolicy">
+             <enum>Qt::DefaultContextMenu</enum>
+            </property>
+            <property name="displayFormat">
+             <string>dd/MM/yyyy</string>
+            </property>
+            <property name="calendarPopup">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_userid_rp">
+            <property name="text">
+             <string>userID</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLabel" name="label_userid_message">
+            <property name="text">
+             <string>generato dal sistema a termine della registrazione</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_password_rp">
+            <property name="text">
+             <string>password</string>
+            </property>
+           </widget>
+          </item>
           <item row="5" column="1">
            <widget class="QLineEdit" name="lineEdit_password_rp">
             <property name="placeholderText">
              <string>Digitare password RP</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="label_ripeti_password_rp">
+            <property name="text">
+             <string>ripeti password</string>
             </property>
            </widget>
           </item>
@@ -1163,34 +1216,16 @@ background-color: rgb(49, 149, 255);
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
-           <widget class="QLabel" name="label_userid_message">
-            <property name="text">
-             <string>generato dal sistema a termine della registrazione</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_luogo_nascita_rp">
-            <property name="text">
-             <string>Luogo di nascita</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_data_nascita">
-            <property name="text">
-             <string>Data di nascita</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="lineEdit_luogo_nascita_rp"/>
-          </item>
-          <item row="3" column="1">
-           <widget class="QDateEdit" name="dateEdit_data_nascita_rp">
-            <property name="calendarPopup">
+          <item row="7" column="1">
+           <widget class="QLabel" name="label_error_password_rp">
+            <property name="enabled">
              <bool>true</bool>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color:red;</string>
+            </property>
+            <property name="text">
+             <string>Le password inserite non sono uguali</string>
             </property>
            </widget>
           </item>
@@ -1198,6 +1233,9 @@ background-color: rgb(49, 149, 255);
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <property name="spacing">
+           <number>50</number>
+          </property>
           <item>
            <widget class="QPushButton" name="pushButton_annulla_rp">
             <property name="text">

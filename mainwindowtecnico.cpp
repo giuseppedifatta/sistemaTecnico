@@ -33,6 +33,8 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
     QObject::connect(this,SIGNAL(schedaPronta(SchedaVoto*)),model,SLOT(storeScheda(SchedaVoto*)),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(storedSchedaVoto()),this,SLOT(messageStoredSchedaVoto()),Qt::QueuedConnection);
     //inserire le 4 connect per la memorizzazione della procedura sul db e la regitrazione del tecnico
+    QObject::connect(this,SIGNAL(rpPronto(ResponsabileProcedimento*)),model,SLOT(storeRP(ResponsabileProcedimento*)),Qt::QueuedConnection);
+    QObject::connect(model,SIGNAL(storedRP(QString)),this,SLOT(messageRegisteredRP(QString)),Qt::QueuedConnection);
 }
 
 
@@ -152,12 +154,20 @@ void MainWindowTecnico::messageStoredProcedura()
     pulisciInterfacciaCreazioneProcedura();
 }
 
-void MainWindowTecnico::messageRegisteredRP()
+void MainWindowTecnico::messageRegisteredRP(QString userid)
 {
-    QMessageBox::information(this,"Success","Il Responsabile di Procedimento è stato correttamente registrato.");
+    QMessageBox::information(this,"Success","Il Responsabile di Procedimento è stato correttamente registrato. La sua userid da conservare per l'accesso è: " + userid);
     delete nuovoRP;
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::sceltaOperazione);
     pulisciInterfacciaCreazioneRP();
+}
+
+void MainWindowTecnico::startCreationProcedura(vector<ResponsabileProcedimento> rps)
+{
+    //TODO aggiungere le info ricevute in rps alla struttura nuovaProcedura nel dato membro rps
+    nuovaProcedura->copyToRPS(rps);
+
+    ui->stackedWidget->setCurrentIndex(InterfacceTecnico::creazioneProcedura);
 }
 
 void MainWindowTecnico::on_pushButton_back_to_login_urna_2_clicked()
@@ -194,12 +204,19 @@ void MainWindowTecnico::on_pushButton_crea_procedura_clicked()
     nuovaProcedura = new ProceduraVoto();
     QDateTime tomorrow(QDateTime::currentDateTime().date().addDays(1));
     ui->dateTimeEdit_data_ora_inizio->setMinimumDateTime(tomorrow);
-    ui->stackedWidget->setCurrentIndex(InterfacceTecnico::creazioneProcedura);
+
+    //TODO emetto il segnale per la richiesta delle info degli RP memorizzati nel sistema
+    emit needInfoRPS();
+
+
 }
 
 void MainWindowTecnico::on_pushButton_registra_RP_clicked()
 {
     nuovoRP = new ResponsabileProcedimento();
+    ui->dateEdit_data_nascita_rp->setMaximumDate(QDate::currentDate().addYears(-18));
+    ui->label_error_password_rp->hide();
+    ui->pushButton_completa_reg_rp->setEnabled(false);
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::registrazioneRP);
 }
 
@@ -251,10 +268,10 @@ void MainWindowTecnico::on_pushButton_salva_procedura_clicked()
         return;
     }
     else{
-        idRP = ui->comboBox_idRP->currentText().toUInt();
-        QString infoRP = QString::fromStdString(nuovaProcedura->getInfoRP(idRP));
+        //idRP = ui->comboBox_idRP->currentText().toUInt();
+        //QString infoRP = QString::fromStdString(nuovaProcedura->getInfoRP(idRP));
         QMessageBox msgBox(this);
-        msgBox.setInformativeText("Sta per essere creata la procedura: " + descrizione + ". /n Il responsabile di Procedimento è: " + infoRP);
+        msgBox.setInformativeText("Sta per essere creata la procedura: "+ descrizione);//  + ". /n Il responsabile di Procedimento è: " + infoRP);
         msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Abort);
         int ret = msgBox.exec();
         if(ret == QMessageBox::Abort){
@@ -294,11 +311,6 @@ void MainWindowTecnico::pulisciInterfacciaCreazioneScheda(){
     ui->comboBox_tipo_elezione->clear();
     ui->spinBox_numero_preferenze->clear();
 
-}
-
-void MainWindowTecnico::on_pushButton_clicked()
-{
-    ui->stackedWidget->setCurrentIndex(InterfacceTecnico::sceltaOperazione);
 }
 
 void MainWindowTecnico::on_pushButton_addSchedaVoto_clicked()
@@ -448,13 +460,13 @@ void MainWindowTecnico::on_pushButton_rimuovi_candidato_clicked()
     if(ui->comboBox_seleziona_candidato->currentText()!=""){
         int index = ui->comboBox_seleziona_candidato->currentIndex();
         //vector <Candidato> listCandidati = nuovaScheda->getListCandidati();
-//        uint index;
-//        for (uint i = 0; i < listCandidati.size(); i++){
-//            if((listCandidati[i].getNominativo()) == entry.toStdString()){
-//                index = i;
-//                break;
-//            }
-//        }
+        //        uint index;
+        //        for (uint i = 0; i < listCandidati.size(); i++){
+        //            if((listCandidati[i].getNominativo()) == entry.toStdString()){
+        //                index = i;
+        //                break;
+        //            }
+        //        }
         nuovaScheda->removeCandidato(index);
         ui->comboBox_seleziona_candidato->removeItem(index);
     }
@@ -528,7 +540,7 @@ void MainWindowTecnico::hideBoxAggiungi(){
 }
 
 
-void MainWindowTecnico::on_lineEdit_nome_textChanged(const QString &arg1)
+void MainWindowTecnico::on_lineEdit_nome_c_textChanged(const QString &arg1)
 {
     if(arg1==""){
         ui->pushButton_conferma_aggiungi->setEnabled(false);
@@ -732,8 +744,84 @@ void MainWindowTecnico::pulisciInterfacciaCreazioneRP(){
 
 void MainWindowTecnico::on_pushButton_completa_reg_rp_clicked()
 {
-    //TODO estrarre dati schermata
+    QString pass1,pass2;
+    pass1 = ui->lineEdit_password_rp->text();
+    pass2 = ui->lineEdit_ripeti_password_rp->text();
+    if(pass1!=pass2){
+        ui->label_error_password_rp->show();
+        return;
+    }
+
+    QString nome = ui->lineEdit_nome_rp->text();
+    QString cognome = ui->lineEdit_cognome_rp->text();
+    QString luogoNascita = ui->lineEdit_luogo_nascita_rp->text();
+    QDate dataNascita = ui->dateEdit_data_nascita_rp->date();
+    nuovoRP->setNome(nome.toStdString());
+    nuovoRP->setCognome(cognome.toStdString());
+    nuovoRP->setLuogoNascita(luogoNascita.toStdString());
+    nuovoRP->setPassword(pass1.toStdString());
+    nuovoRP->setDataNascita(dataNascita.toString("yyyy/MM/dd").toStdString());
 
     //emetto il segnale di RP pronto alla memorizzazione
     emit rpPronto(nuovoRP);
+}
+
+void MainWindowTecnico::on_lineEdit_nome_rp_textChanged(const QString &arg1)
+{
+    if(arg1==""){
+        ui->pushButton_completa_reg_rp->setEnabled(false);
+    }
+    else{
+        QString cognome,luogo,pass1,pass2;
+        cognome = ui->lineEdit_cognome_rp->text();
+        luogo = ui->lineEdit_luogo_nascita_rp->text();
+        pass1 = ui->lineEdit_password_rp->text();
+        pass2 = ui->lineEdit_ripeti_password_rp->text();
+        if(cognome!="" && luogo !="" && pass1!="" &&pass2!=""){
+            ui->pushButton_completa_reg_rp->setEnabled(true);
+        }
+    }
+}
+
+void MainWindowTecnico::on_lineEdit_cognome_rp_textChanged(const QString &arg1)
+{
+    if(arg1==""){
+        ui->pushButton_completa_reg_rp->setEnabled(false);
+    }
+    else{
+        QString nome,luogo,pass1,pass2;
+        nome = ui->lineEdit_nome_rp->text();
+        luogo = ui->lineEdit_luogo_nascita_rp->text();
+        pass1 = ui->lineEdit_password_rp->text();
+        pass2 = ui->lineEdit_ripeti_password_rp->text();
+        if(nome!="" && luogo !="" && pass1!="" &&pass2!=""){
+            ui->pushButton_completa_reg_rp->setEnabled(true);
+        }
+    }
+}
+
+void MainWindowTecnico::on_lineEdit_password_rp_textChanged(const QString &arg1)
+{
+    ui->lineEdit_ripeti_password_rp->clear();
+    if(arg1==""){
+        ui->pushButton_completa_reg_rp->setEnabled(false);
+    }
+}
+
+void MainWindowTecnico::on_lineEdit_ripeti_password_rp_textChanged(const QString &arg1)
+{
+    if(arg1==""){
+        ui->pushButton_completa_reg_rp->setEnabled(false);
+    }
+    else{
+        QString nome,cognome,luogo,pass1,pass2;
+        nome = ui->lineEdit_nome_rp->text();
+        cognome = ui->lineEdit_cognome_rp->text();
+        luogo = ui->lineEdit_luogo_nascita_rp->text();
+        pass1 = ui->lineEdit_password_rp->text();
+        pass2 = ui->lineEdit_ripeti_password_rp->text();
+        if(nome!="" && cognome!="" && luogo !="" && pass1!="" &&pass2!=""){
+            ui->pushButton_completa_reg_rp->setEnabled(true);
+        }
+    }
 }

@@ -42,6 +42,7 @@ public:
     void resetSessioni();
     void removeSessioneByIndex(int index);
     string getInfoRP(uint idRP);
+    void copyToRPS(vector <ResponsabileProcedimento> rps);
 private:
     string descrizione;
     uint numSchedeVoto;

@@ -20,6 +20,7 @@ signals:
     void tecnicoPassChanged();
     void wrongSUpass();
     void storedSchedaVoto();
+    void storedRP(QString userid);
 
 public slots:
     void checkPassTecnico(QString pass);

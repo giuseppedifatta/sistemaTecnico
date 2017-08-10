@@ -88,20 +88,29 @@ void ProceduraVoto::removeSessioneByIndex(int index)
 }
 
 string ProceduraVoto::getInfoRP(uint idRP)
-{
+{   string infoRP;
     if(rps.empty()){
         return "";
     }
-    for(unsigned int i = 0; i< rps.size(); i++){
-        string nome,cognome,data,luogo;
-        if(rps.at(i).getIdRP() == idRP){
-            nome = rps.at(i).getNome();
-            cognome = rps.at(i).getCognome();
-            data = rps.at(i).getDataNascita();
-            luogo = rps.at(i).getLuogoNascita();
-            return nome + " " + cognome + ", " + luogo + ", " + data;
+    else{
+        for(unsigned int i = 0; i< rps.size(); i++){
+            string nome,cognome,data,luogo;
+            if(rps.at(i).getIdRP() == idRP){
+                nome = rps.at(i).getNome();
+                cognome = rps.at(i).getCognome();
+                data = rps.at(i).getDataNascita();
+                luogo = rps.at(i).getLuogoNascita();
+                infoRP =  nome + " " + cognome + ", " + luogo + ", " + data;
+                break;
+            }
         }
     }
+    return infoRP;
+}
+
+void ProceduraVoto::copyToRPS(vector<ResponsabileProcedimento> rps)
+{
+    copy(rps.begin(), rps.end(), this->rps.begin());
 }
 
 void ProceduraVoto::getRPsFromDB()

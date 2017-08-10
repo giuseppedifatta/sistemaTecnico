@@ -2,8 +2,11 @@
 #include "schedavoto.h"
 #include <tinyxml2.h>
 #include <sstream>
+#include <algorithm>
+#include <iostream>
 
 using namespace tinyxml2;
+using namespace std;
 
 #ifndef XMLCheckResult
 #define XMLCheckResult(a_eResult)
@@ -19,12 +22,12 @@ DataManager::DataManager(QObject *parent) : QObject(parent)
 
 void DataManager::checkPassTecnico(QString pass)
 {
-   if(pass==tecnicoPass){
-       emit passOK();
-   }
-   else{
-       emit wrongTecnicoPass();
-   }
+    if(pass==tecnicoPass){
+        emit passOK();
+    }
+    else{
+        emit wrongTecnicoPass();
+    }
 }
 
 void DataManager::tryChangeTecnicoPass(QString su_pass, QString newTecnicoPass)
@@ -47,9 +50,9 @@ void DataManager::storeScheda(SchedaVoto *scheda)
     XMLNode * pRoot = xmlDoc.NewElement("SchedaVoto");
     xmlDoc.InsertFirstChild(pRoot);
     XMLElement * pElement;
-//    std::ostringstream s;
-//    s << idProceduraVoto;
-//    const std::string i_as_string(s.str());
+    //    std::ostringstream s;
+    //    s << idProceduraVoto;
+    //    const std::string i_as_string(s.str());
 
     uint idScheda = 1;
     pElement = xmlDoc.NewElement("idScheda");
@@ -101,6 +104,22 @@ void DataManager::storeScheda(SchedaVoto *scheda)
 void DataManager::storeRP(ResponsabileProcedimento *rp)
 {
 
+    string userid;
+    string orig = rp->getNome() + "." + rp->getCognome();
+    remove_copy( orig.begin() , orig.end() , back_inserter( userid ) , ' ');
+    transform(userid.begin(), userid.end(), userid.begin(), ::tolower);
+    cout << "UserId del nuovo RP: " << userid << endl;
+    QString qsUserid = QString::fromStdString(userid);
+
+    //TODO cercare sul DB se l'userid creato è già presente, in caso positivo,
+    //aggiungere un numero casuale da 1 a 10 alla fine dell'userid e riprovare
+
+    //userid univoco trovato!
+    //TODO procedere alla memorizzazione dell'RP sul database
+
+
+    //emetto il segnale che l'RP è stato memorizzato e gli passo l'userid di RP come parametro
+    emit storedRP(qsUserid);
 }
 
 void DataManager::storeProcedura(ProceduraVoto *procedura)

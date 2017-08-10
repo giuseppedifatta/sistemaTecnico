@@ -38,6 +38,8 @@ private:
     string cognome;
     string luogoNascita;
     string dataNascita;
+
+    //AVRÀ UN VALORE SOLO QUANDO VERRÀ PRELEVATO DAL DB, NEL MOMENTO IN CUI SI VUOLE CREARE UNA PROCEDURA
     uint idRP;
 };
 Q_DECLARE_METATYPE(ResponsabileProcedimento)
