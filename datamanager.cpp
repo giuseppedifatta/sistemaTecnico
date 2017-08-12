@@ -1,23 +1,31 @@
 #include "datamanager.h"
-#include "schedavoto.h"
-#include <tinyxml2.h>
-#include <sstream>
-#include <algorithm>
-#include <iostream>
+//#include "mysql_driver.h"
 
-using namespace tinyxml2;
-using namespace std;
+//#ifndef XMLCheckResult
+//#define XMLCheckResult(a_eResult)
+//#endif
 
-#ifndef XMLCheckResult
-#define XMLCheckResult(a_eResult)
-#endif
 
+using namespace CryptoPP;
 DataManager::DataManager(QObject *parent) : QObject(parent)
 {
     tecnicoPass= "tecnico";
     suPass = "admin";
+    try{
+        driver=get_driver_instance();
+        connection=driver->connect("localhost:3306","root", "root");
+        connection->setAutoCommit(false);
+        connection->setSchema("mydb");
+    }catch(SQLException &ex){
+        cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
+    }
+    cout << "MySql Server ok." << endl;
+}
 
-    //qRegisterMetaType<SchedaVoto>("SchedaVoto");
+DataManager::~DataManager()
+{
+    delete connection;
+    //delete driver;
 }
 
 void DataManager::checkPassTecnico(QString pass)
@@ -103,27 +111,123 @@ void DataManager::storeScheda(SchedaVoto *scheda)
 
 void DataManager::storeRP(ResponsabileProcedimento *rp)
 {
-
     string userid;
-    string orig = rp->getNome() + "." + rp->getCognome();
-    remove_copy( orig.begin() , orig.end() , back_inserter( userid ) , ' ');
+    string vergin_userid = rp->getNome() + "." + rp->getCognome();
+    remove_copy( vergin_userid.begin() , vergin_userid.end() , back_inserter( userid ) , ' ');
     transform(userid.begin(), userid.end(), userid.begin(), ::tolower);
+    //verifichiamo che l'userid sia già presente, in caso positivo va aggiunto un digit random alla fine e si riprova
+    bool useridJustExist = true; //supponiamo inizialmente che esista
+    ResultSet *resultSet=NULL;
+    PreparedStatement *pstmt;
+    pstmt = connection->prepareStatement("SELECT * FROM ResponsabiliProcedimento WHERE userid = ?");
+
+    try{
+
+        while(useridJustExist){
+            useridJustExist = false;
+            pstmt->setString(1,userid);
+            resultSet=pstmt->executeQuery();
+
+            //resultSet avrà al più un elemento perché userid è chiave primaria nel db
+            while(resultSet->next()){
+                //userid già presente
+                useridJustExist = true;
+                cout << "L'userid: " << userid << " è già presente." << endl;
+                int digitToAdd = rand() % 10;
+
+                userid = userid + ::to_string(digitToAdd);
+                cout << "Riprovo con l'userid: " << userid << endl;
+            }
+        }
+    }catch(SQLException &ex){
+        cout << "Exception occurred: " << ex.getErrorCode() <<endl;
+    }
+    delete resultSet;
+    pstmt=connection->prepareStatement
+            ("INSERT INTO ResponsabiliProcedimento ( userid, nome, cognome, dataNascita, luogoNascita ) VALUES (?,?,?,?,?)");
+    try{
+        cout << "Memorizzazione del nuovo RP in corso..." << endl;
+        pstmt->setString(1,userid);
+        pstmt->setString(2,rp->getNome());
+        pstmt->setString(3,rp->getCognome());
+        pstmt->setDateTime(4,rp->getDataNascita());
+        pstmt->setString(5,rp->getLuogoNascita());
+        pstmt->executeUpdate();
+        connection->commit();
+    }catch(SQLException &ex){
+        cout<<"Exception occurred"<<ex.getErrorCode()<<endl;
+    }
+    pstmt->close();
+    delete pstmt;
+
+
     cout << "UserId del nuovo RP: " << userid << endl;
     QString qsUserid = QString::fromStdString(userid);
 
-    //TODO cercare sul DB se l'userid creato è già presente, in caso positivo,
-    //aggiungere un numero casuale da 1 a 10 alla fine dell'userid e riprovare
 
-    //userid univoco trovato!
-    //TODO procedere alla memorizzazione dell'RP sul database
-
-
+    //memorizzazione sul db della coppia userid-password
+    storePassNewRP(userid,rp->getPassword());
     //emetto il segnale che l'RP è stato memorizzato e gli passo l'userid di RP come parametro
     emit storedRP(qsUserid);
 }
 
 void DataManager::storeProcedura(ProceduraVoto *procedura)
 {
+    //TODO memorizzare procedura nel db
+}
+
+void DataManager::getRPSFromDB()
+{
+    //TODO ottenere dal DB informazioni dei responsabili di procedimento registrati nel sistema
+}
+
+void DataManager::storePassNewRP(string userid, string pass)
+{
+    /*Generate salt */
+    AutoSeededRandomPool prng;
+    SecByteBlock salt(AES::BLOCKSIZE);
+    prng.GenerateBlock(salt, sizeof(salt));
+    string s;
+    HexEncoder hex(new StringSink(s));
+    hex.Put(salt, salt.size());
+    hex.MessageEnd();
+
+
+    string hashedPass = hashPassword(pass, s);
+    cout << "salt:" << s << ", size: " << s.size() << endl;
+    cout << "Hash della Password: " << hashedPass  << ", size: " << hashedPass.size()<< endl;
+
+    PreparedStatement *pstmt;
+
+    pstmt = connection->prepareStatement("INSERT INTO Utenti (userid,salt,hashedPassword) VALUES(?,?,?)");
+    try{
+        pstmt->setString(1,userid);
+        pstmt->setString(2,s);
+        pstmt->setString(3,hashedPass);
+        pstmt->executeUpdate();
+        connection->commit();
+    }catch(SQLException &ex){
+        cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
+    }
+    pstmt->close();
+    delete pstmt;
+}
+
+string DataManager::hashPassword( string plainPass, string salt){
+    SecByteBlock result(32);
+    string hexResult;
+
+    PKCS5_PBKDF2_HMAC<SHA256> pbkdf;
+
+    pbkdf.DeriveKey(result, result.size(),0x00,(byte *) plainPass.data(), plainPass.size(),(byte *) salt.data(), salt.size(),100);
+
+    //ArraySource resultEncoder(result,result.size(), true, new HexEncoder(new StringSink(hexResult)));
+
+    HexEncoder hex(new StringSink(hexResult));
+    hex.Put(result.data(), result.size());
+    hex.MessageEnd();
+
+    return hexResult;
 
 }
 

@@ -53,7 +53,6 @@ private:
     vector <SessioneVoto> sessioni;
     vector <ResponsabileProcedimento> rps;
 
-    void getRPsFromDB();
 
 };
 Q_DECLARE_METATYPE(ProceduraVoto)

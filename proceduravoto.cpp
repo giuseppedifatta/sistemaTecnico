@@ -4,7 +4,6 @@ ProceduraVoto::ProceduraVoto()
 {
     this->data_ora_inizio = "";
     this->data_ora_termine = "";
-    getRPsFromDB();
 }
 
 string ProceduraVoto::getDescrizione() const
@@ -113,8 +112,4 @@ void ProceduraVoto::copyToRPS(vector<ResponsabileProcedimento> rps)
     copy(rps.begin(), rps.end(), this->rps.begin());
 }
 
-void ProceduraVoto::getRPsFromDB()
-{
-
-}
 

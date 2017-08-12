@@ -19,7 +19,10 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
     ui->lineEdit_new_password->setEchoMode(QLineEdit::Password);
     ui->lineEdit_repeat_new_password->setEchoMode(QLineEdit::Password);
     ui->lineEdit_su_password->setEchoMode(QLineEdit::Password);
+    ui->lineEdit_password_rp->setEchoMode(QLineEdit::Password);
+    ui->lineEdit_ripeti_password_rp->setEchoMode(QLineEdit::Password);
 
+    cout << "inizializzazione model..." << endl;
     model = new DataManager(this);
 
     QObject::connect(this,SIGNAL(tecnicoPass(QString)),model,SLOT(checkPassTecnico(QString)),Qt::QueuedConnection);
@@ -29,17 +32,20 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
     QObject::connect(model,SIGNAL(wrongSUpass()),this,SLOT(suPassErrorMessage()),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(tecnicoPassChanged()),this,SLOT(tecnicoPassAggiornata()),Qt::QueuedConnection);
 
-    //qRegisterMetaType< SchedaVoto >( "SchedaVoto" );
     QObject::connect(this,SIGNAL(schedaPronta(SchedaVoto*)),model,SLOT(storeScheda(SchedaVoto*)),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(storedSchedaVoto()),this,SLOT(messageStoredSchedaVoto()),Qt::QueuedConnection);
-    //inserire le 4 connect per la memorizzazione della procedura sul db e la regitrazione del tecnico
+
     QObject::connect(this,SIGNAL(rpPronto(ResponsabileProcedimento*)),model,SLOT(storeRP(ResponsabileProcedimento*)),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(storedRP(QString)),this,SLOT(messageRegisteredRP(QString)),Qt::QueuedConnection);
+
+    //QObject::connect(this,SIGNAL(needInfoRPS()),model,SLOT(),Qt::QueuedConnection);
+    //QObject::connect(model,SIGNAL(),this,SLOT(startCreationProcedura(vector<ResponsabileProcedimento>)),Qt::QueuedConnection);
 }
 
 
 MainWindowTecnico::~MainWindowTecnico()
 {
+    delete model;
     delete ui;
 }
 
@@ -214,6 +220,7 @@ void MainWindowTecnico::on_pushButton_crea_procedura_clicked()
 void MainWindowTecnico::on_pushButton_registra_RP_clicked()
 {
     nuovoRP = new ResponsabileProcedimento();
+    ui->dateEdit_data_nascita_rp->clear();
     ui->dateEdit_data_nascita_rp->setMaximumDate(QDate::currentDate().addYears(-18));
     ui->label_error_password_rp->hide();
     ui->pushButton_completa_reg_rp->setEnabled(false);
