@@ -20,6 +20,7 @@
 #include <cryptopp/filters.h>
 #include <cryptopp/secblock.h>
 #include <cryptopp/hex.h>
+#include <cryptopp/rsa.h>
 
 #include <cppconn/connection.h>
 #include <cppconn/prepared_statement.h>

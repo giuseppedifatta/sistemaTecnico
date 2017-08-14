@@ -118,6 +118,8 @@ private slots:
 
     void on_lineEdit_ripeti_password_rp_textChanged(const QString &arg1);
 
+    void on_pushButton_visualizzaInfoRP_clicked();
+
 private:
     Ui::MainWindowTecnico *ui;
 

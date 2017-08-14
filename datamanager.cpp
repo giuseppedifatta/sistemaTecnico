@@ -5,7 +5,7 @@
 //#define XMLCheckResult(a_eResult)
 //#endif
 
-
+#include <istream>
 using namespace CryptoPP;
 DataManager::DataManager(QObject *parent) : QObject(parent)
 {
@@ -133,6 +133,10 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
                 //userid già presente
                 useridJustExist = true;
                 cout << "L'userid: " << userid << " è già presente." << endl;
+
+                int seed = QDateTime::currentDateTime().time().second();
+                cout << "Seed: " << seed << endl;
+                srand(seed);
                 int digitToAdd = rand() % 10;
 
                 userid = userid + ::to_string(digitToAdd);
@@ -143,8 +147,42 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
         cout << "Exception occurred: " << ex.getErrorCode() <<endl;
     }
     delete resultSet;
+
+    //genera coppia di chiavi asimmetriche
+    AutoSeededRandomPool rnd;
+
+    RSA::PrivateKey rsaPrivate;
+    rsaPrivate.GenerateRandomWithKeySize(rnd, 3072);
+
+    RSA::PublicKey rsaPublic(rsaPrivate);
+
+    ByteQueue queue;
+    rsaPublic.Save(queue);
+    HexEncoder encoder;
+    queue.CopyTo(encoder);
+    encoder.MessageEnd();
+    string s;
+    StringSink ss(s);
+    encoder.CopyTo(ss);
+    ss.MessageEnd();
+    cout << "publicKey: " << s << endl;
+    std::stringstream rsaPublicBlob(s);
+
+    //la privateKey è salvata sul DB per comodità temporanea di sviluppo, ma non è la cosa corretta da fare
+    ByteQueue queue2;
+    rsaPrivate.Save(queue2);
+    HexEncoder encoder2;
+    queue2.CopyTo(encoder2);
+    encoder2.MessageEnd();
+    string s2;
+    StringSink ss2(s2);
+    encoder.CopyTo(ss2);
+    ss2.MessageEnd();
+    cout << "privateKey: " << s2 << endl;
+    std::stringstream rsaPrivateBlob(s2);
+
     pstmt=connection->prepareStatement
-            ("INSERT INTO ResponsabiliProcedimento ( userid, nome, cognome, dataNascita, luogoNascita ) VALUES (?,?,?,?,?)");
+            ("INSERT INTO ResponsabiliProcedimento ( userid, nome, cognome, dataNascita, luogoNascita,publicKey,privateKey ) VALUES (?,?,?,?,?,?,?)");
     try{
         cout << "Memorizzazione del nuovo RP in corso..." << endl;
         pstmt->setString(1,userid);
@@ -152,10 +190,12 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
         pstmt->setString(3,rp->getCognome());
         pstmt->setDateTime(4,rp->getDataNascita());
         pstmt->setString(5,rp->getLuogoNascita());
+        pstmt->setBlob(6,&rsaPublicBlob);
+        pstmt->setBlob(7,&rsaPrivateBlob);
         pstmt->executeUpdate();
         connection->commit();
     }catch(SQLException &ex){
-        cout<<"Exception occurred"<<ex.getErrorCode()<<endl;
+        cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
     }
     pstmt->close();
     delete pstmt;
@@ -179,6 +219,30 @@ void DataManager::storeProcedura(ProceduraVoto *procedura)
 void DataManager::getRPSFromDB()
 {
     //TODO ottenere dal DB informazioni dei responsabili di procedimento registrati nel sistema
+    vector <ResponsabileProcedimento> listRPS;
+    ResultSet *resultSet=NULL;
+    PreparedStatement *pstmt;
+    pstmt = connection->prepareStatement("SELECT * FROM ResponsabiliProcedimento");
+    try{
+        resultSet=pstmt->executeQuery();
+        while(resultSet->next()){
+            ResponsabileProcedimento rp;
+            rp.setNome(resultSet->getString("nome"));
+            rp.setCognome(resultSet->getString("cognome"));
+            rp.setDataNascita(resultSet->getString("dataNascita"));
+            rp.setLuogoNascita(resultSet->getString("luogoNascita"));
+            rp.setUserid(resultSet->getString("userid"));
+            rp.setIdRP(resultSet->getInt("idResponsabileProcedimento"));
+            listRPS.push_back(rp);
+        }
+    }catch(SQLException &ex){
+        cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
+    }
+    pstmt->close();
+    delete pstmt;
+    delete resultSet;
+
+    emit readyRPS(listRPS);
 }
 
 void DataManager::storePassNewRP(string userid, string pass)

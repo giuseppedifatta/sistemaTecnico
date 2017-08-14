@@ -38,8 +38,9 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
     QObject::connect(this,SIGNAL(rpPronto(ResponsabileProcedimento*)),model,SLOT(storeRP(ResponsabileProcedimento*)),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(storedRP(QString)),this,SLOT(messageRegisteredRP(QString)),Qt::QueuedConnection);
 
-    //QObject::connect(this,SIGNAL(needInfoRPS()),model,SLOT(),Qt::QueuedConnection);
-    //QObject::connect(model,SIGNAL(),this,SLOT(startCreationProcedura(vector<ResponsabileProcedimento>)),Qt::QueuedConnection);
+    QObject::connect(this,SIGNAL(needInfoRPS()),model,SLOT(getRPSFromDB()),Qt::QueuedConnection);
+    qRegisterMetaType< vector<ResponsabileProcedimento> >( "vector<ResponsabileProcedimento>" );
+    QObject::connect(model,SIGNAL(readyRPS(vector <ResponsabileProcedimento>)),this,SLOT(startCreationProcedura(vector <ResponsabileProcedimento>)),Qt::QueuedConnection);
 }
 
 
@@ -171,7 +172,11 @@ void MainWindowTecnico::messageRegisteredRP(QString userid)
 void MainWindowTecnico::startCreationProcedura(vector<ResponsabileProcedimento> rps)
 {
     //TODO aggiungere le info ricevute in rps alla struttura nuovaProcedura nel dato membro rps
-    nuovaProcedura->copyToRPS(rps);
+    nuovaProcedura->setRps(rps);
+    for (unsigned int i = 0; i < rps.size(); i++){
+        QString rp = QString::number(rps.at(i).getIdRP()) + ", " + QString::fromStdString(rps.at(i).getNome()) + " " + QString::fromStdString(rps.at(i).getCognome());
+        ui->comboBox_idRP->addItem(rp);
+    }
 
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::creazioneProcedura);
 }
@@ -259,6 +264,7 @@ void MainWindowTecnico::pulisciInterfacciaCreazioneProcedura(){
     ui->dateTimeEdit_data_ora_termine->clear();
     ui->timeEdit_apertura_sessione->clear();
     ui->timeEdit_chiusura_sessione->clear();
+    ui->comboBox_idRP->clear();
 }
 
 void MainWindowTecnico::on_pushButton_salva_procedura_clicked()
@@ -275,11 +281,11 @@ void MainWindowTecnico::on_pushButton_salva_procedura_clicked()
         return;
     }
     else{
-        //idRP = ui->comboBox_idRP->currentText().toUInt();
-        //QString infoRP = QString::fromStdString(nuovaProcedura->getInfoRP(idRP));
         QMessageBox msgBox(this);
-        msgBox.setInformativeText("Sta per essere creata la procedura: "+ descrizione);//  + ". /n Il responsabile di Procedimento è: " + infoRP);
+        msgBox.setInformativeText("Sta per essere creata la procedura: "+ descrizione);
         msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Abort);
+        msgBox.buttons().at(0)->setText("Prosegui");
+        msgBox.buttons().at(1)->setText("Annulla");
         int ret = msgBox.exec();
         if(ret == QMessageBox::Abort){
             return;
@@ -831,4 +837,15 @@ void MainWindowTecnico::on_lineEdit_ripeti_password_rp_textChanged(const QString
             ui->pushButton_completa_reg_rp->setEnabled(true);
         }
     }
+}
+
+void MainWindowTecnico::on_pushButton_visualizzaInfoRP_clicked()
+{
+    uint index = ui->comboBox_idRP->currentIndex();
+    vector <ResponsabileProcedimento> rps = nuovaProcedura->getRps();
+    uint idRP = rps.at(index).getIdRP();
+    QString infoRP = QString::fromStdString(nuovaProcedura->getInfoRP(idRP));
+
+    QMessageBox::information(this,"InfoRP: " + QString::number(idRP),infoRP);
+
 }

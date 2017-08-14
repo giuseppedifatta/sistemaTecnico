@@ -1,4 +1,6 @@
 #include "proceduravoto.h"
+#include <iostream>
+using namespace std;
 
 ProceduraVoto::ProceduraVoto()
 {
@@ -107,9 +109,14 @@ string ProceduraVoto::getInfoRP(uint idRP)
     return infoRP;
 }
 
-void ProceduraVoto::copyToRPS(vector<ResponsabileProcedimento> rps)
+vector<ResponsabileProcedimento> ProceduraVoto::getRps() const
 {
-    copy(rps.begin(), rps.end(), this->rps.begin());
+    return rps;
+}
+
+void ProceduraVoto::setRps(const vector<ResponsabileProcedimento> &value)
+{
+    rps = value;
 }
 
 
