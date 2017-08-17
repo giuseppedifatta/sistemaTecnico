@@ -46,7 +46,9 @@ signals:
     void wrongSUpass();
     void storedSchedaVoto();
     void storedRP(QString userid);
+    void storedProcedura();
     void readyRPS(vector <ResponsabileProcedimento> rps);
+    void readyProcedure(QList <ProceduraVoto> pv);
 public slots:
     void checkPassTecnico(QString pass);
     void tryChangeTecnicoPass(QString su_pass, QString newTecnicoPas);
@@ -54,7 +56,7 @@ public slots:
     void storeRP(ResponsabileProcedimento* rp);
     void storeProcedura(ProceduraVoto* procedura);
     void getRPSFromDB();
-
+    void getProcedureVotoFromDB();
 private:
     QString tecnicoPass;
     QString suPass;

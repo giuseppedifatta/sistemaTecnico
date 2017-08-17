@@ -6,6 +6,7 @@
 //#endif
 
 #include <istream>
+#include <QDebug>
 using namespace CryptoPP;
 DataManager::DataManager(QObject *parent) : QObject(parent)
 {
@@ -211,25 +212,21 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
     emit storedRP(qsUserid);
 }
 
-void DataManager::storeProcedura(ProceduraVoto *procedura)
-{
-    //TODO memorizzare procedura nel db
-}
-
 void DataManager::getRPSFromDB()
 {
-    //TODO ottenere dal DB informazioni dei responsabili di procedimento registrati nel sistema
     vector <ResponsabileProcedimento> listRPS;
     ResultSet *resultSet=NULL;
     PreparedStatement *pstmt;
     pstmt = connection->prepareStatement("SELECT * FROM ResponsabiliProcedimento");
     try{
-        resultSet=pstmt->executeQuery();
+        resultSet = pstmt->executeQuery();
         while(resultSet->next()){
             ResponsabileProcedimento rp;
             rp.setNome(resultSet->getString("nome"));
             rp.setCognome(resultSet->getString("cognome"));
-            rp.setDataNascita(resultSet->getString("dataNascita"));
+            QString qsDataNascita = QString::fromStdString(resultSet->getString("dataNascita"));
+            QDate dataNascita = QDate::fromString(qsDataNascita,"yyyy-MM-dd");
+            rp.setDataNascita(dataNascita.toString("dd/MM/yyyy").toStdString());
             rp.setLuogoNascita(resultSet->getString("luogoNascita"));
             rp.setUserid(resultSet->getString("userid"));
             rp.setIdRP(resultSet->getInt("idResponsabileProcedimento"));
@@ -243,6 +240,44 @@ void DataManager::getRPSFromDB()
     delete resultSet;
 
     emit readyRPS(listRPS);
+}
+
+void DataManager::getProcedureVotoFromDB()
+{
+    QList <ProceduraVoto> listPVs;
+
+    PreparedStatement *pstmt;
+    ResultSet *resultSet;
+    pstmt = connection->prepareStatement("SELECT * FROM ProcedureVoto");
+
+    try{
+        resultSet = pstmt->executeQuery();
+        while(resultSet->next()){
+           ProceduraVoto pv;
+           pv.setIdProceduraVoto(resultSet->getUInt("idProceduraVoto"));
+           pv.setIdRP(resultSet->getUInt("idResponsabileProcedimento"));
+           pv.setDescrizione(resultSet->getString("descrizione"));
+           QString qsInizio = QString::fromStdString(resultSet->getString("inizio"));
+           QDateTime data_ora_inizio = QDateTime::fromString(qsInizio,"yyyy-MM-dd hh:mm");
+           pv.setData_ora_inizio(data_ora_inizio.toString().toStdString());
+           QString qsFine = QString::fromStdString(resultSet->getString("fine"));
+           QDateTime data_ora_fine = QDateTime::fromString(qsFine,"yyyy-MM-dd hh:mm");
+           pv.setData_ora_termine(data_ora_fine.toString().toStdString());
+           pv.setNumSchedeVoto(resultSet->getUInt("numSchede"));
+           pv.setStato(resultSet->getString("stato"));
+           listPVs.append(pv);
+        }
+
+    }catch(SQLException &ex){
+        cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
+    }
+    pstmt->close();
+    delete pstmt;
+    delete resultSet;
+
+    //TODO ottenere procedure memorizzate nel DB
+
+    emit readyProcedure(listPVs);
 }
 
 void DataManager::storePassNewRP(string userid, string pass)
@@ -275,6 +310,67 @@ void DataManager::storePassNewRP(string userid, string pass)
     }
     pstmt->close();
     delete pstmt;
+}
+
+void DataManager::storeProcedura(ProceduraVoto *procedura)
+{
+    // memorizzare procedura nel db
+    PreparedStatement *pstmt;
+
+
+    pstmt = connection->prepareStatement
+            ("INSERT INTO ProcedureVoto (idResponsabileProcedimento, descrizione, numSchede, stato, ultimaModifica, inizio, fine) VALUES(?,?,?,?,?,?,?)");
+    string currentTime = QDateTime::currentDateTime().toString("yyyy/MM/dd hh:mm:ss").toStdString();
+    try{
+        pstmt->setUInt(1,procedura->getIdRP());
+        pstmt->setString(2,procedura->getDescrizione());
+        pstmt->setUInt(3,procedura->getNumSchedeVoto());
+        pstmt->setString(4,"creazione");
+        pstmt->setDateTime(5,currentTime);
+        pstmt->setDateTime(6,procedura->getData_ora_inizio());
+        pstmt->setDateTime(7,procedura->getData_ora_termine());
+        pstmt->executeUpdate();
+        connection->commit();
+    }catch(SQLException &ex){
+        cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
+    }
+
+    cout << "after insert procedura" << endl;
+
+    pstmt = connection->prepareStatement("SELECT LAST_INSERT_ID() AS idProceduraVoto");
+    ResultSet *resultSet=NULL;
+    uint idProceduraInserita;
+    try{
+        resultSet = pstmt->executeQuery();
+        resultSet->next();
+        idProceduraInserita = resultSet->getUInt("idProceduraVoto");
+
+    }catch(SQLException &ex){
+        cout<<"Exception occurred: "<< ex.getErrorCode()<<endl;
+    }
+
+    cout << "La procedura appena inserita ha id: " << idProceduraInserita << endl;
+
+    //memorizzazione sessioni
+        vector <SessioneVoto> sessioni = procedura->getSessioni();
+        pstmt = connection->prepareStatement("INSERT INTO Sessioni (idProceduraVoto,data,apertura,chiusura) VALUES(?,?,?,?)");
+        try{
+            for(unsigned int i = 0; i < sessioni.size(); i++){
+                pstmt->setUInt(1,idProceduraInserita);
+                pstmt->setDateTime(2,sessioni.at(i).getData());
+                pstmt->setString(3,sessioni.at(i).getOraApertura());
+                pstmt->setString(4,sessioni.at(i).getOraChiusura());
+                pstmt->executeUpdate();
+                connection->commit();
+            }
+        }catch(SQLException &ex){
+            cout<<"Exception occurred: "<< ex.getErrorCode()<<endl;
+        }
+
+    pstmt->close();
+    delete pstmt;
+
+    emit storedProcedura();
 }
 
 string DataManager::hashPassword( string plainPass, string salt){

@@ -13,7 +13,12 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::loginUrna);
-    //on_pushButton_addSchedaVoto_clicked();
+    QStringList tableHeaders;
+    tableHeaders << "idProcedureVoto" << "Descrizione" << "idRP" << "Inizio" << "Termine" << "numero schede" << "stato";
+
+    ui->tableWidget_lista_procedure->setHorizontalHeaderLabels(tableHeaders);
+    ui->tableWidget_lista_procedure->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableWidget_lista_procedure->resizeColumnsToContents();
 
     ui->lineEdit_password_tecnico->setEchoMode(QLineEdit::Password);
     ui->lineEdit_new_password->setEchoMode(QLineEdit::Password);
@@ -41,6 +46,13 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
     QObject::connect(this,SIGNAL(needInfoRPS()),model,SLOT(getRPSFromDB()),Qt::QueuedConnection);
     qRegisterMetaType< vector<ResponsabileProcedimento> >( "vector<ResponsabileProcedimento>" );
     QObject::connect(model,SIGNAL(readyRPS(vector <ResponsabileProcedimento>)),this,SLOT(startCreationProcedura(vector <ResponsabileProcedimento>)),Qt::QueuedConnection);
+
+    QObject::connect(this,SIGNAL(proceduraPronta(ProceduraVoto*)),model,SLOT(storeProcedura(ProceduraVoto*)),Qt::QueuedConnection);
+    QObject::connect(model,SIGNAL(storedProcedura()),this,SLOT(messageStoredProcedura()),Qt::QueuedConnection);
+
+    QObject::connect(this,SIGNAL(needInfoProcedureVoto()),model,SLOT(getProcedureVotoFromDB()),Qt::QueuedConnection);
+    qRegisterMetaType< QList<ProceduraVoto> >( "QList<ProceduraVoto>" );
+    QObject::connect(model,SIGNAL(readyProcedure(QList<ProceduraVoto>)),this,SLOT(showViewProcedureVoto(QList<ProceduraVoto>)),Qt::QueuedConnection);
 }
 
 
@@ -50,16 +62,7 @@ MainWindowTecnico::~MainWindowTecnico()
     delete ui;
 }
 
-//void MainWindowSeggio::on_aggiungiHT_button_clicked()
-//{
-//    QString codHT = ui->codHT_lineEdit->text();
-//    ui->codHT_lineEdit->setText("");
-//    ui->token_tableWidget->insertRow(ui->token_tableWidget->rowCount());
-//    int rigaAggiunta = ui->token_tableWidget->rowCount()-1;
-//    ui->token_tableWidget->setItem(rigaAggiunta,0,new QTableWidgetItem(codHT));
-//    QString elimina = "Elimina";
-//    ui->token_tableWidget->setItem(rigaAggiunta,1,new QTableWidgetItem(elimina));
-//}
+
 
 //void MainWindowSeggio::on_token_tableWidget_clicked(const QModelIndex &index)
 //{
@@ -171,12 +174,19 @@ void MainWindowTecnico::messageRegisteredRP(QString userid)
 
 void MainWindowTecnico::startCreationProcedura(vector<ResponsabileProcedimento> rps)
 {
-    //TODO aggiungere le info ricevute in rps alla struttura nuovaProcedura nel dato membro rps
-    nuovaProcedura->setRps(rps);
-    for (unsigned int i = 0; i < rps.size(); i++){
-        QString rp = QString::number(rps.at(i).getIdRP()) + ", " + QString::fromStdString(rps.at(i).getNome()) + " " + QString::fromStdString(rps.at(i).getCognome());
-        ui->comboBox_idRP->addItem(rp);
+    //aggiungere le info ricevute in rps alla struttura nuovaProcedura nel dato membro rps
+    if(rps.size()>0){
+        nuovaProcedura->setRps(rps);
+        for (unsigned int i = 0; i < rps.size(); i++){
+            QString rp = QString::number(rps.at(i).getIdRP()) + ", " + QString::fromStdString(rps.at(i).getNome()) + " " + QString::fromStdString(rps.at(i).getCognome());
+            ui->comboBox_idRP->addItem(rp);
+        }
+        ui->pushButton_visualizzaInfoRP->setEnabled(true);
     }
+    else{
+        ui->pushButton_visualizzaInfoRP->setEnabled(false);
+    }
+
 
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::creazioneProcedura);
 }
@@ -234,9 +244,38 @@ void MainWindowTecnico::on_pushButton_registra_RP_clicked()
 
 void MainWindowTecnico::on_pushButton_visualizza_procedure_clicked()
 {
-    ui->stackedWidget->setCurrentIndex(InterfacceTecnico::visualizzaProcedure);
+    emit needInfoProcedureVoto();
+
 }
 
+void MainWindowTecnico::showViewProcedureVoto(QList <ProceduraVoto> procedureVoto){
+    for (int row = 0; row < procedureVoto.size();row++){
+            ui->tableWidget_lista_procedure->insertRow(ui->tableWidget_lista_procedure->rowCount());
+            int rigaAggiunta = ui->tableWidget_lista_procedure->rowCount()-1;
+
+            uint idProcedura = procedureVoto.at(row).getIdProceduraVoto();
+            cout << idProcedura << endl;
+            ui->tableWidget_lista_procedure->setItem(rigaAggiunta,0,new QTableWidgetItem(QString::number(idProcedura)));
+            uint idRP = procedureVoto.at(row).getIdRP();
+            QDateTime data_ora_inizio = QDateTime::fromString(QString::fromStdString(procedureVoto.at(row).getData_ora_inizio()),"yyyy-MM-dd hh:mm");
+            QDateTime data_ora_termine = QDateTime::fromString(QString::fromStdString(procedureVoto.at(row).getData_ora_termine()),"yyyy-MM-dd hh:mm");
+            QString descrizione = QString::fromStdString(procedureVoto.at(row).getDescrizione());
+            QString stato = QString::fromStdString(procedureVoto.at(row).getStato());
+            uint numSchede = procedureVoto.at(row).getNumSchedeVoto();
+
+    }
+    ui->stackedWidget->setCurrentIndex(InterfacceTecnico::visualizzaProcedure);
+}
+//void MainWindowSeggio::on_aggiungiHT_button_clicked()
+//{
+//    QString codHT = ui->codHT_lineEdit->text();
+//    ui->codHT_lineEdit->setText("");
+//    ui->token_tableWidget->insertRow(ui->token_tableWidget->rowCount());
+//    int rigaAggiunta = ui->token_tableWidget->rowCount()-1;
+//    ui->token_tableWidget->setItem(rigaAggiunta,0,new QTableWidgetItem(codHT));
+//    QString elimina = "Elimina";
+//    ui->token_tableWidget->setItem(rigaAggiunta,1,new QTableWidgetItem(elimina));
+//}
 void MainWindowTecnico::on_pushButton_logout_clicked()
 {
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::loginUrna);
@@ -272,30 +311,48 @@ void MainWindowTecnico::on_pushButton_salva_procedura_clicked()
     //TODO estrazione dati dalla schermata: descrizione, numero schede, identificativo RP, sessioni
     QString descrizione = ui->lineEdit_descrizione_procedura->text();
     nuovaProcedura->setDescrizione(descrizione.toStdString());
+
     int numSchede = ui->spinBox_numero_schede->value();
     nuovaProcedura->setNumSchedeVoto(numSchede);
-    uint idRP;
+
+    if(nuovaProcedura->getData_ora_inizio()==""){
+        QMessageBox msgBox(this);
+        msgBox.setInformativeText("Inserire almeno una procedura e una sessione prima di continuare.");
+        msgBox.exec();
+        ui->pushButton_salva_procedura->setEnabled(false);
+        return;
+    }
+    if(intervalliSessioni.empty()){
+        QMessageBox msgBox(this);
+        msgBox.setInformativeText("Inserire almeno una sessione di voto.");
+        msgBox.exec();
+        ui->pushButton_salva_procedura->setEnabled(false);
+        return;
+    }
+
     if (ui->comboBox_idRP->currentText()==""){
         QMessageBox msgBox(this);
-        msgBox.setInformativeText("Selezionare un Responsabile di Procedimento,se non è disponibile alcun Responsabile Procedimento registrarne uno al sistema.");
+        msgBox.setInformativeText("Selezionare un Responsabile di Procedimento,se non è disponibile alcun Responsabile Procedimento si prega di registrarne almeno uno tramite la funzionalità apposita nella schermata precedente.");
+        msgBox.exec();
         return;
     }
     else{
         QMessageBox msgBox(this);
-        msgBox.setInformativeText("Sta per essere creata la procedura: "+ descrizione);
+        int index = ui->comboBox_idRP->currentIndex();
+        uint idRP = nuovaProcedura->getRps().at(index).getIdRP();
+        QString infoRP = QString::fromStdString(nuovaProcedura->getInfoRP(idRP));
+
+        msgBox.setInformativeText("Sta per essere creata la procedura: "+ descrizione + ". Il Responsabile di procedimento sarà: " + infoRP);
         msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Abort);
-        msgBox.buttons().at(0)->setText("Prosegui");
+        //msgBox.buttons().at(0)->setText("Prosegui");
         msgBox.buttons().at(1)->setText("Annulla");
         int ret = msgBox.exec();
         if(ret == QMessageBox::Abort){
             return;
         }
-    }
-
-    if(intervalliSessioni.empty()){
-        QMessageBox msgBox(this);
-        msgBox.setInformativeText("Inserire almeno una sessione di voto.");
-        return;
+        else{
+            nuovaProcedura->setIdRP(idRP);
+        }
     }
 
 
@@ -451,7 +508,6 @@ void MainWindowTecnico::on_pushButton_conferma_aggiungi_clicked()
 
 }
 
-
 void MainWindowTecnico::on_pushButton_completa_scheda_clicked()
 {
     uint numPref = ui->spinBox_numero_preferenze->text().toUInt();
@@ -552,7 +608,6 @@ void MainWindowTecnico::hideBoxAggiungi(){
     ui->pushButton_aggiungi_candidato->setEnabled(true);
 }
 
-
 void MainWindowTecnico::on_lineEdit_nome_c_textChanged(const QString &arg1)
 {
     if(arg1==""){
@@ -575,8 +630,6 @@ void MainWindowTecnico::on_lineEdit_nuova_lista_textChanged(const QString &arg1)
     }
 }
 
-
-
 void MainWindowTecnico::on_lineEdit_descrizione_procedura_textChanged(const QString &arg1)
 {
     if(arg1==""){
@@ -595,7 +648,7 @@ void MainWindowTecnico::on_pushButton_memorizza_periodo_procedura_clicked()
 
     if(inizio < termine){
         bool periodoMaiRegistratoPrima = nuovaProcedura->getData_ora_inizio()=="";
-        cout << periodoMaiRegistratoPrima << endl;
+        //cout << periodoMaiRegistratoPrima << endl;
         if( !periodoMaiRegistratoPrima &&
                 (nuovaProcedura->getData_ora_inizio()!=inizio.toString("yyyy/MM/dd hh:mm").toStdString() ||
                  nuovaProcedura->getData_ora_termine()!=termine.toString("yyyy/MM/dd hh:mm").toStdString())){
@@ -617,7 +670,7 @@ void MainWindowTecnico::on_pushButton_memorizza_periodo_procedura_clicked()
 
         //memorizza periodo procedura
         string strInizio= inizio.toString("yyyy/MM/dd hh:mm").toStdString();
-        cout << strInizio << endl;
+        //cout << strInizio << endl;
         nuovaProcedura->setData_ora_inizio(strInizio);
         string strTermine= termine.toString("yyyy/MM/dd hh:mm").toStdString();
         nuovaProcedura->setData_ora_termine(strTermine);
@@ -631,7 +684,7 @@ void MainWindowTecnico::on_pushButton_memorizza_periodo_procedura_clicked()
     }
     else{
         QMessageBox msgBox(this);
-        msgBox.setInformativeText("La data e ora di inizio procedura deve essere precedente alla data e ora di termine procedura.");
+        msgBox.setInformativeText("Selezionare un periodo di tempo valido per lo svolgimento della procedura.");
         msgBox.exec();
     }
 }
@@ -641,12 +694,7 @@ void MainWindowTecnico::on_pushButton_aggiungi_sessione_clicked()
     QDate dataSessione = ui->dateEdit_data_sessione->date();
     QTime oraApertura = ui->timeEdit_apertura_sessione->time();
     QTime oraChiusura = ui->timeEdit_chiusura_sessione->time();
-    if(oraApertura>=oraChiusura){
-        QMessageBox msgBox(this);
-        msgBox.setInformativeText("L'ora di apertura sessione deve essere precedente all'ora di chiusura sessione.");
-        msgBox.exec();
-        return;
-    }
+
 
     QDateTime data_ora_InizioProcedura = QDateTime::fromString(QString::fromStdString(nuovaProcedura->getData_ora_inizio()),"yyyy/MM/dd hh:mm");
     QDateTime data_ora_TermineProcedura = QDateTime::fromString(QString::fromStdString(nuovaProcedura->getData_ora_termine()),"yyyy/MM/dd hh:mm");
@@ -654,7 +702,6 @@ void MainWindowTecnico::on_pushButton_aggiungi_sessione_clicked()
     QDate dataTermineProcedura = data_ora_TermineProcedura.date();
     QTime oraInizioProcedura = data_ora_InizioProcedura.time();
     QTime oraTermineProcedura = data_ora_TermineProcedura.time();
-
     if(dataSessione == dataInizioProcedura){
         if(oraApertura < oraInizioProcedura){
             QMessageBox msgBox(this);
@@ -663,6 +710,7 @@ void MainWindowTecnico::on_pushButton_aggiungi_sessione_clicked()
             return;
         }
     }
+
     if(dataSessione == dataTermineProcedura){
         if(oraChiusura > oraTermineProcedura){
             QMessageBox msgBox(this);
@@ -670,6 +718,13 @@ void MainWindowTecnico::on_pushButton_aggiungi_sessione_clicked()
             msgBox.exec();
             return;
         }
+    }
+
+    if(oraApertura>=oraChiusura){
+        QMessageBox msgBox(this);
+        msgBox.setInformativeText("L'ora di chiusura sessione deve essere successiva all'ora di apertura sessione.");
+        msgBox.exec();
+        return;
     }
 
     nuovaSessione = new SessioneVoto();
@@ -686,8 +741,9 @@ void MainWindowTecnico::on_pushButton_aggiungi_sessione_clicked()
         //nel caso in cui sto inserendo la prima sessione, non sono necessari controlli di sovrapposizione
         nuovaProcedura->addSessione(nuovaSessione);
         intervalliSessioni.push_back(s);
-        ui->comboBox_sessioni_inserite->addItem(dtAperturaSessione.toString("yyyy/MM/dd hh:mm") + " - " + dtChiusuraSessione.toString("yyyy/MM/dd hh:mm"));
+        ui->comboBox_sessioni_inserite->addItem(dtAperturaSessione.toString("dd/MM/yyyy hh:mm") + " - " + dtChiusuraSessione.toString("dd/MM/yyyy hh:mm"));
         ui->pushButton_elimina_sessione->setEnabled(true);
+        ui->pushButton_salva_procedura->setEnabled(true);
     }
     else{
         bool sovrapposizione = false;
@@ -705,8 +761,9 @@ void MainWindowTecnico::on_pushButton_aggiungi_sessione_clicked()
         if (!sovrapposizione){
             nuovaProcedura->addSessione(nuovaSessione);
             intervalliSessioni.push_back(s);
-            ui->comboBox_sessioni_inserite->addItem(dtAperturaSessione.toString("yyyy/MM/dd hh:mm") + " - " + dtChiusuraSessione.toString("yyyy/MM/dd hh:mm"));
+            ui->comboBox_sessioni_inserite->addItem(dtAperturaSessione.toString("dd/MM/yyyy hh:mm") + " - " + dtChiusuraSessione.toString("dd/MM/yyyy hh:mm"));
             ui->pushButton_elimina_sessione->setEnabled(true);
+            ui->pushButton_salva_procedura->setEnabled(true);
         }
         else{
             QMessageBox msgBox(this);
@@ -746,10 +803,11 @@ void MainWindowTecnico::on_pushButton_annulla_rp_clicked()
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::sceltaOperazione);
     pulisciInterfacciaCreazioneRP();
 }
+
 void MainWindowTecnico::pulisciInterfacciaCreazioneRP(){
     ui->lineEdit_nome_rp->clear();
     ui->lineEdit_cognome_rp->clear();
-    ui->dateEdit_data_nascita_rp->clear();
+    ui->dateEdit_data_nascita_rp->setDate(QDate::currentDate().addYears(-18));
     ui->lineEdit_luogo_nascita_rp->clear();
     ui->lineEdit_password_rp->clear();
     ui->lineEdit_ripeti_password_rp->clear();
@@ -841,11 +899,12 @@ void MainWindowTecnico::on_lineEdit_ripeti_password_rp_textChanged(const QString
 
 void MainWindowTecnico::on_pushButton_visualizzaInfoRP_clicked()
 {
-    uint index = ui->comboBox_idRP->currentIndex();
-    vector <ResponsabileProcedimento> rps = nuovaProcedura->getRps();
-    uint idRP = rps.at(index).getIdRP();
-    QString infoRP = QString::fromStdString(nuovaProcedura->getInfoRP(idRP));
+    if(ui->comboBox_idRP->currentText()!=""){
+        uint index = ui->comboBox_idRP->currentIndex();
+        vector <ResponsabileProcedimento> rps = nuovaProcedura->getRps();
+        uint idRP = rps.at(index).getIdRP();
+        QString infoRP = QString::fromStdString(nuovaProcedura->getInfoRP(idRP));
 
-    QMessageBox::information(this,"InfoRP: " + QString::number(idRP),infoRP);
-
+        QMessageBox::information(this,"InfoRP: " + QString::number(idRP),infoRP);
+    }
 }

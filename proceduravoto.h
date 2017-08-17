@@ -25,8 +25,8 @@ public:
     uint getNumSchedeVoto() const;
     void setNumSchedeVoto(const uint &value);
 
-    uint getStato() const;
-    void setStato(const uint &value);
+    string getStato() const;
+    void setStato(const string &value);
 
     uint getIdRP() const;
     void setIdRP(const uint &value);
@@ -45,15 +45,19 @@ public:
     vector<ResponsabileProcedimento> getRps() const;
     void setRps(const vector<ResponsabileProcedimento> &value);
 
+    uint getIdProceduraVoto() const;
+    void setIdProceduraVoto(const uint &value);
+
 private:
     string descrizione;
     uint numSchedeVoto;
-    uint stato;
+    string stato;
     uint idRP;
     string data_ora_inizio;
     string data_ora_termine;
     vector <SessioneVoto> sessioni;
     vector <ResponsabileProcedimento> rps;
+    uint idProceduraVoto;
 
 
 };

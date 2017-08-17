@@ -28,6 +28,7 @@ signals:
     void proceduraPronta(ProceduraVoto *nuovaProcedura);
     void rpPronto(ResponsabileProcedimento *nuovoRP);
     void needInfoRPS();
+    void needInfoProcedureVoto();
 public slots:
     void showViewSceltaOperazione();
     void passwordErrorMessage();
@@ -37,6 +38,7 @@ public slots:
     void messageStoredProcedura();
     void messageRegisteredRP(QString userid);
     void startCreationProcedura(vector <ResponsabileProcedimento> rps);
+    void showViewProcedureVoto(QList<ProceduraVoto> procedureVoto);
 public:
     explicit MainWindowTecnico(QWidget *parent = 0);
     ~MainWindowTecnico();

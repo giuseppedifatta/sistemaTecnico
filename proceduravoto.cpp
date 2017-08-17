@@ -28,12 +28,12 @@ void ProceduraVoto::setNumSchedeVoto(const uint &value)
     numSchedeVoto = value;
 }
 
-uint ProceduraVoto::getStato() const
+string ProceduraVoto::getStato() const
 {
     return stato;
 }
 
-void ProceduraVoto::setStato(const uint &value)
+void ProceduraVoto::setStato(const string &value)
 {
     stato = value;
 }
@@ -117,6 +117,16 @@ vector<ResponsabileProcedimento> ProceduraVoto::getRps() const
 void ProceduraVoto::setRps(const vector<ResponsabileProcedimento> &value)
 {
     rps = value;
+}
+
+uint ProceduraVoto::getIdProceduraVoto() const
+{
+    return idProceduraVoto;
+}
+
+void ProceduraVoto::setIdProceduraVoto(const uint &value)
+{
+    idProceduraVoto = value;
 }
 
 
