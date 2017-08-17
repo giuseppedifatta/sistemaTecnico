@@ -249,6 +249,9 @@ void MainWindowTecnico::on_pushButton_visualizza_procedure_clicked()
 }
 
 void MainWindowTecnico::showViewProcedureVoto(QList <ProceduraVoto> procedureVoto){
+    //ui->tableWidget_lista_procedure->model()->removeRows(0,ui->tableWidget_lista_procedure->rowCount());
+    ui->tableWidget_lista_procedure->clear();
+    ui->tableWidget_lista_procedure->setRowCount(0);
     for (int row = 0; row < procedureVoto.size();row++){
             ui->tableWidget_lista_procedure->insertRow(ui->tableWidget_lista_procedure->rowCount());
             int rigaAggiunta = ui->tableWidget_lista_procedure->rowCount()-1;
