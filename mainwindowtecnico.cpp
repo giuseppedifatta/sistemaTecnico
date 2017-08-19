@@ -14,11 +14,12 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
     ui->setupUi(this);
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::loginUrna);
     QStringList tableHeaders;
-    tableHeaders << "idProcedureVoto" << "Descrizione" << "idRP" << "Inizio" << "Termine" << "numero schede" << "stato";
+    tableHeaders << "seleziona" << "idProcedureVoto" << "Descrizione" << "idRP" << "Inizio" << "Termine" << "numero schede" << "stato" ;
 
     ui->tableWidget_lista_procedure->setHorizontalHeaderLabels(tableHeaders);
-    ui->tableWidget_lista_procedure->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    //ui->tableWidget_lista_procedure->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableWidget_lista_procedure->resizeColumnsToContents();
+    ui->tableWidget_lista_procedure->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     ui->lineEdit_password_tecnico->setEchoMode(QLineEdit::Password);
     ui->lineEdit_new_password->setEchoMode(QLineEdit::Password);
@@ -53,6 +54,8 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
     QObject::connect(this,SIGNAL(needInfoProcedureVoto()),model,SLOT(getProcedureVotoFromDB()),Qt::QueuedConnection);
     qRegisterMetaType< QList<ProceduraVoto> >( "QList<ProceduraVoto>" );
     QObject::connect(model,SIGNAL(readyProcedure(QList<ProceduraVoto>)),this,SLOT(showViewProcedureVoto(QList<ProceduraVoto>)),Qt::QueuedConnection);
+    QObject::connect(this,SIGNAL(deleteProcedura(uint)),model,SLOT(deleteProceduraVoto(uint)),Qt::QueuedConnection);
+    QObject::connect(model,SIGNAL(deletedProcedura()),this,SLOT(on_pushButton_visualizza_procedure_clicked()),Qt::QueuedConnection);
 }
 
 
@@ -244,29 +247,69 @@ void MainWindowTecnico::on_pushButton_registra_RP_clicked()
 
 void MainWindowTecnico::on_pushButton_visualizza_procedure_clicked()
 {
+    idProceduraSelezionata = -1;
+    statoProceduraSelezionata = "";
     emit needInfoProcedureVoto();
 
 }
 
 void MainWindowTecnico::showViewProcedureVoto(QList <ProceduraVoto> procedureVoto){
-    //ui->tableWidget_lista_procedure->model()->removeRows(0,ui->tableWidget_lista_procedure->rowCount());
-    ui->tableWidget_lista_procedure->clear();
-    ui->tableWidget_lista_procedure->setRowCount(0);
+    //pulizia tabella - tipo 1
+    ui->tableWidget_lista_procedure->model()->removeRows(0,ui->tableWidget_lista_procedure->rowCount());
+    //pulizia tabella - tipo 2
+    //    ui->tableWidget_lista_procedure->clear();
+    //    ui->tableWidget_lista_procedure->setRowCount(0);
     for (int row = 0; row < procedureVoto.size();row++){
-            ui->tableWidget_lista_procedure->insertRow(ui->tableWidget_lista_procedure->rowCount());
-            int rigaAggiunta = ui->tableWidget_lista_procedure->rowCount()-1;
+        ui->tableWidget_lista_procedure->insertRow(ui->tableWidget_lista_procedure->rowCount());
+        int rigaAggiunta = ui->tableWidget_lista_procedure->rowCount()-1;
 
-            uint idProcedura = procedureVoto.at(row).getIdProceduraVoto();
-            cout << idProcedura << endl;
-            ui->tableWidget_lista_procedure->setItem(rigaAggiunta,0,new QTableWidgetItem(QString::number(idProcedura)));
-            uint idRP = procedureVoto.at(row).getIdRP();
-            QDateTime data_ora_inizio = QDateTime::fromString(QString::fromStdString(procedureVoto.at(row).getData_ora_inizio()),"yyyy-MM-dd hh:mm");
-            QDateTime data_ora_termine = QDateTime::fromString(QString::fromStdString(procedureVoto.at(row).getData_ora_termine()),"yyyy-MM-dd hh:mm");
-            QString descrizione = QString::fromStdString(procedureVoto.at(row).getDescrizione());
-            QString stato = QString::fromStdString(procedureVoto.at(row).getStato());
-            uint numSchede = procedureVoto.at(row).getNumSchedeVoto();
+        QTableWidgetItem *checkBoxItem = new QTableWidgetItem();
+        checkBoxItem->setToolTip("seleziona procedura della riga corrispondente");
+        checkBoxItem->setCheckState(Qt::Unchecked);
+        ui->tableWidget_lista_procedure->setItem(rigaAggiunta,0,checkBoxItem);
+
+        uint idProcedura = procedureVoto.at(row).getIdProceduraVoto();
+        QTableWidgetItem *item = new QTableWidgetItem(QString::number(idProcedura));
+        item->setTextAlignment(Qt::AlignCenter);
+        ui->tableWidget_lista_procedure->setItem(rigaAggiunta,1,item);
+
+        QString descrizione = QString::fromStdString(procedureVoto.at(row).getDescrizione());
+        item = new QTableWidgetItem(descrizione);
+        item->setTextAlignment(Qt::AlignCenter);
+        ui->tableWidget_lista_procedure->setItem(rigaAggiunta,2,item);
+
+        uint idRP = procedureVoto.at(row).getIdRP();
+        item = new QTableWidgetItem(QString::number(idRP));
+        item->setTextAlignment(Qt::AlignCenter);
+        ui->tableWidget_lista_procedure->setItem(rigaAggiunta,3,item);
+
+        QString qsInizio = QString::fromStdString(procedureVoto.at(row).getData_ora_inizio());
+        item = new QTableWidgetItem(qsInizio);
+        item->setTextAlignment(Qt::AlignCenter);
+        ui->tableWidget_lista_procedure->setItem(rigaAggiunta,4,item);
+
+        QString qsTermine = QString::fromStdString(procedureVoto.at(row).getData_ora_termine());
+        item = new QTableWidgetItem(qsTermine);
+        item->setTextAlignment(Qt::AlignCenter);
+        ui->tableWidget_lista_procedure->setItem(rigaAggiunta,5,item);
+
+        uint numSchede = procedureVoto.at(row).getNumSchedeVoto();
+        item = new QTableWidgetItem(QString::number(numSchede));
+        item->setTextAlignment(Qt::AlignCenter);
+        ui->tableWidget_lista_procedure->setItem(rigaAggiunta,6,item);
+
+        QString stato = QString::fromStdString(procedureVoto.at(row).getStato());
+        item = new QTableWidgetItem(stato);
+        item->setTextAlignment(Qt::AlignCenter);
+        ui->tableWidget_lista_procedure->setItem(rigaAggiunta,7,item);
 
     }
+    ui->tableWidget_lista_procedure->resizeColumnsToContents();
+    ui->tableWidget_lista_procedure->horizontalHeader()->setStretchLastSection(true);
+
+    idProceduraSelezionata = -1;
+    statoProceduraSelezionata = "";
+    ui->widget_azioni_procedura->setEnabled(false);
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::visualizzaProcedure);
 }
 //void MainWindowSeggio::on_aggiungiHT_button_clicked()
@@ -301,7 +344,7 @@ void MainWindowTecnico::pulisciInterfacciaCreazioneProcedura(){
     intervalliSessioni.clear();
     ui->dateEdit_data_sessione->clear();
     ui->lineEdit_descrizione_procedura->clear();
-    ui->spinBox_numero_schede->clear();
+    ui->spinBox_numero_schede->setValue(1);
     ui->dateTimeEdit_data_ora_inizio->clear();
     ui->dateTimeEdit_data_ora_termine->clear();
     ui->timeEdit_apertura_sessione->clear();
@@ -370,10 +413,12 @@ void MainWindowTecnico::on_pushButton_back_scelta_op_clicked()
 
 void MainWindowTecnico::on_pushButton_annulla_scheda_clicked()
 {
-    ui->stackedWidget->setCurrentIndex(InterfacceTecnico::sceltaOperazione);
+
     cout << "annullamento operazione: cancello la nuova scheda di voto" << endl;
     delete nuovaScheda;
     pulisciInterfacciaCreazioneScheda();
+
+    on_pushButton_visualizza_procedure_clicked();
 }
 
 void MainWindowTecnico::pulisciInterfacciaCreazioneScheda(){
@@ -388,6 +433,19 @@ void MainWindowTecnico::pulisciInterfacciaCreazioneScheda(){
 
 void MainWindowTecnico::on_pushButton_addSchedaVoto_clicked()
 {
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle("Creazione nuova scheda");
+    msgBox.setInformativeText("Stai per inserire una scheda di voto per la procedura con id: " + QString::number(idProceduraSelezionata));
+    //msgBox.setInformativeText("Do you want to save your changes?");
+    msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+    msgBox.buttons().at(0)->setText("Procedi");
+    msgBox.buttons().at(1)->setText("Annulla");
+    int ret = msgBox.exec();
+
+    if (ret==QMessageBox::Cancel){
+        return;
+    }
+
     ui->formWidget_candidato->hide();
     ui->formWidget_lista->hide();
     ui->pushButton_annulla_aggiungi->hide();
@@ -403,10 +461,7 @@ void MainWindowTecnico::on_pushButton_addSchedaVoto_clicked()
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::creazioneSchede);
 
     nuovaScheda = new SchedaVoto();
-
-    //    uint row = ui->tableWidget_lista_procedure->currentRow();
-    //    uint idProceduraVoto = ui->tableWidget_lista_procedure->item(row,1)->text().toUInt();
-    nuovaScheda->setIdProceduraVoto(1);
+    nuovaScheda->setIdProceduraVoto(this->idProceduraSelezionata);
 }
 
 void MainWindowTecnico::on_pushButton_aggiungi_candidato_clicked()
@@ -423,13 +478,11 @@ void MainWindowTecnico::on_pushButton_aggiungi_candidato_clicked()
     ui->comboBox_seleziona_lista_1->clear();
 
 
-    vector <string> listListe = nuovaScheda->getListListe();
-    for(unsigned i=0; i< listListe.size(); ++i){
-        QString str = QString::fromStdString(listListe.at(i));
-
-
+    vector <ListaElettorale> listeElettorali = nuovaScheda->getListeElettorali();
+    for(unsigned i=0; i< listeElettorali.size(); ++i){
+        QString str = QString::fromStdString(listeElettorali.at(i).getNome());
         ui->comboBox_seleziona_lista_1->addItem(str);
-        //}
+
     }
 
 
@@ -471,19 +524,24 @@ void MainWindowTecnico::on_pushButton_conferma_aggiungi_clicked()
         QString lista = ui->comboBox_seleziona_lista_1->currentText();
         string strLista = lista.toStdString();
         if(strLista == ""){
-            QMessageBox msgBox;
-            msgBox.setText("Vuoi inserire un candidato senza lista?");
+            QMessageBox msgBox(this);
+            msgBox.setInformativeText("Vuoi inserire un candidato senza lista? Il candidato verrà aggiunto alla lista <nessuna lista>");
             //msgBox.setInformativeText("Do you want to save your changes?");
             msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Cancel);
             msgBox.buttons().at(0)->setText("Si");
             msgBox.buttons().at(1)->setText("No");
-            msgBox.setDefaultButton(QMessageBox::Save);
+            //msgBox.setDefaultButton(QMessageBox::Save);
             int ret = msgBox.exec();
 
             if (ret==QMessageBox::Cancel){
                 return;
             }
+            else{
+                strLista = "nessuna lista";
+                ui->comboBox_seleziona_lista_2->addItem(QString::fromStdString(strLista));
+            }
         }
+
         QString nome = ui->lineEdit_nome_c->text();
         string strNome = nome.toStdString();
         QString cognome = ui->lineEdit_cognome_c->text();
@@ -494,11 +552,21 @@ void MainWindowTecnico::on_pushButton_conferma_aggiungi_clicked()
         //QDate date = QDate::fromString(&dateUTC,"yyyy/MM/dd");
         QString luogoNascita = ui->lineEdit_luogo_nascita_c->text();
         string strLuogo = luogoNascita.toStdString();
+        QString matricola = ui->lineEdit_matricola->text();
+        string strMatricola = matricola.toStdString();
 
-        nuovaScheda->addCandidato(strNome,strLista,strCognome,dateUTC,strLuogo);
-        ui->comboBox_seleziona_candidato->addItem(nome + " " + cognome);
-
-        hideBoxAggiungi();
+        if(nuovaScheda->addCandidato(strMatricola,strNome,strCognome,strLista,dateUTC,strLuogo)){
+            ui->comboBox_seleziona_candidato->addItem(nome + " " + cognome);
+            hideBoxAggiungi();
+            QMessageBox msgBox(this);
+            msgBox.setInformativeText("Il candidato con matricola " + matricola + " è stato aggiunto correttamente.");
+            msgBox.exec();
+        }
+        else{
+            QMessageBox msgBox(this);
+            msgBox.setInformativeText("Un candidato con matricola " + matricola + " è già presente, impossibile riaggiungerlo o aggiungerne un altro con la stessa matricola, verificare se il numero di matricola è corretto!");
+            msgBox.exec();
+        }
     }
     else{
         //modo: aggiungi lista
@@ -517,7 +585,7 @@ void MainWindowTecnico::on_pushButton_completa_scheda_clicked()
     nuovaScheda->setNumPreferenze(numPref);
     nuovaScheda->setTipoElezione(ui->comboBox_tipo_elezione->currentIndex());
 
-    if(nuovaScheda->getListCandidati().size()>1){
+    if(nuovaScheda->getCandidati().size()>1){
         emit schedaPronta(nuovaScheda);
         cout << "emesso il segnale di scheda pronta" << endl;
     }
@@ -539,11 +607,11 @@ void MainWindowTecnico::on_pushButton_rimuovi_candidato_clicked()
         //                break;
         //            }
         //        }
-        nuovaScheda->removeCandidato(index);
+        nuovaScheda->removeCandidatoFromLista(index);
         ui->comboBox_seleziona_candidato->removeItem(index);
     }
     else{
-        QMessageBox msb;
+        QMessageBox msb(this);
         msb.setText("Nulla da eliminare");
         msb.exec();
     }
@@ -553,33 +621,32 @@ void MainWindowTecnico::on_pushButton_rimuovi_gruppo_clicked()
 {
     if(ui->comboBox_seleziona_lista_2->currentText()!=""){
         QString entry = ui->comboBox_seleziona_lista_2->currentText();
-        vector <string> listAs_g = nuovaScheda->getListListe();;
+        vector <ListaElettorale> listElettorali = nuovaScheda->getListeElettorali();
         uint index;
-        for (uint i = 0; i < listAs_g.size(); i++){
-            if((listAs_g[i]) == entry.toStdString()){
+        for (uint i = 0; i < listElettorali.size(); i++){
+            if(listElettorali.at(i).getNome() == entry.toStdString()){
                 index = i;
                 break;
             }
         }
-        nuovaScheda->removeLista(index);
+        vector <Candidato> candidatiDaRimuovere =  nuovaScheda->removeLista(index);
+        nuovaScheda->removeCandidatiFromScheda(candidatiDaRimuovere);
+
         ui->comboBox_seleziona_lista_2->removeItem(index);
 
         //aggiornamento comboBoxListaCandidati
         ui->comboBox_seleziona_candidato->clear();
 
 
-        vector <Candidato> listCandidati = nuovaScheda->getListCandidati();
+        vector <Candidato> listCandidati = nuovaScheda->getCandidati();
         for(unsigned i=0; i< listCandidati.size(); ++i){
             QString str = QString::fromStdString(listCandidati[i].getNome());
-
-
             ui->comboBox_seleziona_candidato->addItem(str);
-
         }
 
     }
     else{
-        QMessageBox msb;
+        QMessageBox msb(this);
         msb.setText("Nulla da eliminare");
         msb.exec();
     }
@@ -593,11 +660,11 @@ void MainWindowTecnico::on_pushButton_annulla_aggiungi_clicked()
 void MainWindowTecnico::hideBoxAggiungi(){
     ui->formWidget_lista->hide();
     ui->lineEdit_nuova_lista->clear();
-
+    ui->lineEdit_matricola->clear();
     ui->formWidget_candidato->hide();
     ui->lineEdit_nome_c->clear();
     ui->lineEdit_cognome_c->clear();
-    QDate resetDate = QDate::currentDate();
+    QDate resetDate = QDate::currentDate().addYears(-18);
     ui->dateEdit_data_nascita_c->setDate(resetDate);
     ui->lineEdit_luogo_nascita_c->clear();
     ui->pushButton_annulla_aggiungi->hide();
@@ -909,5 +976,80 @@ void MainWindowTecnico::on_pushButton_visualizzaInfoRP_clicked()
         QString infoRP = QString::fromStdString(nuovaProcedura->getInfoRP(idRP));
 
         QMessageBox::information(this,"InfoRP: " + QString::number(idRP),infoRP);
+    }
+}
+
+uint MainWindowTecnico::getIdProceduraSelezionata() const
+{
+    return idProceduraSelezionata;
+}
+
+void MainWindowTecnico::setIdProceduraSelezionata(const uint &value)
+{
+    idProceduraSelezionata = value;
+}
+
+void MainWindowTecnico::on_tableWidget_lista_procedure_cellClicked(int row, int column)
+{
+    unsigned int currentRow = row;
+    if(column==0){
+        if(ui->tableWidget_lista_procedure->item(row,0)->checkState() == Qt::Checked){
+
+            idProceduraSelezionata = ui->tableWidget_lista_procedure->item(currentRow,1)->text().toUInt();
+            statoProceduraSelezionata = ui->tableWidget_lista_procedure->item(currentRow,7)->text();
+            cout << "id Procedura selezionata: " << idProceduraSelezionata << endl;
+            unsigned int numberRows = ui->tableWidget_lista_procedure->rowCount();
+
+            for (unsigned int rowIndex = 0; rowIndex < numberRows; rowIndex++){
+                if(rowIndex!=currentRow){
+                    ui->tableWidget_lista_procedure->item(rowIndex,0)->setCheckState(Qt::Unchecked);
+                }
+            }
+
+            ui->widget_azioni_procedura->setEnabled(true);
+            if(statoProceduraSelezionata!="creazione"){
+                ui->pushButton_addSchedaVoto->setEnabled(false);
+            }
+            if(statoProceduraSelezionata=="in corso" || statoProceduraSelezionata == "conclusa" || statoProceduraSelezionata == "scrutinata"){
+                ui->pushButton_removeProcedura->setEnabled(false);
+            }
+
+        }
+        else if(ui->tableWidget_lista_procedure->item(row,0)->checkState() == Qt::Unchecked){
+            uint idProceduraDeselezionata = ui->tableWidget_lista_procedure->item(currentRow,1)->text().toUInt();
+            if(idProceduraDeselezionata == idProceduraSelezionata){
+                ui->widget_azioni_procedura->setEnabled(false);
+                idProceduraSelezionata = -1;
+                statoProceduraSelezionata = "";
+                cout << "nessuna Procedura selezionata! " << endl;
+            }
+
+
+        }
+    }
+}
+
+void MainWindowTecnico::on_pushButton_removeProcedura_clicked()
+{
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle("Eliminazione Procedura");
+    msgBox.setInformativeText("Sei sicuro di voler eliminare la procedura con id: " + QString::number(idProceduraSelezionata));
+    msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+    msgBox.buttons().at(0)->setText("Sì");
+    msgBox.buttons().at(1)->setText("No");
+    int ret = msgBox.exec();
+
+    if (ret==QMessageBox::Cancel){
+        return;
+    }
+    else{
+        emit deleteProcedura(idProceduraSelezionata);
+    }
+}
+
+void MainWindowTecnico::on_spinBox_numero_schede_editingFinished()
+{
+    if(ui->spinBox_numero_schede->text()==""){
+        ui->spinBox_numero_schede->setValue(1);
     }
 }

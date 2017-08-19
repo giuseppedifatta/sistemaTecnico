@@ -7,7 +7,7 @@ using namespace std;
 class Candidato
 {
 public:
-    Candidato(string nome, string lista, string cognome,string data, string luogo);
+    Candidato(string nome, string lista, string cognome,string data, string luogo,string matricola);
     string getNominativo() const;
     void setNominativo(const string &value);
 
@@ -26,12 +26,16 @@ public:
     string getDataNascita() const;
     void setDataNascita(const string &value);
 
+    string getMatricola() const;
+    void setMatricola(const string &value);
+
 private:
     string lista;
     string nome;
     string cognome;
     string luogoNascita;
     string dataNascita;
+    string matricola;
 
 
 };

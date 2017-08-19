@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1048</width>
-    <height>721</height>
+    <height>722</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -74,7 +74,7 @@ background-color: rgb(49, 149, 255);
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>5</number>
+       <number>6</number>
       </property>
       <widget class="QWidget" name="login_urna_page">
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -656,7 +656,7 @@ background-color: rgb(49, 149, 255);
         <item>
          <widget class="QTableWidget" name="tableWidget_lista_procedure">
           <property name="rowCount">
-           <number>0</number>
+           <number>1</number>
           </property>
           <property name="columnCount">
            <number>8</number>
@@ -673,6 +673,11 @@ background-color: rgb(49, 149, 255);
           <attribute name="verticalHeaderVisible">
            <bool>false</bool>
           </attribute>
+          <row>
+           <property name="text">
+            <string>New Row</string>
+           </property>
+          </row>
           <column/>
           <column/>
           <column/>
@@ -681,39 +686,53 @@ background-color: rgb(49, 149, 255);
           <column/>
           <column/>
           <column/>
+          <item row="0" column="7">
+           <property name="checkState">
+            <enum>Unchecked</enum>
+           </property>
+          </item>
          </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_7">
-          <item>
-           <widget class="QPushButton" name="pushButton_back_scelta_op">
-            <property name="text">
-             <string>Indietro</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButton_removeProcedura">
-            <property name="text">
-             <string>Elimina Procedura</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButton_addSchedaVoto">
-            <property name="text">
-             <string>Aggiungi Scheda</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButton_printSessionKeys">
-            <property name="text">
-             <string>Stampa Chiavi Sessione</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QWidget" name="widget_azioni_procedura" native="true">
+          <layout class="QHBoxLayout" name="horizontalLayout_7">
+           <item>
+            <widget class="QPushButton" name="pushButton_removeProcedura">
+             <property name="text">
+              <string>Elimina Procedura</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_addSchedaVoto">
+             <property name="text">
+              <string>Aggiungi Scheda</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_visualizzaSessioni">
+             <property name="text">
+              <string>Visualizza Sessioni</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_printSessionKeys">
+             <property name="text">
+              <string>Stampa Chiavi Prossima Sessione</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_back_scelta_op">
+          <property name="text">
+           <string>Indietro</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -889,66 +908,66 @@ background-color: rgb(49, 149, 255);
             <item>
              <widget class="QWidget" name="formWidget_candidato" native="true">
               <layout class="QFormLayout" name="formLayout_7">
-               <item row="0" column="0">
+               <item row="1" column="0">
                 <widget class="QLabel" name="label__nome_c">
                  <property name="text">
                   <string>Nome</string>
                  </property>
                 </widget>
                </item>
-               <item row="0" column="1">
+               <item row="1" column="1">
                 <widget class="QLineEdit" name="lineEdit_nome_c">
                  <property name="placeholderText">
                   <string>Inserire nome candidato</string>
                  </property>
                 </widget>
                </item>
-               <item row="1" column="0">
+               <item row="2" column="0">
                 <widget class="QLabel" name="label_cognome_c">
                  <property name="text">
                   <string>Cognome</string>
                  </property>
                 </widget>
                </item>
-               <item row="1" column="1">
+               <item row="2" column="1">
                 <widget class="QLineEdit" name="lineEdit_cognome_c">
                  <property name="placeholderText">
                   <string>Inserire cognome candidato</string>
                  </property>
                 </widget>
                </item>
-               <item row="2" column="0">
+               <item row="3" column="0">
                 <widget class="QLabel" name="label_data_nascita_c">
                  <property name="text">
                   <string>Data di nascita</string>
                  </property>
                 </widget>
                </item>
-               <item row="3" column="0">
+               <item row="4" column="0">
                 <widget class="QLabel" name="label_luogo_nascita_c">
                  <property name="text">
                   <string>Luogo di nascita</string>
                  </property>
                 </widget>
                </item>
-               <item row="3" column="1">
+               <item row="4" column="1">
                 <widget class="QLineEdit" name="lineEdit_luogo_nascita_c">
                  <property name="placeholderText">
                   <string>Inserire luogo di nascita</string>
                  </property>
                 </widget>
                </item>
-               <item row="4" column="0">
+               <item row="5" column="0">
                 <widget class="QLabel" name="label_seleziona_lista">
                  <property name="text">
                   <string>Seleziona una lista</string>
                  </property>
                 </widget>
                </item>
-               <item row="4" column="1">
+               <item row="5" column="1">
                 <widget class="QComboBox" name="comboBox_seleziona_lista_1"/>
                </item>
-               <item row="2" column="1">
+               <item row="3" column="1">
                 <widget class="QDateEdit" name="dateEdit_data_nascita_c">
                  <property name="time">
                   <time>
@@ -969,6 +988,20 @@ background-color: rgb(49, 149, 255);
                  </property>
                  <property name="calendarPopup">
                   <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_matricola">
+                 <property name="text">
+                  <string>Matricola</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QLineEdit" name="lineEdit_matricola">
+                 <property name="placeholderText">
+                  <string>Inserire matricola candidato</string>
                  </property>
                 </widget>
                </item>

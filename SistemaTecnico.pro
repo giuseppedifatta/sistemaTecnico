@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     sessionevoto.cpp \
     candidato.cpp \
     sessioniqt.cpp \
-    responsabileprocedimento.cpp
+    responsabileprocedimento.cpp \
+    listaelettorale.cpp
 
 HEADERS  += mainwindowtecnico.h \
     datamanager.h \
@@ -29,7 +30,8 @@ HEADERS  += mainwindowtecnico.h \
     sessionevoto.h \
     candidato.h \
     sessioniqt.h \
-    responsabileprocedimento.h
+    responsabileprocedimento.h \
+    listaelettorale.h
 
 FORMS += \
     mainwindowtecnico.ui

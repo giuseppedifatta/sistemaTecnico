@@ -2,6 +2,7 @@
 #define DATAMANAGER_H
 
 #include <QObject>
+#include <QDateTime>
 #include <tinyxml2.h>
 #include <sstream>
 #include <algorithm>
@@ -12,6 +13,7 @@
 #include "schedavoto.h"
 #include "proceduravoto.h"
 #include "responsabileprocedimento.h"
+
 
 #include <cryptopp/pwdbased.h>
 #include <cryptopp/osrng.h>
@@ -49,6 +51,7 @@ signals:
     void storedProcedura();
     void readyRPS(vector <ResponsabileProcedimento> rps);
     void readyProcedure(QList <ProceduraVoto> pv);
+    void deletedProcedura();
 public slots:
     void checkPassTecnico(QString pass);
     void tryChangeTecnicoPass(QString su_pass, QString newTecnicoPas);
@@ -57,6 +60,7 @@ public slots:
     void storeProcedura(ProceduraVoto* procedura);
     void getRPSFromDB();
     void getProcedureVotoFromDB();
+    void deleteProceduraVoto(uint idProceduraVoto);
 private:
     QString tecnicoPass;
     QString suPass;

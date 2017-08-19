@@ -7,6 +7,7 @@
 
 #include <istream>
 #include <QDebug>
+
 using namespace CryptoPP;
 DataManager::DataManager(QObject *parent) : QObject(parent)
 {
@@ -63,10 +64,10 @@ void DataManager::storeScheda(SchedaVoto *scheda)
     //    s << idProceduraVoto;
     //    const std::string i_as_string(s.str());
 
-    uint idScheda = 1;
-    pElement = xmlDoc.NewElement("idScheda");
-    pElement->SetText(idScheda);
-    pRoot->InsertEndChild(pElement);
+//    uint idScheda = 1;
+//    pElement = xmlDoc.NewElement("idScheda");
+//    pElement->SetText(idScheda);
+//    pRoot->InsertEndChild(pElement);
 
     uint idProceduraVoto = scheda->getIdProceduraVoto();
     pElement = xmlDoc.NewElement("idProcedura");
@@ -88,7 +89,7 @@ void DataManager::storeScheda(SchedaVoto *scheda)
     pRoot->InsertEndChild(pCandidati);
 
     XMLElement *pCandidato;
-    vector <Candidato> listCandidati = scheda->getListCandidati();
+    vector <Candidato> listCandidati = scheda->getCandidati();
     for(uint index = 0; index < listCandidati.size(); index ++ ){
         pCandidato = xmlDoc.NewElement("candidato");
         pCandidato->SetText(listCandidati.at(index).getNome().c_str());
@@ -98,9 +99,31 @@ void DataManager::storeScheda(SchedaVoto *scheda)
     }
 
 
-
-    string nomeFile = "schedaVoto"+to_string(idScheda)+".xml";
+    //"+to_string(idScheda)+"
+    string nomeFile = "schedaVoto.xml";
     XMLError eResult = xmlDoc.SaveFile(nomeFile.c_str());
+
+    //store scheda to db
+    XMLPrinter printer;
+    xmlDoc.Print( &printer );
+    string schedaStr = printer.CStr();
+    cout << schedaStr << endl;
+
+    PreparedStatement *pstmt;
+    pstmt = connection->prepareStatement("INSERT INTO SchedeVoto (fileScheda,idProceduraVoto) VALUES(?,?)");
+    try{
+        std::stringstream ss(schedaStr);
+        pstmt->setBlob(1,&ss);
+        pstmt->setUInt(2,scheda->getIdProceduraVoto());
+        pstmt->executeUpdate();
+        connection->commit();
+    }
+    catch(SQLException &ex){
+        cout << "Exception occurred: " << ex.getErrorCode() <<endl;
+    }
+    pstmt->close();
+    delete pstmt;
+
     if (eResult != XML_SUCCESS) {
         printf("XMLError: %i\n", eResult);
     }
@@ -253,19 +276,22 @@ void DataManager::getProcedureVotoFromDB()
     try{
         resultSet = pstmt->executeQuery();
         while(resultSet->next()){
-           ProceduraVoto pv;
-           pv.setIdProceduraVoto(resultSet->getUInt("idProceduraVoto"));
-           pv.setIdRP(resultSet->getUInt("idResponsabileProcedimento"));
-           pv.setDescrizione(resultSet->getString("descrizione"));
-           QString qsInizio = QString::fromStdString(resultSet->getString("inizio"));
-           QDateTime data_ora_inizio = QDateTime::fromString(qsInizio,"yyyy-MM-dd hh:mm");
-           pv.setData_ora_inizio(data_ora_inizio.toString().toStdString());
-           QString qsFine = QString::fromStdString(resultSet->getString("fine"));
-           QDateTime data_ora_fine = QDateTime::fromString(qsFine,"yyyy-MM-dd hh:mm");
-           pv.setData_ora_termine(data_ora_fine.toString().toStdString());
-           pv.setNumSchedeVoto(resultSet->getUInt("numSchede"));
-           pv.setStato(resultSet->getString("stato"));
-           listPVs.append(pv);
+            ProceduraVoto pv;
+            pv.setIdProceduraVoto(resultSet->getUInt("idProceduraVoto"));
+            pv.setIdRP(resultSet->getUInt("idResponsabileProcedimento"));
+            pv.setDescrizione(resultSet->getString("descrizione"));
+
+            QString qsInizio = QString::fromStdString(resultSet->getString("inizio")); //format is: yyyy-MM-dd hh:mm
+            QDateTime dt1 = QDateTime::fromString(qsInizio,"yyyy-MM-dd hh:mm:ss");
+            pv.setData_ora_inizio(dt1.toString("dd/MM/yyyy hh:mm").toStdString());
+
+            QString qsFine = QString::fromStdString(resultSet->getString("fine"));
+            QDateTime dt2 = QDateTime::fromString(qsFine,"yyyy-MM-dd hh:mm:ss");
+            pv.setData_ora_termine(dt2.toString("dd/MM/yyyy hh:mm").toStdString());
+
+            pv.setNumSchedeVoto(resultSet->getUInt("numSchede"));
+            pv.setStato(resultSet->getString("stato"));
+            listPVs.append(pv);
         }
 
     }catch(SQLException &ex){
@@ -278,6 +304,24 @@ void DataManager::getProcedureVotoFromDB()
     //TODO ottenere procedure memorizzate nel DB
 
     emit readyProcedure(listPVs);
+}
+
+void DataManager::deleteProceduraVoto(uint idProceduraVoto)
+{
+    PreparedStatement * pstmt;
+    pstmt = connection->prepareStatement("DELETE FROM `ProcedureVoto` WHERE `idProceduraVoto`=?");
+    try{
+        pstmt->setUInt(1,idProceduraVoto);
+        pstmt->executeQuery();
+        connection->commit();
+    }catch(SQLException &ex){
+        cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
+    }
+    pstmt->close();
+    delete pstmt;
+
+    emit deletedProcedura();
+
 }
 
 void DataManager::storePassNewRP(string userid, string pass)
@@ -352,20 +396,20 @@ void DataManager::storeProcedura(ProceduraVoto *procedura)
     cout << "La procedura appena inserita ha id: " << idProceduraInserita << endl;
 
     //memorizzazione sessioni
-        vector <SessioneVoto> sessioni = procedura->getSessioni();
-        pstmt = connection->prepareStatement("INSERT INTO Sessioni (idProceduraVoto,data,apertura,chiusura) VALUES(?,?,?,?)");
-        try{
-            for(unsigned int i = 0; i < sessioni.size(); i++){
-                pstmt->setUInt(1,idProceduraInserita);
-                pstmt->setDateTime(2,sessioni.at(i).getData());
-                pstmt->setString(3,sessioni.at(i).getOraApertura());
-                pstmt->setString(4,sessioni.at(i).getOraChiusura());
-                pstmt->executeUpdate();
-                connection->commit();
-            }
-        }catch(SQLException &ex){
-            cout<<"Exception occurred: "<< ex.getErrorCode()<<endl;
+    vector <SessioneVoto> sessioni = procedura->getSessioni();
+    pstmt = connection->prepareStatement("INSERT INTO Sessioni (idProceduraVoto,data,apertura,chiusura) VALUES(?,?,?,?)");
+    try{
+        for(unsigned int i = 0; i < sessioni.size(); i++){
+            pstmt->setUInt(1,idProceduraInserita);
+            pstmt->setDateTime(2,sessioni.at(i).getData());
+            pstmt->setString(3,sessioni.at(i).getOraApertura());
+            pstmt->setString(4,sessioni.at(i).getOraChiusura());
+            pstmt->executeUpdate();
+            connection->commit();
         }
+    }catch(SQLException &ex){
+        cout<<"Exception occurred: "<< ex.getErrorCode()<<endl;
+    }
 
     pstmt->close();
     delete pstmt;

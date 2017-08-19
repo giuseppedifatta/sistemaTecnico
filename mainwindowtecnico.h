@@ -29,6 +29,7 @@ signals:
     void rpPronto(ResponsabileProcedimento *nuovoRP);
     void needInfoRPS();
     void needInfoProcedureVoto();
+    void deleteProcedura(uint idProceduraSelezionata);
 public slots:
     void showViewSceltaOperazione();
     void passwordErrorMessage();
@@ -42,6 +43,9 @@ public slots:
 public:
     explicit MainWindowTecnico(QWidget *parent = 0);
     ~MainWindowTecnico();
+
+    uint getIdProceduraSelezionata() const;
+    void setIdProceduraSelezionata(const uint &value);
 
 private slots:
     void on_pushButton_exit_clicked();
@@ -122,6 +126,12 @@ private slots:
 
     void on_pushButton_visualizzaInfoRP_clicked();
 
+    void on_tableWidget_lista_procedure_cellClicked(int row, int column);
+
+    void on_pushButton_removeProcedura_clicked();
+
+    void on_spinBox_numero_schede_editingFinished();
+
 private:
     Ui::MainWindowTecnico *ui;
 
@@ -131,7 +141,8 @@ private:
     SessioneVoto *nuovaSessione;
     SchedaVoto *nuovaScheda;
     ResponsabileProcedimento *nuovoRP;
-
+    uint idProceduraSelezionata;
+    QString statoProceduraSelezionata;
 
     enum InterfacceTecnico{
         loginUrna,

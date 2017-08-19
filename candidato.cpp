@@ -1,12 +1,13 @@
 #include "candidato.h"
 
-Candidato::Candidato(std::__cxx11::string nome, std::__cxx11::string lista, string cognome, string data, string luogo)
+Candidato::Candidato(string nome, string lista, string cognome, string data, string luogo, string matricola)
 {
     this->nome = nome;
     this->cognome = cognome;
     this->dataNascita = data;
     this->luogoNascita = luogo;
     this->lista = lista;
+    this->matricola = matricola;
 }
 
 
@@ -58,5 +59,15 @@ string Candidato::getDataNascita() const
 void Candidato::setDataNascita(const string &value)
 {
     dataNascita = value;
+}
+
+string Candidato::getMatricola() const
+{
+    return matricola;
+}
+
+void Candidato::setMatricola(const string &value)
+{
+    matricola = value;
 }
 
