@@ -8,8 +8,6 @@ class Candidato
 {
 public:
     Candidato(string nome, string lista, string cognome,string data, string luogo,string matricola);
-    string getNominativo() const;
-    void setNominativo(const string &value);
 
     string getLista() const;
     void setLista(const string &value);

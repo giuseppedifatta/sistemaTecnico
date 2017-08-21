@@ -547,24 +547,24 @@ void MainWindowTecnico::on_pushButton_conferma_aggiungi_clicked()
         QString cognome = ui->lineEdit_cognome_c->text();
         string strCognome = cognome.toStdString();
         QDate dataNascita = ui->dateEdit_data_nascita_c->date();
-        string dateUTC = dataNascita.toString("yyyy/MM/dd").toStdString();
-        cout << dateUTC << endl;
-        //QDate date = QDate::fromString(&dateUTC,"yyyy/MM/dd");
+        string strDataNascita = dataNascita.toString("dd/MM/yyyy").toStdString();
+
+
         QString luogoNascita = ui->lineEdit_luogo_nascita_c->text();
-        string strLuogo = luogoNascita.toStdString();
+        string strLuogoNascita = luogoNascita.toStdString();
         QString matricola = ui->lineEdit_matricola->text();
         string strMatricola = matricola.toStdString();
 
-        if(nuovaScheda->addCandidato(strMatricola,strNome,strCognome,strLista,dateUTC,strLuogo)){
+        if(nuovaScheda->addCandidato(strMatricola,strNome,strCognome,strLista,strDataNascita,strLuogoNascita)){
             ui->comboBox_seleziona_candidato->addItem(nome + " " + cognome);
             hideBoxAggiungi();
             QMessageBox msgBox(this);
-            msgBox.setInformativeText("Il candidato con matricola " + matricola + " è stato aggiunto correttamente.");
+            msgBox.setInformativeText("Il candidato con matricola " + matricola + " è stato aggiunto correttamente alla lista: " + QString::fromStdString(strLista) );
             msgBox.exec();
         }
         else{
             QMessageBox msgBox(this);
-            msgBox.setInformativeText("Un candidato con matricola " + matricola + " è già presente, impossibile riaggiungerlo o aggiungerne un altro con la stessa matricola, verificare se il numero di matricola è corretto!");
+            msgBox.setInformativeText("Un candidato con matricola " + matricola + " è già presente, impossibile riaggiungerlo o aggiungerne un altro con la stessa matricola, verificare se il numero di matricola inserito è corretto!");
             msgBox.exec();
         }
     }

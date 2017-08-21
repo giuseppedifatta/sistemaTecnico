@@ -64,10 +64,10 @@ void DataManager::storeScheda(SchedaVoto *scheda)
     //    s << idProceduraVoto;
     //    const std::string i_as_string(s.str());
 
-//    uint idScheda = 1;
-//    pElement = xmlDoc.NewElement("idScheda");
-//    pElement->SetText(idScheda);
-//    pRoot->InsertEndChild(pElement);
+    //    uint idScheda = 1;
+    //    pElement = xmlDoc.NewElement("idScheda");
+    //    pElement->SetText(idScheda);
+    //    pRoot->InsertEndChild(pElement);
 
     uint idProceduraVoto = scheda->getIdProceduraVoto();
     pElement = xmlDoc.NewElement("idProcedura");
@@ -84,24 +84,53 @@ void DataManager::storeScheda(SchedaVoto *scheda)
     pElement->SetText(numPref);
     pRoot->InsertEndChild(pElement);
 
+    vector <ListaElettorale> listeInserite = scheda->getListeElettorali();
+    XMLNode * pListe = xmlDoc.NewElement("liste");
+    pRoot->InsertEndChild(pListe);
+    unsigned int idCandidato = 0;
+    unsigned int idLista = 0;
+    for (uint indexListe = 0; indexListe < listeInserite.size(); indexListe++){
+        idLista++;
+        XMLElement * pNuovaLista = xmlDoc.NewElement("lista");
+        pNuovaLista->SetAttribute("id",idLista);
+        pNuovaLista->SetAttribute("nome",listeInserite.at(indexListe).getNome().c_str());
 
-    XMLElement *pCandidati = xmlDoc.NewElement("candidati");
-    pRoot->InsertEndChild(pCandidati);
+        pListe->InsertEndChild(pNuovaLista);
+        vector <Candidato> candidatiLista =  listeInserite.at(indexListe).getCandidati();
+        for (uint indexCandidati = 0; indexCandidati < candidatiLista.size(); indexCandidati++){
 
-    XMLElement *pCandidato;
-    vector <Candidato> listCandidati = scheda->getCandidati();
-    for(uint index = 0; index < listCandidati.size(); index ++ ){
-        pCandidato = xmlDoc.NewElement("candidato");
-        pCandidato->SetText(listCandidati.at(index).getNome().c_str());
+            idCandidato++;
+            pElement = xmlDoc.NewElement("candidato");
+            pElement->SetAttribute("id",idCandidato);
+            pNuovaLista->InsertEndChild(pElement);
 
-        //aggiungo il candidato all'insieme dei candidati
-        pCandidati->InsertEndChild(pCandidato);
+
+
+            XMLElement * pMatr = xmlDoc.NewElement("matricola");
+            pMatr->SetText(candidatiLista.at(indexCandidati).getMatricola().c_str());
+            pElement->InsertEndChild(pMatr);
+
+            XMLElement * pNome = xmlDoc.NewElement("nome");
+            pNome->SetText(candidatiLista.at(indexCandidati).getNome().c_str());
+            pElement->InsertEndChild(pNome);
+
+            XMLElement * pCognome = xmlDoc.NewElement("cognome");
+            pCognome->SetText(candidatiLista.at(indexCandidati).getCognome().c_str());
+            pElement->InsertEndChild(pCognome);
+
+            XMLElement * pLN = xmlDoc.NewElement("luogoNascita");
+            pLN->SetText(candidatiLista.at(indexCandidati).getLuogoNascita().c_str());
+            pElement->InsertEndChild(pLN);
+
+            XMLElement * pDN = xmlDoc.NewElement("dataNascita");
+            pDN->SetText(candidatiLista.at(indexCandidati).getDataNascita().c_str());
+            pElement->InsertEndChild(pDN);
+
+
+        }
     }
 
 
-    //"+to_string(idScheda)+"
-    string nomeFile = "schedaVoto.xml";
-    XMLError eResult = xmlDoc.SaveFile(nomeFile.c_str());
 
     //store scheda to db
     XMLPrinter printer;
@@ -117,12 +146,79 @@ void DataManager::storeScheda(SchedaVoto *scheda)
         pstmt->setUInt(2,scheda->getIdProceduraVoto());
         pstmt->executeUpdate();
         connection->commit();
-    }
-    catch(SQLException &ex){
+        cout << "Scheda inserita per la procedura: " << scheda->getIdProceduraVoto() << endl;
+    }catch(SQLException &ex){
         cout << "Exception occurred: " << ex.getErrorCode() <<endl;
     }
+
+
+    //"+to_string(idScheda)+"
+    string nomeFile = "schedaVoto.xml";
+    XMLError eResult = xmlDoc.SaveFile(nomeFile.c_str());
+
+    //verifichiamo il numero di schede inserite per la procedura per cui si è inserita la scheda
+    unsigned int numSchedeInserite = 0;
+    ResultSet * resultSet;
+    pstmt = connection->prepareStatement("SELECT * FROM SchedeVoto WHERE idProceduraVoto=?");
+    try{
+        pstmt->setUInt(1,scheda->getIdProceduraVoto());
+        resultSet = pstmt->executeQuery();
+
+        while(resultSet->next()){
+            numSchedeInserite++;
+        }
+        cout << "Per la procedura: " << scheda->getIdProceduraVoto() << " le schede inserite sono: " << numSchedeInserite << endl;
+    }catch(SQLException &ex){
+        cout << "Exception occurred: " << ex.getErrorCode() <<endl;
+    }
+    delete resultSet;
+    //verifichiamo il numero di schede richieste per la procedura per cui si è inserita la scheda
+
+    uint numSchedeRichieste = 0;
+    pstmt = connection->prepareStatement("SELECT numSchede FROM ProcedureVoto WHERE idProceduraVoto=?");
+    try{
+        pstmt->setUInt(1,scheda->getIdProceduraVoto());
+        resultSet = pstmt->executeQuery();
+        if(resultSet->next()){
+            numSchedeRichieste = resultSet->getUInt("numSchede");
+        }
+        cout << "Le schede richieste sono: " << numSchedeRichieste  << endl;
+    }catch(SQLException &ex){
+        cout << "Exception occurred: " << ex.getErrorCode() <<endl;
+    }
+
+
+    //se il numero di schede è quello richiesto, aggiorniamo lo stato della procedura su: programmata
+    if(numSchedeInserite==numSchedeRichieste){
+        pstmt = connection->prepareStatement("UPDATE `ProcedureVoto` SET `stato`='programmata' schedeInserite=? WHERE `idProceduraVoto`=?");
+        try{
+            pstmt->setUInt(1,numSchedeInserite);
+            pstmt->setUInt(2,scheda->getIdProceduraVoto());
+            pstmt->executeUpdate();
+            connection->commit();
+        }catch(SQLException &ex){
+            cout << "Exception occurred: " << ex.getErrorCode() <<endl;
+        }
+        cout << "tutte le schede sono state inserite per la procedura: " << scheda->getIdProceduraVoto()  << endl;
+    }
+    else{
+        pstmt = connection->prepareStatement("UPDATE `ProcedureVoto` SET schedeInserite=? WHERE `idProceduraVoto`=?");
+        try{
+            pstmt->setUInt(1,numSchedeInserite);
+            pstmt->setUInt(2,scheda->getIdProceduraVoto());
+            pstmt->executeUpdate();
+            connection->commit();
+        }catch(SQLException &ex){
+            cout << "Exception occurred: " << ex.getErrorCode() <<endl;
+        }
+    }
+
+
     pstmt->close();
     delete pstmt;
+
+
+
 
     if (eResult != XML_SUCCESS) {
         printf("XMLError: %i\n", eResult);
