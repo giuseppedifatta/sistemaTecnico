@@ -74,7 +74,7 @@ background-color: rgb(49, 149, 255);
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>6</number>
+       <number>5</number>
       </property>
       <widget class="QWidget" name="login_urna_page">
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -656,10 +656,10 @@ background-color: rgb(49, 149, 255);
         <item>
          <widget class="QTableWidget" name="tableWidget_lista_procedure">
           <property name="rowCount">
-           <number>1</number>
+           <number>0</number>
           </property>
           <property name="columnCount">
-           <number>8</number>
+           <number>9</number>
           </property>
           <attribute name="horizontalHeaderCascadingSectionResizes">
            <bool>false</bool>
@@ -673,11 +673,11 @@ background-color: rgb(49, 149, 255);
           <attribute name="verticalHeaderVisible">
            <bool>false</bool>
           </attribute>
-          <row>
+          <column>
            <property name="text">
-            <string>New Row</string>
+            <string>9</string>
            </property>
-          </row>
+          </column>
           <column/>
           <column/>
           <column/>
@@ -686,11 +686,6 @@ background-color: rgb(49, 149, 255);
           <column/>
           <column/>
           <column/>
-          <item row="0" column="7">
-           <property name="checkState">
-            <enum>Unchecked</enum>
-           </property>
-          </item>
          </widget>
         </item>
         <item>

@@ -387,6 +387,7 @@ void DataManager::getProcedureVotoFromDB()
 
             pv.setNumSchedeVoto(resultSet->getUInt("numSchede"));
             pv.setStato(resultSet->getString("stato"));
+            pv.setSchedeInserite(resultSet->getUInt("schedeInserite"));
             listPVs.append(pv);
         }
 

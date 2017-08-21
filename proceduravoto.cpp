@@ -129,4 +129,14 @@ void ProceduraVoto::setIdProceduraVoto(const uint &value)
     idProceduraVoto = value;
 }
 
+uint ProceduraVoto::getSchedeInserite() const
+{
+    return schedeInserite;
+}
+
+void ProceduraVoto::setSchedeInserite(const uint &value)
+{
+    schedeInserite = value;
+}
+
 

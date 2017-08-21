@@ -48,9 +48,13 @@ public:
     uint getIdProceduraVoto() const;
     void setIdProceduraVoto(const uint &value);
 
+    uint getSchedeInserite() const;
+    void setSchedeInserite(const uint &value);
+
 private:
     string descrizione;
     uint numSchedeVoto;
+    uint schedeInserite;
     string stato;
     uint idRP;
     string data_ora_inizio;

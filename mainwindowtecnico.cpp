@@ -14,7 +14,7 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
     ui->setupUi(this);
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::loginUrna);
     QStringList tableHeaders;
-    tableHeaders << "seleziona" << "idProcedureVoto" << "Descrizione" << "idRP" << "Inizio" << "Termine" << "numero schede" << "stato" ;
+    tableHeaders << "seleziona" << "id Proceedimento" << "Descrizione" << "id RP" << "Inizio" << "Termine" << "Schede Richieste" << "Schede Inserite" << "stato" ;
 
     ui->tableWidget_lista_procedure->setHorizontalHeaderLabels(tableHeaders);
     //ui->tableWidget_lista_procedure->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -298,10 +298,15 @@ void MainWindowTecnico::showViewProcedureVoto(QList <ProceduraVoto> procedureVot
         item->setTextAlignment(Qt::AlignCenter);
         ui->tableWidget_lista_procedure->setItem(rigaAggiunta,6,item);
 
+        uint schedeInserite = procedureVoto.at(row).getSchedeInserite();
+        item = new QTableWidgetItem(QString::number(schedeInserite));
+        item->setTextAlignment(Qt::AlignCenter);
+        ui->tableWidget_lista_procedure->setItem(rigaAggiunta,7,item);
+
         QString stato = QString::fromStdString(procedureVoto.at(row).getStato());
         item = new QTableWidgetItem(stato);
         item->setTextAlignment(Qt::AlignCenter);
-        ui->tableWidget_lista_procedure->setItem(rigaAggiunta,7,item);
+        ui->tableWidget_lista_procedure->setItem(rigaAggiunta,8,item);
 
     }
     ui->tableWidget_lista_procedure->resizeColumnsToContents();
