@@ -11,8 +11,6 @@
 using namespace CryptoPP;
 DataManager::DataManager(QObject *parent) : QObject(parent)
 {
-    tecnicoPass= "tecnico";
-    suPass = "admin";
     try{
         driver=get_driver_instance();
         connection=driver->connect("localhost:3306","root", "root");
@@ -21,6 +19,15 @@ DataManager::DataManager(QObject *parent) : QObject(parent)
     }catch(SQLException &ex){
         cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
     }
+
+    //decommentare per impostare le password seguenti come password di tecnico e superuser
+//    string tecnicoPass;
+//    string suPass;
+//    tecnicoPass= "tecnico";
+//    suPass = "admin";
+//    storePassNewUser("tecnico", tecnicoPass);
+//    storePassNewUser("superuser", suPass);
+
     cout << "MySql Server ok." << endl;
 }
 
@@ -30,26 +37,90 @@ DataManager::~DataManager()
     //delete driver;
 }
 
-void DataManager::checkPassTecnico(QString pass)
+void DataManager::checkPassTecnico(QString passTecnico)
 {
-    if(pass==tecnicoPass){
+    if(verifyUserPass("tecnico",passTecnico.toStdString()))
+    {
+        cout << "Granted access to tecnico" << endl;
         emit passOK();
     }
     else{
         emit wrongTecnicoPass();
     }
 }
+bool DataManager::verifyUserPass(string userid,string userPass){
+    //ottengo dal database salt e hash della password del tecnico
+    string storedSalt;
+    string storedHashedPassword;
 
+    PreparedStatement * pstmt;
+    ResultSet * resultSet;
+    pstmt = connection->prepareStatement("SELECT salt, hashedPassword FROM Utenti WHERE userid = ?");
+    try{
+        pstmt->setString(1,userid);
+        resultSet = pstmt->executeQuery();
+        if(resultSet->next()){
+            storedSalt = resultSet->getString("salt");
+            storedHashedPassword = resultSet->getString("hashedPassword");
+        }
+    }catch(SQLException &ex){
+        cout << "Exception occurred: " << ex.getErrorCode() <<endl;
+    }
+    pstmt->close();
+    delete pstmt;
+    delete resultSet;
+
+    string calculatedHashedPassword = hashPassword(userPass,storedSalt);
+
+    if(calculatedHashedPassword==storedHashedPassword){
+        return true;
+    }
+    else {
+        return false;
+    }
+}
 void DataManager::tryChangeTecnicoPass(QString su_pass, QString newTecnicoPass)
 {
-    if(su_pass==suPass){
-        this->tecnicoPass = newTecnicoPass;
+    if(verifyUserPass("superuser",su_pass.toStdString())){
+
+        updateUserPassword("tecnico",newTecnicoPass.toStdString());
 
         emit tecnicoPassChanged();
     }
     else{
         emit wrongSUpass();
     }
+}
+
+void DataManager::updateUserPassword(string userid,string nuovaPassword){
+    /*Generate salt */
+    AutoSeededRandomPool prng;
+    SecByteBlock salt(AES::BLOCKSIZE);
+    prng.GenerateBlock(salt, sizeof(salt));
+    string strSalt;
+    HexEncoder hex(new StringSink(strSalt));
+    hex.Put(salt, salt.size());
+    hex.MessageEnd();
+
+
+    string hashedPass = hashPassword(nuovaPassword, strSalt);
+    cout << "salt:" << strSalt << ", size: " << strSalt.size() << endl;
+    cout << "Hash della Password: " << hashedPass  << ", size: " << hashedPass.size()<< endl;
+
+    PreparedStatement *pstmt;
+
+    pstmt = connection->prepareStatement("UPDATE Utenti SET salt = ? , hashedPassword = ? WHERE userid = ?");
+    try{
+        pstmt->setString(1,strSalt);
+        pstmt->setString(2,hashedPass);
+        pstmt->setString(3,userid);
+        pstmt->executeUpdate();
+        connection->commit();
+    }catch(SQLException &ex){
+        cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
+    }
+    pstmt->close();
+    delete pstmt;
 }
 
 void DataManager::storeScheda(SchedaVoto *scheda)
@@ -332,7 +403,7 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
 
 
     //memorizzazione sul db della coppia userid-password
-    storePassNewRP(userid,rp->getPassword());
+    storePassNewUser(userid,rp->getPassword());
     //emetto il segnale che l'RP è stato memorizzato e gli passo l'userid di RP come parametro
     emit storedRP(qsUserid);
 }
@@ -463,20 +534,20 @@ void DataManager::deleteProceduraVoto(uint idProceduraVoto)
 
 }
 
-void DataManager::storePassNewRP(string userid, string pass)
+void DataManager::storePassNewUser(string userid, string pass)
 {
     /*Generate salt */
     AutoSeededRandomPool prng;
     SecByteBlock salt(AES::BLOCKSIZE);
     prng.GenerateBlock(salt, sizeof(salt));
-    string s;
-    HexEncoder hex(new StringSink(s));
+    string strSalt;
+    HexEncoder hex(new StringSink(strSalt));
     hex.Put(salt, salt.size());
     hex.MessageEnd();
 
 
-    string hashedPass = hashPassword(pass, s);
-    cout << "salt:" << s << ", size: " << s.size() << endl;
+    string hashedPass = hashPassword(pass, strSalt);
+    cout << "salt:" << strSalt << ", size: " << strSalt.size() << endl;
     cout << "Hash della Password: " << hashedPass  << ", size: " << hashedPass.size()<< endl;
 
     PreparedStatement *pstmt;
@@ -484,7 +555,7 @@ void DataManager::storePassNewRP(string userid, string pass)
     pstmt = connection->prepareStatement("INSERT INTO Utenti (userid,salt,hashedPassword) VALUES(?,?,?)");
     try{
         pstmt->setString(1,userid);
-        pstmt->setString(2,s);
+        pstmt->setString(2,strSalt);
         pstmt->setString(3,hashedPass);
         pstmt->executeUpdate();
         connection->commit();

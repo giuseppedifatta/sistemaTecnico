@@ -62,14 +62,15 @@ public slots:
     void getProcedureVotoFromDB();
     void deleteProceduraVoto(uint idProceduraVoto);
 private:
-    QString tecnicoPass;
-    QString suPass;
+
     Driver *driver;
     Connection *connection;
 
 
-    void storePassNewRP(string userid, string pass);
+    void storePassNewUser(string userid, string pass);
     string hashPassword(string plainPass, string salt);
+    bool verifyUserPass(string userid, string userPass);
+    void updateUserPassword(string userid, string nuovaPassword);
 };
 
 #endif // DATAMANAGER_H
