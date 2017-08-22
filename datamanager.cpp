@@ -21,12 +21,12 @@ DataManager::DataManager(QObject *parent) : QObject(parent)
     }
 
     //decommentare per impostare le password seguenti come password di tecnico e superuser
-//    string tecnicoPass;
-//    string suPass;
-//    tecnicoPass= "tecnico";
-//    suPass = "admin";
-//    storePassNewUser("tecnico", tecnicoPass);
-//    storePassNewUser("superuser", suPass);
+    //    string tecnicoPass;
+    //    string suPass;
+    //    tecnicoPass= "tecnico";
+    //    suPass = "admin";
+    //    storePassNewUser("tecnico", tecnicoPass);
+    //    storePassNewUser("superuser", suPass);
 
     cout << "MySql Server ok." << endl;
 }
@@ -514,6 +514,44 @@ void DataManager::getProcedureVotoFromDB()
     delete resultSet;
 
     emit readyProcedure(listPVs);
+}
+
+void DataManager::getSessioniProceduraFromDB(uint idProcedura)
+{
+    QList <SessioneVoto> sessioni;
+
+    PreparedStatement * pstmt;
+    ResultSet * resultSet;
+    pstmt = connection->prepareStatement("SELECT * FROM Sessioni WHERE idProceduraVoto = ?");
+    try{
+        pstmt->setUInt(1,idProcedura);
+        resultSet = pstmt->executeQuery();
+        while(resultSet->next()){
+            SessioneVoto s;
+
+            QString qsData = QString::fromStdString(resultSet->getString("data")); //format is: yyyy-MM-dd
+            QDate data = QDate::fromString(qsData,"yyyy-MM-dd");
+            s.setData(data.toString("dd/MM/yyyy").toStdString());
+
+            QString qsApertura = QString::fromStdString(resultSet->getString("apertura")); //format is: yyyy-MM-dd
+            QTime tApertura = QTime::fromString(qsApertura,"hh:mm:ss");
+            s.setOraApertura(tApertura.toString("hh:mm").toStdString());
+
+            QString qsChiusura = QString::fromStdString(resultSet->getString("chiusura")); //format is: yyyy-MM-dd
+            QTime tChiusura = QTime::fromString(qsChiusura,"hh:mm:ss");
+            s.setOraApertura(tChiusura.toString("hh:mm").toStdString());
+
+            s.setIdSessione(resultSet->getUInt("idSessione"));
+            sessioni.append(s);
+        }
+    }catch(SQLException &ex){
+        cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
+    }
+    pstmt->close();
+    delete pstmt;
+    delete resultSet;
+
+    emit readySessioni(sessioni);
 }
 
 void DataManager::deleteProceduraVoto(uint idProceduraVoto)

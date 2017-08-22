@@ -30,6 +30,7 @@ signals:
     void needInfoRPS();
     void needInfoProcedureVoto();
     void deleteProcedura(uint idProceduraSelezionata);
+    void needSessioni(uint idProceduraSelezionata);
 public slots:
     void showViewSceltaOperazione();
     void passwordErrorMessage();
@@ -40,6 +41,7 @@ public slots:
     void messageRegisteredRP(QString userid);
     void startCreationProcedura(vector <ResponsabileProcedimento> rps);
     void showViewProcedureVoto(QList<ProceduraVoto> procedureVoto);
+    void showViewSessioniProcedura(QList<SessioneVoto> sessioni);
 public:
     explicit MainWindowTecnico(QWidget *parent = 0);
     ~MainWindowTecnico();
@@ -135,6 +137,16 @@ private slots:
 
     void on_spinBox_numero_schede_editingFinished();
 
+    void on_pushButton_visualizzaSessioni_clicked();
+
+    void on_pushButton_indietro_toProcedure_clicked();
+
+    void on_lineEdit_new_password_textChanged(const QString &arg1);
+
+    void on_lineEdit_su_password_textChanged(const QString &arg1);
+
+    void on_lineEdit_repeat_new_password_editingFinished();
+
 private:
     Ui::MainWindowTecnico *ui;
 
@@ -146,6 +158,7 @@ private:
     ResponsabileProcedimento *nuovoRP;
     uint idProceduraSelezionata;
     ProceduraVoto::statiProcedura statoProceduraSelezionata;
+    QString descProceduraSelezionata;
 
     enum InterfacceTecnico{
         loginUrna,
@@ -157,7 +170,9 @@ private:
         creazioneSchede,
         registrazioneRP,
         creazioneSeggio,
-        aggiuntaTokenSeggio
+        aggiuntaTokenSeggio,
+        visualizzaSessioni,
+        visualizzaSchede
     };
 
     vector <SessioniQt> intervalliSessioni;
@@ -166,6 +181,7 @@ private:
     void pulisciInterfacciaCreazioneProcedura();
     void pulisciInterfacciaCreazioneScheda();
     void pulisciInterfacciaCreazioneRP();
+    void setTables();
 };
 
 #endif // MAINWINDOWTECNICO_H

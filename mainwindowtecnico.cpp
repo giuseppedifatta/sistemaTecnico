@@ -13,13 +13,7 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::loginUrna);
-    QStringList tableHeaders;
-    tableHeaders << "seleziona" << "id Procedura" << "Descrizione" << "id RP" << "Inizio" << "Termine" << "Schede Richieste" << "Schede Inserite" << "Stato Procedura" ;
-
-    ui->tableWidget_lista_procedure->setHorizontalHeaderLabels(tableHeaders);
-    //ui->tableWidget_lista_procedure->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->tableWidget_lista_procedure->resizeColumnsToContents();
-    ui->tableWidget_lista_procedure->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    this->setTables();
 
     ui->lineEdit_password_tecnico->setEchoMode(QLineEdit::Password);
     ui->lineEdit_new_password->setEchoMode(QLineEdit::Password);
@@ -56,6 +50,11 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
     QObject::connect(model,SIGNAL(readyProcedure(QList<ProceduraVoto>)),this,SLOT(showViewProcedureVoto(QList<ProceduraVoto>)),Qt::QueuedConnection);
     QObject::connect(this,SIGNAL(deleteProcedura(uint)),model,SLOT(deleteProceduraVoto(uint)),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(deletedProcedura()),this,SLOT(on_pushButton_visualizza_procedure_clicked()),Qt::QueuedConnection);
+
+    qRegisterMetaType< QList <SessioneVoto> >("QList <SessioneVoto>");
+    QObject::connect(this,SIGNAL(needSessioni(uint)),model,SLOT(getSessioniProceduraFromDB(uint)),Qt::QueuedConnection);
+    QObject::connect(model,SIGNAL(readySessioni(QList <SessioneVoto>)),this,SLOT(showViewSessioniProcedura(QList <SessioneVoto>)),Qt::QueuedConnection);
+
 }
 
 
@@ -65,7 +64,21 @@ MainWindowTecnico::~MainWindowTecnico()
     delete ui;
 }
 
+void MainWindowTecnico::setTables(){
+    QStringList tableHeaders;
+    tableHeaders << "seleziona" << "id Procedura" << "Descrizione" << "id RP" << "Inizio" << "Termine" << "Schede Richieste" << "Schede Inserite" << "Stato Procedura" ;
 
+    ui->tableWidget_lista_procedure->setHorizontalHeaderLabels(tableHeaders);
+    //ui->tableWidget_lista_procedure->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableWidget_lista_procedure->resizeColumnsToContents();
+    ui->tableWidget_lista_procedure->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    QStringList tableHeaders2;
+    tableHeaders2 << "id Sessione" << "data Sessione" << "apertura Seggi" << "chiusura Seggi";
+    ui->tableWidget_sessioni->setHorizontalHeaderLabels(tableHeaders2);
+    ui->tableWidget_sessioni->resizeColumnsToContents();
+    ui->tableWidget_sessioni->setEditTriggers(QAbstractItemView::NoEditTriggers);
+}
 
 //void MainWindowSeggio::on_token_tableWidget_clicked(const QModelIndex &index)
 //{
@@ -110,6 +123,7 @@ void MainWindowTecnico::on_pushButton_change_password_clicked()
 {
     ui->label_error_su_password->hide();
     ui->label_error_repeat_pass->hide();
+    ui->pushButton_confirm_new_password->setEnabled(false);
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::modificaPasswordTecnico);
 
 }
@@ -143,11 +157,16 @@ void MainWindowTecnico::passwordErrorMessage()
 void MainWindowTecnico::suPassErrorMessage()
 {
     ui->label_error_su_password->show();
+    ui->pushButton_confirm_new_password->setEnabled(false);
 }
 
 void MainWindowTecnico::tecnicoPassAggiornata()
 {
+
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::loginUrna);
+    ui->lineEdit_su_password->clear();
+    ui->lineEdit_new_password->clear();
+    ui->lineEdit_repeat_new_password->clear();
 }
 
 void MainWindowTecnico::messageStoredSchedaVoto()
@@ -200,6 +219,9 @@ void MainWindowTecnico::startCreationProcedura(vector<ResponsabileProcedimento> 
 
 void MainWindowTecnico::on_pushButton_back_to_login_urna_2_clicked()
 {
+    ui->lineEdit_su_password->clear();
+    ui->lineEdit_new_password->clear();
+    ui->lineEdit_repeat_new_password->clear();
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::loginUrna);
 }
 
@@ -322,6 +344,41 @@ void MainWindowTecnico::showViewProcedureVoto(QList <ProceduraVoto> procedureVot
     statoProceduraSelezionata = ProceduraVoto::statiProcedura::undefined;
     ui->widget_azioni_procedura->setEnabled(false);
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::visualizzaProcedure);
+}
+void MainWindowTecnico::showViewSessioniProcedura(QList <SessioneVoto> sessioni){
+
+
+    ui->label_descProc_s_content->setText(descProceduraSelezionata);
+    ui->label_idProcedura_s_content->setText(QString::number(idProceduraSelezionata));
+
+    ui->tableWidget_sessioni->model()->removeRows(0,ui->tableWidget_sessioni->rowCount());
+    for (int row = 0; row < sessioni.size();row++){
+        ui->tableWidget_sessioni->insertRow(ui->tableWidget_sessioni->rowCount());
+        int rigaAggiunta = ui->tableWidget_sessioni->rowCount()-1;
+
+        uint idSessione = sessioni.at(row).getIdSessione();
+        QTableWidgetItem *item = new QTableWidgetItem(QString::number(idSessione));
+        item->setTextAlignment(Qt::AlignCenter);
+        ui->tableWidget_sessioni->setItem(rigaAggiunta,0,item);
+
+        string data = sessioni.at(row).getData();
+        item = new QTableWidgetItem(QString::fromStdString(data));
+        item->setTextAlignment(Qt::AlignCenter);
+        ui->tableWidget_sessioni->setItem(rigaAggiunta,1,item);
+
+        string apertura = sessioni.at(row).getOraApertura();
+        item = new QTableWidgetItem(QString::fromStdString(apertura));
+        item->setTextAlignment(Qt::AlignCenter);
+        ui->tableWidget_sessioni->setItem(rigaAggiunta,2,item);
+
+        string chiusura = sessioni.at(row).getOraChiusura();
+        item = new QTableWidgetItem(QString::fromStdString(chiusura));
+        item->setTextAlignment(Qt::AlignCenter);
+        ui->tableWidget_sessioni->setItem(rigaAggiunta,3,item);
+    }
+
+    ui->tableWidget_sessioni->resizeColumnsToContents();
+    ui->stackedWidget->setCurrentIndex(InterfacceTecnico::visualizzaSessioni);
 }
 //void MainWindowSeggio::on_aggiungiHT_button_clicked()
 //{
@@ -1011,6 +1068,7 @@ void MainWindowTecnico::on_tableWidget_lista_procedure_cellClicked(int row, int 
             idProceduraSelezionata = ui->tableWidget_lista_procedure->item(currentRow,1)->text().toUInt();
             QString stato = ui->tableWidget_lista_procedure->item(currentRow,8)->text();
             statoProceduraSelezionata = ProceduraVoto::getStatoFromString(stato.toStdString());
+            descProceduraSelezionata = ui->tableWidget_lista_procedure->item(currentRow,2)->text();
             cout << "id Procedura selezionata: " << idProceduraSelezionata << ", stato: " << ProceduraVoto::getStatoAsString(statoProceduraSelezionata) << endl;
             unsigned int numberRows = ui->tableWidget_lista_procedure->rowCount();
 
@@ -1021,15 +1079,15 @@ void MainWindowTecnico::on_tableWidget_lista_procedure_cellClicked(int row, int 
             }
 
             ui->widget_azioni_procedura->setEnabled(true);
-//            if(statoProceduraSelezionata != ){
-//                ui->pushButton_addSchedaVoto->setEnabled(false);
-//            }
-//            if(statoProceduraSelezionata=="in corso" || statoProceduraSelezionata == "conclusa" || statoProceduraSelezionata == "scrutinata"){
-//                ui->pushButton_removeProcedura->setEnabled(false);
-//            }
-//            else{
-//                ui->pushButton_addSchedaVoto->setEnabled(true);
-//            }
+            //            if(statoProceduraSelezionata != ){
+            //                ui->pushButton_addSchedaVoto->setEnabled(false);
+            //            }
+            //            if(statoProceduraSelezionata=="in corso" || statoProceduraSelezionata == "conclusa" || statoProceduraSelezionata == "scrutinata"){
+            //                ui->pushButton_removeProcedura->setEnabled(false);
+            //            }
+            //            else{
+            //                ui->pushButton_addSchedaVoto->setEnabled(true);
+            //            }
             switch(statoProceduraSelezionata){
             case ProceduraVoto::statiProcedura::creazione:
                 ui->pushButton_addSchedaVoto->setEnabled(true);
@@ -1098,4 +1156,49 @@ ProceduraVoto::statiProcedura MainWindowTecnico::getStatoProceduraSelezionata() 
 void MainWindowTecnico::setStatoProceduraSelezionata(const ProceduraVoto::statiProcedura &value)
 {
     statoProceduraSelezionata = value;
+}
+
+void MainWindowTecnico::on_pushButton_visualizzaSessioni_clicked()
+{
+    emit needSessioni(idProceduraSelezionata);
+
+}
+
+
+void MainWindowTecnico::on_pushButton_indietro_toProcedure_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(InterfacceTecnico::visualizzaProcedure);
+}
+
+void MainWindowTecnico::on_lineEdit_new_password_textChanged(const QString &arg1)
+{
+    ui->lineEdit_repeat_new_password->clear();
+    if(arg1==""){
+        ui->pushButton_confirm_new_password->setEnabled(false);
+    }
+}
+
+void MainWindowTecnico::on_lineEdit_su_password_textChanged(const QString &arg1)
+{
+    if(arg1!=""){
+       ui->pushButton_confirm_new_password->setEnabled(true);
+    }
+    else{
+       ui->pushButton_confirm_new_password->setEnabled(false);
+    }
+}
+
+void MainWindowTecnico::on_lineEdit_repeat_new_password_editingFinished()
+{
+    QString pass1, pass2;
+    pass1 = ui->lineEdit_new_password->text();
+    pass2 = ui->lineEdit_repeat_new_password->text();
+    if(pass1!=pass2){
+        ui->label_error_repeat_pass->show();
+        ui->pushButton_confirm_new_password->setEnabled(false);
+    }
+    else{
+        ui->label_error_repeat_pass->hide();
+        ui->pushButton_confirm_new_password->setEnabled(true);
+    }
 }

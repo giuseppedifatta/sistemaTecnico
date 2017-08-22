@@ -17,10 +17,14 @@ public:
     string getData() const;
     void setData(const string &value);
 
+    uint getIdSessione() const;
+    void setIdSessione(const uint &value);
+
 private:
     string oraApertura;
     string oraChiusura;
     string data;
+    uint idSessione;
 };
 
 #endif // SESSIONEVOTO_H

@@ -74,7 +74,7 @@ background-color: rgb(49, 149, 255);
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="login_urna_page">
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -322,16 +322,16 @@ background-color: rgb(49, 149, 255);
            <number>50</number>
           </property>
           <item>
-           <widget class="QPushButton" name="pushButton_confirm_new_password">
+           <widget class="QPushButton" name="pushButton_back_to_login_urna_2">
             <property name="text">
-             <string>Conferma</string>
+             <string>Indietro</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_back_to_login_urna_2">
+           <widget class="QPushButton" name="pushButton_confirm_new_password">
             <property name="text">
-             <string>Indietro</string>
+             <string>Conferma</string>
             </property>
            </widget>
           </item>
@@ -1300,6 +1300,89 @@ background-color: rgb(49, 149, 255);
        <layout class="QVBoxLayout" name="verticalLayout_2"/>
       </widget>
       <widget class="QWidget" name="aggiunta_token_seggio_page"/>
+      <widget class="QWidget" name="visualizzazione_sessioni_page">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="spacing">
+         <number>50</number>
+        </property>
+        <property name="leftMargin">
+         <number>50</number>
+        </property>
+        <property name="topMargin">
+         <number>50</number>
+        </property>
+        <property name="rightMargin">
+         <number>50</number>
+        </property>
+        <property name="bottomMargin">
+         <number>50</number>
+        </property>
+        <item>
+         <layout class="QFormLayout" name="formLayout_5">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_descProc_s">
+            <property name="text">
+             <string>Descrizione Procedura:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="label_descProc_s_content">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_idProcedura_s">
+            <property name="text">
+             <string>id Procedura:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="label_idProcedura_s_content">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="tableWidget_sessioni">
+          <column>
+           <property name="text">
+            <string>1</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>2</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>3</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>4</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_indietro_toProcedure">
+          <property name="text">
+           <string>Indietro</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="visualizzazione_schede_page"/>
      </widget>
     </item>
    </layout>

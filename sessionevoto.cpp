@@ -35,5 +35,15 @@ void SessioneVoto::setData(const string &value)
     data = value;
 }
 
+uint SessioneVoto::getIdSessione() const
+{
+    return idSessione;
+}
+
+void SessioneVoto::setIdSessione(const uint &value)
+{
+    idSessione = value;
+}
+
 
 

@@ -51,6 +51,7 @@ signals:
     void storedProcedura();
     void readyRPS(vector <ResponsabileProcedimento> rps);
     void readyProcedure(QList <ProceduraVoto> pv);
+    void readySessioni(QList <SessioneVoto>);
     void deletedProcedura();
 public slots:
     void checkPassTecnico(QString pass);
@@ -60,6 +61,7 @@ public slots:
     void storeProcedura(ProceduraVoto* procedura);
     void getRPSFromDB();
     void getProcedureVotoFromDB();
+    void getSessioniProceduraFromDB(uint idProcedura);
     void deleteProceduraVoto(uint idProceduraVoto);
 private:
 
