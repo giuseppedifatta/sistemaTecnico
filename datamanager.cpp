@@ -130,8 +130,6 @@ void DataManager::storeScheda(SchedaVoto *scheda)
         }
     }
 
-
-
     //store scheda to db
     XMLPrinter printer;
     xmlDoc.Print( &printer );
@@ -157,7 +155,7 @@ void DataManager::storeScheda(SchedaVoto *scheda)
     XMLError eResult = xmlDoc.SaveFile(nomeFile.c_str());
 
     //verifichiamo il numero di schede inserite per la procedura per cui si è inserita la scheda
-    unsigned int numSchedeInserite = 0;
+    uint numSchedeInserite = 0;
     ResultSet * resultSet;
     pstmt = connection->prepareStatement("SELECT * FROM SchedeVoto WHERE idProceduraVoto=?");
     try{
@@ -186,24 +184,33 @@ void DataManager::storeScheda(SchedaVoto *scheda)
     }catch(SQLException &ex){
         cout << "Exception occurred: " << ex.getErrorCode() <<endl;
     }
-
+    pstmt->close();
+    delete pstmt;
 
     //se il numero di schede è quello richiesto, aggiorniamo lo stato della procedura su: programmata
     if(numSchedeInserite==numSchedeRichieste){
-        pstmt = connection->prepareStatement("UPDATE `ProcedureVoto` SET `stato`='programmata' schedeInserite=? WHERE `idProceduraVoto`=?");
+        cout << "Aggiornamento numero schede inserite e stato della procedura su <programmata>" << endl;
+        PreparedStatement * pstmt;
+        pstmt = connection->prepareStatement("UPDATE `ProcedureVoto` SET stato=?, schedeInserite=? WHERE idProceduraVoto=?");
         try{
-            pstmt->setUInt(1,numSchedeInserite);
-            pstmt->setUInt(2,scheda->getIdProceduraVoto());
+            pstmt->setUInt(1,ProceduraVoto::statiProcedura::programmata);
+            pstmt->setUInt(2,numSchedeInserite);
+            pstmt->setUInt(3,scheda->getIdProceduraVoto());
             pstmt->executeUpdate();
             connection->commit();
         }catch(SQLException &ex){
             cout << "Exception occurred: " << ex.getErrorCode() <<endl;
         }
+        pstmt->close();
+        delete pstmt;
         cout << "tutte le schede sono state inserite per la procedura: " << scheda->getIdProceduraVoto()  << endl;
     }
     else{
+        cout <<"Aggiornamento del numero di schede inserite" << endl;
+        PreparedStatement * pstmt;
         pstmt = connection->prepareStatement("UPDATE `ProcedureVoto` SET schedeInserite=? WHERE `idProceduraVoto`=?");
         try{
+
             pstmt->setUInt(1,numSchedeInserite);
             pstmt->setUInt(2,scheda->getIdProceduraVoto());
             pstmt->executeUpdate();
@@ -211,11 +218,10 @@ void DataManager::storeScheda(SchedaVoto *scheda)
         }catch(SQLException &ex){
             cout << "Exception occurred: " << ex.getErrorCode() <<endl;
         }
+        pstmt->close();
+        delete pstmt;
     }
 
-
-    pstmt->close();
-    delete pstmt;
 
 
 
@@ -373,22 +379,60 @@ void DataManager::getProcedureVotoFromDB()
         resultSet = pstmt->executeQuery();
         while(resultSet->next()){
             ProceduraVoto pv;
-            pv.setIdProceduraVoto(resultSet->getUInt("idProceduraVoto"));
+            uint idProceduraVoto = resultSet->getUInt("idProceduraVoto");
+            pv.setIdProceduraVoto(idProceduraVoto);
             pv.setIdRP(resultSet->getUInt("idResponsabileProcedimento"));
             pv.setDescrizione(resultSet->getString("descrizione"));
 
             QString qsInizio = QString::fromStdString(resultSet->getString("inizio")); //format is: yyyy-MM-dd hh:mm
-            QDateTime dt1 = QDateTime::fromString(qsInizio,"yyyy-MM-dd hh:mm:ss");
-            pv.setData_ora_inizio(dt1.toString("dd/MM/yyyy hh:mm").toStdString());
+            QDateTime dtInizio = QDateTime::fromString(qsInizio,"yyyy-MM-dd hh:mm:ss");
+            pv.setData_ora_inizio(dtInizio.toString("dd/MM/yyyy hh:mm").toStdString());
 
             QString qsFine = QString::fromStdString(resultSet->getString("fine"));
-            QDateTime dt2 = QDateTime::fromString(qsFine,"yyyy-MM-dd hh:mm:ss");
-            pv.setData_ora_termine(dt2.toString("dd/MM/yyyy hh:mm").toStdString());
+            QDateTime dtFine = QDateTime::fromString(qsFine,"yyyy-MM-dd hh:mm:ss");
+            pv.setData_ora_termine(dtFine.toString("dd/MM/yyyy hh:mm").toStdString());
 
             pv.setNumSchedeVoto(resultSet->getUInt("numSchede"));
-            pv.setStato(resultSet->getString("stato"));
+
+            ProceduraVoto::statiProcedura statoOttenuto = (ProceduraVoto::statiProcedura)resultSet->getUInt("stato");
+            QDateTime dtCorrente = QDateTime::currentDateTime();
+            ProceduraVoto::statiProcedura statoProceduraAggiornato = statoOttenuto;
+            bool correzione = false;
+            if(dtCorrente >= dtInizio && dtCorrente <= dtFine){
+                if(statoOttenuto!=ProceduraVoto::statiProcedura::in_corso){
+                    correzione = true;
+                    statoProceduraAggiornato = ProceduraVoto::statiProcedura::in_corso;
+                }
+            }
+            else if(dtCorrente > dtFine){
+                if(statoOttenuto!=ProceduraVoto::statiProcedura::conclusa){
+                    correzione = true;
+                    statoProceduraAggiornato = ProceduraVoto::statiProcedura::conclusa;
+                }
+            }
+            pv.setStato(statoProceduraAggiornato);
+
+
             pv.setSchedeInserite(resultSet->getUInt("schedeInserite"));
+
             listPVs.append(pv);
+
+            if(correzione){
+                PreparedStatement *pstmt2;
+
+                pstmt2 = connection->prepareStatement("UPDATE ProcedureVoto SET stato=? WHERE idProceduraVoto=?");
+                try{
+                    pstmt2->setUInt(1,statoProceduraAggiornato);
+                    pstmt2->setUInt(2,idProceduraVoto);
+                    pstmt2->executeUpdate();
+                    connection->commit();
+                }catch(SQLException &ex){
+                    cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
+                }
+                pstmt2->close();
+                delete pstmt2;
+
+            }
         }
 
     }catch(SQLException &ex){
@@ -397,8 +441,6 @@ void DataManager::getProcedureVotoFromDB()
     pstmt->close();
     delete pstmt;
     delete resultSet;
-
-    //TODO ottenere procedure memorizzate nel DB
 
     emit readyProcedure(listPVs);
 }
@@ -466,7 +508,7 @@ void DataManager::storeProcedura(ProceduraVoto *procedura)
         pstmt->setUInt(1,procedura->getIdRP());
         pstmt->setString(2,procedura->getDescrizione());
         pstmt->setUInt(3,procedura->getNumSchedeVoto());
-        pstmt->setString(4,"creazione");
+        pstmt->setUInt(4,ProceduraVoto::statiProcedura::creazione);
         pstmt->setDateTime(5,currentTime);
         pstmt->setDateTime(6,procedura->getData_ora_inizio());
         pstmt->setDateTime(7,procedura->getData_ora_termine());

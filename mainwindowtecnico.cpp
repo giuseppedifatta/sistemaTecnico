@@ -14,7 +14,7 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
     ui->setupUi(this);
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::loginUrna);
     QStringList tableHeaders;
-    tableHeaders << "seleziona" << "id Proceedimento" << "Descrizione" << "id RP" << "Inizio" << "Termine" << "Schede Richieste" << "Schede Inserite" << "stato" ;
+    tableHeaders << "seleziona" << "id Procedimento" << "Descrizione" << "id RP" << "Inizio" << "Termine" << "Schede Richieste" << "Schede Inserite" << "stato" ;
 
     ui->tableWidget_lista_procedure->setHorizontalHeaderLabels(tableHeaders);
     //ui->tableWidget_lista_procedure->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -153,10 +153,14 @@ void MainWindowTecnico::tecnicoPassAggiornata()
 void MainWindowTecnico::messageStoredSchedaVoto()
 {
     QMessageBox::information(this,"Success","La scheda di voto è stata correttamente memorizzata nella procedura di voto selezionata.");
+
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::visualizzaProcedure);
+
     delete nuovaScheda;
 
     pulisciInterfacciaCreazioneScheda();
+
+    on_pushButton_visualizza_procedure_clicked();
 }
 
 void MainWindowTecnico::messageStoredProcedura()
@@ -248,7 +252,7 @@ void MainWindowTecnico::on_pushButton_registra_RP_clicked()
 void MainWindowTecnico::on_pushButton_visualizza_procedure_clicked()
 {
     idProceduraSelezionata = -1;
-    statoProceduraSelezionata = "";
+    statoProceduraSelezionata = ProceduraVoto::statiProcedura::undefined;
     emit needInfoProcedureVoto();
 
 }
@@ -303,7 +307,9 @@ void MainWindowTecnico::showViewProcedureVoto(QList <ProceduraVoto> procedureVot
         item->setTextAlignment(Qt::AlignCenter);
         ui->tableWidget_lista_procedure->setItem(rigaAggiunta,7,item);
 
-        QString stato = QString::fromStdString(procedureVoto.at(row).getStato());
+        ProceduraVoto::statiProcedura statoProcedura = procedureVoto.at(row).getStato();
+        QString stato = QString::fromStdString(ProceduraVoto::getStatoAsString(statoProcedura));
+
         item = new QTableWidgetItem(stato);
         item->setTextAlignment(Qt::AlignCenter);
         ui->tableWidget_lista_procedure->setItem(rigaAggiunta,8,item);
@@ -313,7 +319,7 @@ void MainWindowTecnico::showViewProcedureVoto(QList <ProceduraVoto> procedureVot
     ui->tableWidget_lista_procedure->horizontalHeader()->setStretchLastSection(true);
 
     idProceduraSelezionata = -1;
-    statoProceduraSelezionata = "";
+    statoProceduraSelezionata = ProceduraVoto::statiProcedura::undefined;
     ui->widget_azioni_procedura->setEnabled(false);
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::visualizzaProcedure);
 }
@@ -1001,8 +1007,9 @@ void MainWindowTecnico::on_tableWidget_lista_procedure_cellClicked(int row, int 
         if(ui->tableWidget_lista_procedure->item(row,0)->checkState() == Qt::Checked){
 
             idProceduraSelezionata = ui->tableWidget_lista_procedure->item(currentRow,1)->text().toUInt();
-            statoProceduraSelezionata = ui->tableWidget_lista_procedure->item(currentRow,7)->text();
-            cout << "id Procedura selezionata: " << idProceduraSelezionata << endl;
+            QString stato = ui->tableWidget_lista_procedure->item(currentRow,8)->text();
+            statoProceduraSelezionata = ProceduraVoto::getStatoFromString(stato.toStdString());
+            cout << "id Procedura selezionata: " << idProceduraSelezionata << ", stato: " << ProceduraVoto::getStatoAsString(statoProceduraSelezionata) << endl;
             unsigned int numberRows = ui->tableWidget_lista_procedure->rowCount();
 
             for (unsigned int rowIndex = 0; rowIndex < numberRows; rowIndex++){
@@ -1012,11 +1019,33 @@ void MainWindowTecnico::on_tableWidget_lista_procedure_cellClicked(int row, int 
             }
 
             ui->widget_azioni_procedura->setEnabled(true);
-            if(statoProceduraSelezionata!="creazione"){
+//            if(statoProceduraSelezionata != ){
+//                ui->pushButton_addSchedaVoto->setEnabled(false);
+//            }
+//            if(statoProceduraSelezionata=="in corso" || statoProceduraSelezionata == "conclusa" || statoProceduraSelezionata == "scrutinata"){
+//                ui->pushButton_removeProcedura->setEnabled(false);
+//            }
+//            else{
+//                ui->pushButton_addSchedaVoto->setEnabled(true);
+//            }
+            switch(statoProceduraSelezionata){
+            case ProceduraVoto::statiProcedura::creazione:
+                ui->pushButton_addSchedaVoto->setEnabled(true);
+                ui->pushButton_removeProcedura->setEnabled(true);
+                break;
+            case ProceduraVoto::statiProcedura::programmata:
                 ui->pushButton_addSchedaVoto->setEnabled(false);
-            }
-            if(statoProceduraSelezionata=="in corso" || statoProceduraSelezionata == "conclusa" || statoProceduraSelezionata == "scrutinata"){
+                ui->pushButton_removeProcedura->setEnabled(true);
+                break;
+            case ProceduraVoto::statiProcedura::in_corso:
+            case ProceduraVoto::statiProcedura::conclusa:
+            case ProceduraVoto::statiProcedura::scrutinata:
+                ui->pushButton_addSchedaVoto->setEnabled(false);
                 ui->pushButton_removeProcedura->setEnabled(false);
+                break;
+            case ProceduraVoto::statiProcedura::undefined:
+                ui->widget_azioni_procedura->setEnabled(true);
+                break;
             }
 
         }
@@ -1025,7 +1054,7 @@ void MainWindowTecnico::on_tableWidget_lista_procedure_cellClicked(int row, int 
             if(idProceduraDeselezionata == idProceduraSelezionata){
                 ui->widget_azioni_procedura->setEnabled(false);
                 idProceduraSelezionata = -1;
-                statoProceduraSelezionata = "";
+                statoProceduraSelezionata = ProceduraVoto::statiProcedura::undefined;
                 cout << "nessuna Procedura selezionata! " << endl;
             }
 
@@ -1057,4 +1086,14 @@ void MainWindowTecnico::on_spinBox_numero_schede_editingFinished()
     if(ui->spinBox_numero_schede->text()==""){
         ui->spinBox_numero_schede->setValue(1);
     }
+}
+
+ProceduraVoto::statiProcedura MainWindowTecnico::getStatoProceduraSelezionata() const
+{
+    return statoProceduraSelezionata;
+}
+
+void MainWindowTecnico::setStatoProceduraSelezionata(const ProceduraVoto::statiProcedura &value)
+{
+    statoProceduraSelezionata = value;
 }

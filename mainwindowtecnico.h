@@ -47,6 +47,9 @@ public:
     uint getIdProceduraSelezionata() const;
     void setIdProceduraSelezionata(const uint &value);
 
+    ProceduraVoto::statiProcedura getStatoProceduraSelezionata() const;
+    void setStatoProceduraSelezionata(const ProceduraVoto::statiProcedura &value);
+
 private slots:
     void on_pushButton_exit_clicked();
 
@@ -142,7 +145,7 @@ private:
     SchedaVoto *nuovaScheda;
     ResponsabileProcedimento *nuovoRP;
     uint idProceduraSelezionata;
-    QString statoProceduraSelezionata;
+    ProceduraVoto::statiProcedura statoProceduraSelezionata;
 
     enum InterfacceTecnico{
         loginUrna,

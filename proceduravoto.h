@@ -11,22 +11,12 @@ class ProceduraVoto
 {
 public:
     ProceduraVoto();
-    enum statoProcedura{
-        creazione,
-        programmata,
-        in_corso,
-        conclusa,
-        scrutinata
-    };
 
     string getDescrizione() const;
     void setDescrizione(const string &value);
 
     uint getNumSchedeVoto() const;
     void setNumSchedeVoto(const uint &value);
-
-    string getStato() const;
-    void setStato(const string &value);
 
     uint getIdRP() const;
     void setIdRP(const uint &value);
@@ -51,11 +41,25 @@ public:
     uint getSchedeInserite() const;
     void setSchedeInserite(const uint &value);
 
+    enum statiProcedura{
+        creazione,
+        programmata,
+        in_corso,
+        conclusa,
+        scrutinata,
+        undefined
+    };
+
+    statiProcedura getStato() const;
+    void setStato(const statiProcedura &value);
+    static string getStatoAsString(statiProcedura stato);
+    static statiProcedura getStatoFromString(string stato);
+
 private:
     string descrizione;
     uint numSchedeVoto;
     uint schedeInserite;
-    string stato;
+    statiProcedura stato;
     uint idRP;
     string data_ora_inizio;
     string data_ora_termine;
