@@ -14,7 +14,7 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
     ui->setupUi(this);
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::loginUrna);
     QStringList tableHeaders;
-    tableHeaders << "seleziona" << "id Procedimento" << "Descrizione" << "id RP" << "Inizio" << "Termine" << "Schede Richieste" << "Schede Inserite" << "stato" ;
+    tableHeaders << "seleziona" << "id Procedura" << "Descrizione" << "id RP" << "Inizio" << "Termine" << "Schede Richieste" << "Schede Inserite" << "Stato Procedura" ;
 
     ui->tableWidget_lista_procedure->setHorizontalHeaderLabels(tableHeaders);
     //ui->tableWidget_lista_procedure->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -567,7 +567,7 @@ void MainWindowTecnico::on_pushButton_conferma_aggiungi_clicked()
         string strMatricola = matricola.toStdString();
 
         if(nuovaScheda->addCandidato(strMatricola,strNome,strCognome,strLista,strDataNascita,strLuogoNascita)){
-            ui->comboBox_seleziona_candidato->addItem(nome + " " + cognome);
+            ui->comboBox_seleziona_candidato->addItem(matricola + ", " + nome + " " + cognome);
             hideBoxAggiungi();
             QMessageBox msgBox(this);
             msgBox.setInformativeText("Il candidato con matricola " + matricola + " è stato aggiunto correttamente alla lista: " + QString::fromStdString(strLista) );
@@ -649,10 +649,12 @@ void MainWindowTecnico::on_pushButton_rimuovi_gruppo_clicked()
         ui->comboBox_seleziona_candidato->clear();
 
 
-        vector <Candidato> listCandidati = nuovaScheda->getCandidati();
-        for(unsigned i=0; i< listCandidati.size(); ++i){
-            QString str = QString::fromStdString(listCandidati[i].getNome());
-            ui->comboBox_seleziona_candidato->addItem(str);
+        vector <Candidato> candidati = nuovaScheda->getCandidati();
+        for(unsigned i=0; i< candidati.size(); ++i){
+            QString nome = QString::fromStdString(candidati.at(i).getNome());
+            QString cognome = QString::fromStdString(candidati.at(i).getCognome());
+            QString matricola = QString::fromStdString(candidati.at(i).getMatricola());
+            ui->comboBox_seleziona_candidato->addItem(matricola + ", " + nome + " " + cognome);
         }
 
     }
