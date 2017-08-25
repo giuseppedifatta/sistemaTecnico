@@ -52,6 +52,7 @@ signals:
     void readyRPS(vector <ResponsabileProcedimento> rps);
     void readyProcedure(QList <ProceduraVoto> pv);
     void readySessioni(QList <SessioneVoto>);
+    void readySchede(QList <SchedaVoto>);
     void deletedProcedura();
 public slots:
     void checkPassTecnico(QString pass);
@@ -63,6 +64,7 @@ public slots:
     void getProcedureVotoFromDB();
     void getSessioniProceduraFromDB(uint idProcedura);
     void deleteProceduraVoto(uint idProceduraVoto);
+    void getSchedeProceduraFromDB(uint idProcedura);
 private:
 
     Driver *driver;

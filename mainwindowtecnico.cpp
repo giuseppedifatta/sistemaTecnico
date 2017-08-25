@@ -1,9 +1,7 @@
 #include "mainwindowtecnico.h"
 #include "ui_mainwindowtecnico.h"
-#include <iostream>
-#include <string>
-#include <vector>
-#include <QMessageBox>
+
+
 
 using namespace std;
 
@@ -55,6 +53,9 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
     QObject::connect(this,SIGNAL(needSessioni(uint)),model,SLOT(getSessioniProceduraFromDB(uint)),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(readySessioni(QList <SessioneVoto>)),this,SLOT(showViewSessioniProcedura(QList <SessioneVoto>)),Qt::QueuedConnection);
 
+    qRegisterMetaType< QList <SchedaVoto> >("QList <SchedaVoto>");
+    QObject::connect(this,SIGNAL(needSchedeProcedura(uint)),model,SLOT(getSchedeProceduraFromDB(uint)),Qt::QueuedConnection);
+    QObject::connect(model,SIGNAL(readySchede(QList<SchedaVoto>)),this,SLOT(showViewSchedeProcedura(QList<SchedaVoto>)),Qt::QueuedConnection);
 }
 
 
@@ -380,6 +381,89 @@ void MainWindowTecnico::showViewSessioniProcedura(QList <SessioneVoto> sessioni)
     ui->tableWidget_sessioni->resizeColumnsToContents();
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::visualizzaSessioni);
 }
+
+void MainWindowTecnico::showViewSchedeProcedura(QList<SchedaVoto> schede)
+{
+    schedeOttenute = schede;
+
+    //mostra la prima scheda
+    mostraScheda();
+}
+void MainWindowTecnico::mostraScheda(){
+    numSchede = schedeOttenute.size();
+    if(numSchede == 1){
+        ui->pushButton_successiva->setEnabled(false);
+        ui->pushButton_precedente->setEnabled(false);
+    }
+    else if(numeroSchedaDaMostrare == 0){
+        ui->pushButton_successiva->setEnabled(true);
+    }
+
+    ui->listWidget_candidati->clear();
+    QFont serifFont("Times", 20, QFont::Bold);
+    SchedaVoto schedaCorrente = schedeOttenute.at(numeroSchedaDaMostrare);
+    uint codProcedura = schedaCorrente.getIdProceduraVoto();
+    QListWidgetItem * item = new QListWidgetItem("id Procedura " +
+                                                 QString::number(codProcedura),ui->listWidget_candidati);
+    item->setFont(serifFont);
+    uint codScheda = schedaCorrente.getId();
+    item = new QListWidgetItem("Codice scheda:" +
+                                                 QString::number(codScheda),ui->listWidget_candidati);
+    item->setFont(serifFont);
+    uint numeroPreferenze = schedaCorrente.getNumPreferenze();
+    item = new QListWidgetItem("Numero preferenze: " +
+                                                 QString::number(numeroPreferenze),ui->listWidget_candidati);
+    item->setFont(serifFont);
+
+    vector <ListaElettorale> liste = schedaCorrente.getListeElettorali();
+    for (uint listaIndex = 0; listaIndex < liste.size() ; listaIndex++){
+        ListaElettorale listaCorrente = liste.at(listaIndex);
+        vector <Candidato> candidatiLista = listaCorrente.getCandidati();
+
+        //inserisco nome della lista
+        string nomeLista = listaCorrente.getNome();
+        if(nomeLista!="nessuna lista"){ //"nessuna lista" è il nome di default dato alla lista, quando il nome della lista non è richiesto per una votazione
+            QString infoLista = "Lista " + QString::number(listaIndex+1) + ": " + QString::fromStdString(nomeLista);
+            QListWidgetItem * item = new QListWidgetItem(infoLista,ui->listWidget_candidati);
+            item->setFont(serifFont);
+        }
+        for (uint i = 0; i < candidatiLista.size(); i++ ){
+
+            QString nominativo = QString::fromStdString(candidatiLista.at(i).getNome() + " "+ candidatiLista.at(i).getCognome());
+
+            string matricola = candidatiLista.at(i).getMatricola();
+
+
+            QListWidgetItem* item = new QListWidgetItem(nominativo,ui->listWidget_candidati);
+            item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
+            item->setCheckState(Qt::Unchecked);
+            QVariant matrVariant(QString::fromStdString(matricola));
+            item->setData(Qt::UserRole,matrVariant);
+
+            string luogo = candidatiLista.at(i).getLuogoNascita();
+            string data = candidatiLista.at(i).getDataNascita();
+            QString infoCandidato = QString::fromStdString("nato a " + luogo + " il " + data);
+            QVariant infoCandVariant(infoCandidato);
+            item->setData(Qt::ToolTipRole,infoCandVariant);
+        }
+
+
+    }
+
+
+    ui->stackedWidget->setCurrentIndex(InterfacceTecnico::visualizzaSchede);
+}
+
+void MainWindowTecnico::on_listWidget_candidati_itemChanged(QListWidgetItem *item)
+{
+    bool checked = item->checkState();
+    if(checked){
+        QVariant data = item->data(Qt::UserRole);
+        QString matricola = data.toString();
+        cout << "selezionato candidato con matricola: " << matricola.toStdString() << endl;
+    }
+}
+
 //void MainWindowSeggio::on_aggiungiHT_button_clicked()
 //{
 //    QString codHT = ui->codHT_lineEdit->text();
@@ -1181,10 +1265,10 @@ void MainWindowTecnico::on_lineEdit_new_password_textChanged(const QString &arg1
 void MainWindowTecnico::on_lineEdit_su_password_textChanged(const QString &arg1)
 {
     if(arg1!=""){
-       ui->pushButton_confirm_new_password->setEnabled(true);
+        ui->pushButton_confirm_new_password->setEnabled(true);
     }
     else{
-       ui->pushButton_confirm_new_password->setEnabled(false);
+        ui->pushButton_confirm_new_password->setEnabled(false);
     }
 }
 
@@ -1201,4 +1285,49 @@ void MainWindowTecnico::on_lineEdit_repeat_new_password_editingFinished()
         ui->label_error_repeat_pass->hide();
         ui->pushButton_confirm_new_password->setEnabled(true);
     }
+}
+
+void MainWindowTecnico::on_pushButton_visualizza_schede_clicked()
+{
+    numeroSchedaDaMostrare = 0;
+    ui->pushButton_precedente->setEnabled(false);
+    emit needSchedeProcedura(idProceduraSelezionata);
+}
+
+
+void MainWindowTecnico::on_pushButton_backToProcedure_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(InterfacceTecnico::visualizzaProcedure);
+}
+
+
+void MainWindowTecnico::on_pushButton_successiva_clicked()
+{
+    uint numeroSchedaMostrata = numeroSchedaDaMostrare;
+    if(numeroSchedaMostrata < numSchede){
+        numeroSchedaDaMostrare++;
+        ui->pushButton_precedente->setEnabled(true);
+        uint indexUltimaScheda = numSchede-1;
+        cout << indexUltimaScheda << " " << numeroSchedaDaMostrare << endl;
+        if(numeroSchedaDaMostrare == indexUltimaScheda){
+            cout << "disabilita successiva"<< endl;
+            ui->pushButton_successiva->setEnabled(false);
+        }
+    }
+    mostraScheda();
+}
+
+void MainWindowTecnico::on_pushButton_precedente_clicked()
+{
+    uint numeroSchedaMostrata = numeroSchedaDaMostrare;
+    if(numeroSchedaMostrata > 0)
+    {
+        numeroSchedaDaMostrare--;
+        ui->pushButton_successiva->setEnabled(true);
+        if(numeroSchedaDaMostrare == 0){
+            cout << "disabilita precedente"<< endl;
+            ui->pushButton_precedente->setEnabled(false);
+        }
+    }
+    mostraScheda();
 }

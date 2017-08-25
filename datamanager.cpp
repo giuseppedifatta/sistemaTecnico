@@ -539,7 +539,7 @@ void DataManager::getSessioniProceduraFromDB(uint idProcedura)
 
             QString qsChiusura = QString::fromStdString(resultSet->getString("chiusura")); //format is: yyyy-MM-dd
             QTime tChiusura = QTime::fromString(qsChiusura,"hh:mm:ss");
-            s.setOraApertura(tChiusura.toString("hh:mm").toStdString());
+            s.setOraChiusura(tChiusura.toString("hh:mm").toStdString());
 
             s.setIdSessione(resultSet->getUInt("idSessione"));
             sessioni.append(s);
@@ -570,6 +570,151 @@ void DataManager::deleteProceduraVoto(uint idProceduraVoto)
 
     emit deletedProcedura();
 
+}
+
+void DataManager::getSchedeProceduraFromDB(uint idProcedura)
+{
+    QList <SchedaVoto> schede;
+
+    PreparedStatement *pstmt;
+    ResultSet *resultSet;
+    pstmt = connection->prepareStatement("SELECT * FROM SchedeVoto WHERE idProceduraVoto = ?");
+    try{
+        pstmt->setUInt(1,idProcedura);
+        resultSet = pstmt->executeQuery();
+
+        //per ogni scheda ottengo il contenuto e aggiungo alla lista delle schede
+        while(resultSet->next()){
+            SchedaVoto s;
+            unsigned int idScheda = resultSet->getUInt("codSchedaVoto");
+            s.setId(idScheda);
+
+            std::istream *blobData = resultSet->getBlob("fileScheda");
+            std::istreambuf_iterator<char> isb = std::istreambuf_iterator<char>(*blobData);
+            std::string blobString = std::string(isb, std::istreambuf_iterator<char>());
+            cout << "Scheda: " << idScheda << endl;
+            cout << blobString << endl;
+            XMLDocument xmlDoc;
+            xmlDoc.Parse(blobString.c_str());
+
+            XMLNode *rootNode = xmlDoc.FirstChild();
+            XMLText* textNodeIdProcedura = rootNode->FirstChildElement("idProcedura")->FirstChild()->ToText();
+            const char * idProceduraArray = textNodeIdProcedura->Value();
+
+            int idProcedura = atoi(idProceduraArray);
+            cout << "idProcedura: " << idProcedura << endl;
+            s.setIdProceduraVoto(idProcedura);
+
+            XMLText* textNodeTipologiaElezione= rootNode->FirstChildElement("tipologiaElezione")->FirstChild()->ToText();
+            uint tipologiaElezione = atoi(textNodeTipologiaElezione->Value());
+            cout << "tipologia elezione: " << tipologiaElezione << endl;
+            s.setTipoElezione(tipologiaElezione);
+
+            XMLText* textNodeNumeroPreferenze = rootNode->FirstChildElement("numeroPreferenze")->FirstChild()->ToText();
+            uint numeroPreferenze = atoi(textNodeNumeroPreferenze->Value());
+            cout << "Numero preferenze: " << numeroPreferenze << endl;
+            s.setNumPreferenze(numeroPreferenze);
+
+            XMLElement * listeElement = rootNode->FirstChildElement("liste");
+
+            XMLElement * firstListaElement = listeElement->FirstChildElement("lista");
+            XMLElement * lastListaElement = listeElement->LastChildElement("lista");
+
+            XMLElement *listaElement = firstListaElement;
+            bool lastLista = false;
+            do{
+
+                int idLista = listaElement->IntAttribute("id");
+                cout <<" --- lista trovata" << endl;
+                cout << "id Lista: " << idLista << endl;
+                string nomeLista = listaElement->Attribute("nome");
+                cout << "nome: " << nomeLista << endl;
+
+                XMLElement * firstCandidatoElement  = listaElement->FirstChildElement("candidato");
+                XMLElement * lastCandidatoElement = listaElement->LastChildElement("candidato");
+
+                XMLElement * candidatoElement = firstCandidatoElement;
+                //ottengo tutti i candidati della lista
+                bool lastCandidato = false;
+                do{
+                    int id = candidatoElement->IntAttribute("id");
+                    cout << "trovato candidato, id: " << id << endl;
+
+                    XMLElement * matricolaElement = candidatoElement->FirstChildElement("matricola");
+                    XMLNode * matricolaInnerNode = matricolaElement->FirstChild();
+                    string matricola;
+                    if(matricolaInnerNode!=nullptr){
+                        matricola = matricolaInnerNode->ToText()->Value();
+                    }
+                    cout << matricola << endl;
+
+                    XMLElement *nomeElement = matricolaElement->NextSiblingElement("nome");
+                    XMLNode * nomeInnerNode = nomeElement->FirstChild();
+                    string nome;
+                    if(nomeInnerNode!=nullptr){
+                        nome = nomeInnerNode->ToText()->Value();
+                    }
+                    cout << nome << endl;
+
+                    XMLElement *cognomeElement = nomeElement->NextSiblingElement("cognome");
+                    XMLNode * cognomeInnerNode = cognomeElement->FirstChild();
+                    string cognome;
+                    if(cognomeInnerNode!=nullptr){
+                        cognome = cognomeInnerNode->ToText()->Value();
+                    }
+                    cout << cognome << endl;
+
+                    XMLElement *luogoNascitaElement = cognomeElement->NextSiblingElement("luogoNascita");
+                    XMLNode * luogoNascitaInnerNode = luogoNascitaElement->FirstChild();
+                    string luogoNascita;
+                    if(luogoNascitaInnerNode!=nullptr){
+                        luogoNascita = luogoNascitaInnerNode->ToText()->Value();
+                    }
+                    cout << luogoNascita << endl;
+
+                    XMLElement *dataNascitaElement = luogoNascitaElement->NextSiblingElement("dataNascita");
+                    XMLNode * dataNascitaInnerNode = dataNascitaElement->FirstChild();
+                    string dataNascita;
+                    if(dataNascitaInnerNode!=nullptr){
+                        dataNascita = dataNascitaInnerNode->ToText()->Value();
+                    }
+                    cout << dataNascita << endl;
+
+                    cout << "Estratti i dati del candidato id: " << id << endl;
+                    s.addCandidato(matricola,nome,cognome,nomeLista,dataNascita,luogoNascita);
+
+                    //accesso al successivo candidato
+                    if(candidatoElement == lastCandidatoElement){
+                        lastCandidato = true;
+                    }else {
+                        candidatoElement = candidatoElement->NextSiblingElement("candidato");
+                        cout << "ottengo il puntatore al successivo candidato" << endl;
+                    }
+                }while(!lastCandidato);
+
+                cout << "non ci sono altri candidati nella lista: " << nomeLista << endl;
+
+
+                if(listaElement == lastListaElement){
+                    lastLista = true;
+                }
+                else{
+                    //accediamo alla successiva lista nella scheda di voto
+                    listaElement = listaElement->NextSiblingElement("lista");
+                    cout << "ottengo il puntatore alla successiva lista" << endl;
+                }
+            }while(!lastLista);
+            cout << "non ci sono altre liste" << endl;
+            schede.append(s);
+        }
+    }catch(SQLException &ex){
+        cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
+    }
+    pstmt->close();
+    delete pstmt;
+    delete resultSet;
+
+    emit readySchede(schede);
 }
 
 void DataManager::storePassNewUser(string userid, string pass)

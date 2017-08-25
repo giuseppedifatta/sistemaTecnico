@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1280</width>
-    <height>800</height>
+    <width>1201</width>
+    <height>722</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -74,7 +74,7 @@ background-color: rgb(49, 149, 255);
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>11</number>
       </property>
       <widget class="QWidget" name="login_urna_page">
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -702,6 +702,13 @@ background-color: rgb(49, 149, 255);
             <widget class="QPushButton" name="pushButton_addSchedaVoto">
              <property name="text">
               <string>Aggiungi Scheda</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_visualizza_schede">
+             <property name="text">
+              <string>Visualizza Schede</string>
              </property>
             </widget>
            </item>
@@ -1382,7 +1389,42 @@ background-color: rgb(49, 149, 255);
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="visualizzazione_schede_page"/>
+      <widget class="QWidget" name="visualizzazione_schede_page">
+       <layout class="QVBoxLayout" name="verticalLayout_9">
+        <item>
+         <layout class="QGridLayout" name="gridLayout_Liste">
+          <item row="1" column="0">
+           <widget class="QListWidget" name="listWidget_candidati"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_12">
+          <item>
+           <widget class="QPushButton" name="pushButton_precedente">
+            <property name="text">
+             <string>Precedente</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_successiva">
+            <property name="text">
+             <string>Successiva</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_backToProcedure">
+          <property name="text">
+           <string>Torna alla visualizzazione delle procedure</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>

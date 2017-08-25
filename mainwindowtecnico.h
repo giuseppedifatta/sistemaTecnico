@@ -2,7 +2,14 @@
 #define MAINWINDOWTECNICO_H
 
 #include <QMainWindow>
+#include <QListWidgetItem>
 #include <vector>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <QMessageBox>
+#include <QCheckBox>
+
 
 #include "datamanager.h"
 #include "proceduravoto.h"
@@ -31,6 +38,7 @@ signals:
     void needInfoProcedureVoto();
     void deleteProcedura(uint idProceduraSelezionata);
     void needSessioni(uint idProceduraSelezionata);
+    void needSchedeProcedura(uint idProceduraSelezionata);
 public slots:
     void showViewSceltaOperazione();
     void passwordErrorMessage();
@@ -42,6 +50,7 @@ public slots:
     void startCreationProcedura(vector <ResponsabileProcedimento> rps);
     void showViewProcedureVoto(QList<ProceduraVoto> procedureVoto);
     void showViewSessioniProcedura(QList<SessioneVoto> sessioni);
+    void showViewSchedeProcedura(QList<SchedaVoto> schede);
 public:
     explicit MainWindowTecnico(QWidget *parent = 0);
     ~MainWindowTecnico();
@@ -147,6 +156,16 @@ private slots:
 
     void on_lineEdit_repeat_new_password_editingFinished();
 
+    void on_pushButton_visualizza_schede_clicked();
+
+    void on_pushButton_backToProcedure_clicked();
+
+    void on_listWidget_candidati_itemChanged(QListWidgetItem *item);
+
+    void on_pushButton_successiva_clicked();
+
+    void on_pushButton_precedente_clicked();
+
 private:
     Ui::MainWindowTecnico *ui;
 
@@ -159,6 +178,11 @@ private:
     uint idProceduraSelezionata;
     ProceduraVoto::statiProcedura statoProceduraSelezionata;
     QString descProceduraSelezionata;
+
+    //per interfaccia visualizzazione schede
+    uint numeroSchedaDaMostrare;
+    uint numSchede;
+    QList <SchedaVoto> schedeOttenute;
 
     enum InterfacceTecnico{
         loginUrna,
@@ -182,6 +206,7 @@ private:
     void pulisciInterfacciaCreazioneScheda();
     void pulisciInterfacciaCreazioneRP();
     void setTables();
+    void mostraScheda();
 };
 
 #endif // MAINWINDOWTECNICO_H
