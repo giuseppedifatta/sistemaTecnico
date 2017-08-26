@@ -403,11 +403,11 @@ void MainWindowTecnico::mostraScheda(){
     QFont serifFont("Times", 20, QFont::Bold);
     SchedaVoto schedaCorrente = schedeOttenute.at(numeroSchedaDaMostrare);
     uint codProcedura = schedaCorrente.getIdProceduraVoto();
-    QListWidgetItem * item = new QListWidgetItem("id Procedura " +
+    QListWidgetItem * item = new QListWidgetItem("id Procedura: " +
                                                  QString::number(codProcedura),ui->listWidget_candidati);
     item->setFont(serifFont);
     uint codScheda = schedaCorrente.getId();
-    item = new QListWidgetItem("Codice scheda:" +
+    item = new QListWidgetItem("Codice scheda: " +
                                                  QString::number(codScheda),ui->listWidget_candidati);
     item->setFont(serifFont);
     uint numeroPreferenze = schedaCorrente.getNumPreferenze();
