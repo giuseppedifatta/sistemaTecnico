@@ -50,9 +50,9 @@ signals:
     void storedRP(QString userid);
     void storedProcedura();
     void readyRPS(vector <ResponsabileProcedimento> rps);
-    void readyProcedure(QList <ProceduraVoto> pv);
-    void readySessioni(QList <SessioneVoto>);
-    void readySchede(QList <SchedaVoto>);
+    void readyProcedure(QList <ProceduraVoto> procedure);
+    void readySessioni(QList <SessioneVoto> sessioni);
+    void readySchede(QList <SchedaVoto> schede);
     void deletedProcedura();
 public slots:
     void checkPassTecnico(QString pass);

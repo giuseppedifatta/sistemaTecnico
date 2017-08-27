@@ -435,8 +435,8 @@ void MainWindowTecnico::mostraScheda(){
 
 
             QListWidgetItem* item = new QListWidgetItem(nominativo,ui->listWidget_candidati);
-            item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
-            item->setCheckState(Qt::Unchecked);
+            //item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
+            //item->setCheckState(Qt::Unchecked);
             QVariant matrVariant(QString::fromStdString(matricola));
             item->setData(Qt::UserRole,matrVariant);
 

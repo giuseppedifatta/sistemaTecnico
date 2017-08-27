@@ -220,6 +220,44 @@ void DataManager::storeScheda(SchedaVoto *scheda)
         cout << "Exception occurred: " << ex.getErrorCode() <<endl;
     }
 
+    //aggiungiamo l'id univoco della scheda al file xml appena memorizzato nel database
+    pstmt = connection->prepareStatement("SELECT LAST_INSERT_ID() AS codScheda");
+    ResultSet *resultSet;
+    uint codScheda;
+    try{
+        resultSet = pstmt->executeQuery();
+        resultSet->next();
+        codScheda = resultSet->getUInt("codScheda");
+
+    }catch(SQLException &ex){
+        cout<<"Exception occurred: "<< ex.getErrorCode()<<endl;
+    }
+    pElement = xmlDoc.NewElement("id");
+    pElement->SetText(codScheda);
+    pRoot->InsertEndChild(pElement);
+
+    //---
+
+    //update file scheda con l'id univoco identificativo come suo campo
+    //XMLPrinter printer;
+    xmlDoc.Print( &printer );
+    schedaStr = printer.CStr();
+    cout << schedaStr << endl;
+
+    //PreparedStatement *pstmt;
+    pstmt = connection->prepareStatement("UPDATE INTO SchedeVoto SET fileScheda=? WHERE codScheda=? ");
+    try{
+        std::stringstream ss(schedaStr);
+        pstmt->setBlob(1,&ss);
+        pstmt->setUInt(2,codScheda);
+        pstmt->executeUpdate();
+        connection->commit();
+        cout << "Aggiunto id alla scheda: " << codScheda << endl;
+    }catch(SQLException &ex){
+        cout << "Exception occurred: " << ex.getErrorCode() <<endl;
+    }
+
+
 
     //"+to_string(idScheda)+"
     string nomeFile = "schedaVoto.xml";
@@ -227,7 +265,7 @@ void DataManager::storeScheda(SchedaVoto *scheda)
 
     //verifichiamo il numero di schede inserite per la procedura per cui si è inserita la scheda
     uint numSchedeInserite = 0;
-    ResultSet * resultSet;
+    //ResultSet * resultSet;
     pstmt = connection->prepareStatement("SELECT * FROM SchedeVoto WHERE idProceduraVoto=?");
     try{
         pstmt->setUInt(1,scheda->getIdProceduraVoto());
