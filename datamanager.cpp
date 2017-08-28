@@ -221,19 +221,19 @@ void DataManager::storeScheda(SchedaVoto *scheda)
     }
 
     //aggiungiamo l'id univoco della scheda al file xml appena memorizzato nel database
-    pstmt = connection->prepareStatement("SELECT LAST_INSERT_ID() AS codScheda");
+    pstmt = connection->prepareStatement("SELECT LAST_INSERT_ID() AS codSchedaVoto");
     ResultSet *resultSet;
-    uint codScheda;
+    uint codSchedaVoto;
     try{
         resultSet = pstmt->executeQuery();
         resultSet->next();
-        codScheda = resultSet->getUInt("codScheda");
+        codSchedaVoto = resultSet->getUInt("codSchedaVoto");
 
     }catch(SQLException &ex){
         cout<<"Exception occurred: "<< ex.getErrorCode()<<endl;
     }
     pElement = xmlDoc.NewElement("id");
-    pElement->SetText(codScheda);
+    pElement->SetText(codSchedaVoto);
     pRoot->InsertEndChild(pElement);
 
     //---
@@ -245,14 +245,14 @@ void DataManager::storeScheda(SchedaVoto *scheda)
     cout << schedaStr << endl;
 
     //PreparedStatement *pstmt;
-    pstmt = connection->prepareStatement("UPDATE INTO SchedeVoto SET fileScheda=? WHERE codScheda=? ");
+    pstmt = connection->prepareStatement("UPDATE SchedeVoto SET fileScheda=? WHERE codSchedaVoto=? ");
     try{
         std::stringstream ss(schedaStr);
         pstmt->setBlob(1,&ss);
-        pstmt->setUInt(2,codScheda);
+        pstmt->setUInt(2,codSchedaVoto);
         pstmt->executeUpdate();
         connection->commit();
-        cout << "Aggiunto id alla scheda: " << codScheda << endl;
+        cout << "Aggiunto id alla scheda: " << codSchedaVoto << endl;
     }catch(SQLException &ex){
         cout << "Exception occurred: " << ex.getErrorCode() <<endl;
     }
