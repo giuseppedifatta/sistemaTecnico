@@ -1308,9 +1308,9 @@ void MainWindowTecnico::on_pushButton_successiva_clicked()
         numeroSchedaDaMostrare++;
         ui->pushButton_precedente->setEnabled(true);
         uint indexUltimaScheda = numSchede-1;
-        cout << indexUltimaScheda << " " << numeroSchedaDaMostrare << endl;
+        //cout << indexUltimaScheda << " " << numeroSchedaDaMostrare << endl;
         if(numeroSchedaDaMostrare == indexUltimaScheda){
-            cout << "disabilita successiva"<< endl;
+            //cout << "disabilita successiva"<< endl;
             ui->pushButton_successiva->setEnabled(false);
         }
     }
@@ -1325,7 +1325,7 @@ void MainWindowTecnico::on_pushButton_precedente_clicked()
         numeroSchedaDaMostrare--;
         ui->pushButton_successiva->setEnabled(true);
         if(numeroSchedaDaMostrare == 0){
-            cout << "disabilita precedente"<< endl;
+            //cout << "disabilita precedente"<< endl;
             ui->pushButton_precedente->setEnabled(false);
         }
     }
