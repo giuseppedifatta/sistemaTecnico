@@ -8,7 +8,6 @@
 #include <istream>
 #include <QDebug>
 
-using namespace CryptoPP;
 DataManager::DataManager(QObject *parent) : QObject(parent)
 {
     try{
@@ -403,18 +402,46 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
     cout << "publicKey: " << s << endl;
     std::stringstream rsaPublicBlob(s);
 
-    //la privateKey è salvata sul DB per comodità temporanea di sviluppo, ma non è la cosa corretta da fare
+    //calcoliamo dalla password scelta dall'RP una derivedKey per cifrare la privateKey di RP
+    string pass = rp->getPassword();
+    string derivedKey = deriveKeyFromPass(pass);
+    cout << "derivedKey ottenuta dalla password di RP: " << derivedKey << endl;
+
+
     ByteQueue queue2;
     rsaPrivate.Save(queue2);
     HexEncoder encoder2;
     queue2.CopyTo(encoder2);
     encoder2.MessageEnd();
+    //in s2 c'è la chiave privata in chiaro
     string s2;
-    StringSink ss2(s2);
-    encoder.CopyTo(ss2);
-    ss2.MessageEnd();
-    cout << "privateKey: " << s2 << endl;
-    std::stringstream rsaPrivateBlob(s2);
+
+    cout << "privateKey IN CHIARO: " << s2 << endl;
+
+    //cifratura della chiave privata, la  ribortiamo in byte
+    string decodedDerivedKey;
+    StringSource ss1(derivedKey,
+                    new HexDecoder(
+                        new StringSink(decodedDerivedKey)
+                        ) // HexDecoder
+                    ); // StringSource
+
+    SecByteBlock key(reinterpret_cast<const byte*>(decodedDerivedKey.data()), decodedDerivedKey.size());
+
+    byte iv[AES::MAX_KEYLENGTH];
+    memset(iv, 0x00,AES::MAX_KEYLENGTH);
+
+    string s2Cifrata = encryptStdString(s2,key,iv);
+
+    //rendiamo la chiave cifrata in esadecimale
+    string encodedChiaveRPCifrata;
+    StringSource ss3(s2Cifrata, true,
+                     new HexEncoder(
+                          new StringSink(encodedChiaveRPCifrata)
+                          ) // HexEncoder
+                      ); // StringSourceEnd();
+
+    std::stringstream rsaPrivateBlob(encodedChiaveRPCifrata);
 
     pstmt=connection->prepareStatement
             ("INSERT INTO ResponsabiliProcedimento ( userid, nome, cognome, dataNascita, luogoNascita,publicKey,privateKey ) VALUES (?,?,?,?,?,?,?)");
@@ -444,6 +471,72 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
     storePassNewUser(userid,rp->getPassword());
     //emetto il segnale che l'RP è stato memorizzato e gli passo l'userid di RP come parametro
     emit storedRP(qsUserid);
+}
+string DataManager::encryptStdString(string plaintext, SecByteBlock key, byte* iv) {
+
+    string ciphertext;
+    //settaggio parametri di cifratura
+    //impostazione della chiave che sarà utilizzata da AES
+    CryptoPP::AES::Encryption aesEncryption(key,CryptoPP::AES::DEFAULT_KEYLENGTH);
+
+    //impostazione dell'iv per il cifrario a blocchi
+    CryptoPP::CBC_Mode_ExternalCipher::Encryption cbcEncryption(aesEncryption, iv);
+
+    //impostazione variabile di destinazione del testo cifrato
+    StreamTransformationFilter stfEncryptor(cbcEncryption,new StringSink(ciphertext));
+    //cifratura del plaintext
+    stfEncryptor.Put(reinterpret_cast<const unsigned char*>(plaintext.c_str()),plaintext.length() + 1);
+    stfEncryptor.MessageEnd();
+
+
+    return ciphertext;
+}
+string DataManager::decryptStdString(string ciphertext, SecByteBlock key, SecByteBlock iv){
+    string decryptedtext;
+    CryptoPP::AES::Decryption aesDecryption(key,CryptoPP::AES::DEFAULT_KEYLENGTH);
+
+    CryptoPP::CBC_Mode_ExternalCipher::Decryption cbcDecryption(aesDecryption,iv);
+
+    CryptoPP::StreamTransformationFilter stfDecryptor(cbcDecryption,new CryptoPP::StringSink(decryptedtext));
+    stfDecryptor.Put(reinterpret_cast<const unsigned char*>(ciphertext.c_str()),ciphertext.size());
+    stfDecryptor.MessageEnd();
+
+    return decryptedtext;
+}
+string DataManager::deriveKeyFromPass(string password){
+    string derivedKey;
+    try {
+
+        // KDF parameters
+        unsigned int iterations = 15000;
+        char purpose = 0; // unused by Crypto++
+
+        // 32 bytes of derived material. Used to key the cipher.
+        //   16 bytes are for the key, and 16 bytes are for the iv.
+        SecByteBlock derived(AES::MAX_KEYLENGTH);
+
+        // KDF function
+        PKCS5_PBKDF2_HMAC<SHA256> kdf;
+        kdf.DeriveKey(derived.data(), derived.size(), purpose, (byte*)password.data(), password.size(), NULL, 0, iterations);
+
+
+
+
+        // Encode derived
+        HexEncoder hex(new StringSink(derivedKey));
+        hex.Put(derived.data(), derived.size());
+        hex.MessageEnd();
+
+        // Print stuff
+        cout << "pass: " << password << endl;
+        cout << "derived key: " << derivedKey << endl;
+
+    }
+    catch(CryptoPP::Exception& ex)
+    {
+        cerr << ex.what() << endl;
+    }
+    return derivedKey;
 }
 
 void DataManager::getRPSFromDB()

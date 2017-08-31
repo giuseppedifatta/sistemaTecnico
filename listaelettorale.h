@@ -8,7 +8,7 @@ class ListaElettorale
 {
 public:
     ListaElettorale();
-    ListaElettorale(string nome);
+    ListaElettorale(string nome, uint numeroLista);
     string getNome() const;
     void setNome(const string &value);
     void addCandidato(Candidato &candidato);
@@ -16,8 +16,13 @@ public:
 
     vector<Candidato> getCandidati() const;
 
+    uint getNumeroLista() const;
+    void setNumeroLista(const uint &value);
+
 private:
     string nome;
+    uint numeroLista;
+
     vector <Candidato> candidati;
 };
 

@@ -423,7 +423,7 @@ void MainWindowTecnico::mostraScheda(){
         //inserisco nome della lista
         string nomeLista = listaCorrente.getNome();
         if(nomeLista!="nessuna lista"){ //"nessuna lista" è il nome di default dato alla lista, quando il nome della lista non è richiesto per una votazione
-            QString infoLista = "Lista " + QString::number(listaIndex+1) + ": " + QString::fromStdString(nomeLista);
+            QString infoLista = "Lista " + QString::number(listaCorrente.getNumeroLista()) + ": " + QString::fromStdString(nomeLista);
             QListWidgetItem * item = new QListWidgetItem(infoLista,ui->listWidget_candidati);
             item->setFont(serifFont);
         }

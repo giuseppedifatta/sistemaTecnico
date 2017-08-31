@@ -50,13 +50,7 @@ background-color: white;
 font:18px bold sans serif;
 }
 
-.QGroupBox{
-color: white;
-}
 
-.QRadioButton{
-color: rgb(204, 43, 43);
-}
 
 .QMessageBox{
 background-color: rgb(49, 149, 255);
@@ -74,7 +68,7 @@ background-color: rgb(49, 149, 255);
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>11</number>
+       <number>7</number>
       </property>
       <widget class="QWidget" name="login_urna_page">
        <layout class="QVBoxLayout" name="verticalLayout_3">

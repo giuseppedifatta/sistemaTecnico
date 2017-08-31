@@ -73,7 +73,7 @@ private:
     unsigned int id;
     unsigned int numPreferenze;
     unsigned int modalitaAdd;
-
+    unsigned int numeroLista;
     //liste elettorali
     std::vector <ListaElettorale> listeElettorali;
 

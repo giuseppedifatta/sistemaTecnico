@@ -33,6 +33,7 @@
 using namespace sql;
 using namespace tinyxml2;
 using namespace std;
+using namespace CryptoPP;
 
 class DataManager : public QObject
 {
@@ -75,6 +76,9 @@ private:
     string hashPassword(string plainPass, string salt);
     bool verifyUserPass(string userid, string userPass);
     void updateUserPassword(string userid, string nuovaPassword);
+    string deriveKeyFromPass(string password);
+    string encryptStdString(string plaintext, SecByteBlock key, byte* iv);
+    string decryptStdString(string ciphertext, SecByteBlock key, SecByteBlock iv);
 };
 
 #endif // DATAMANAGER_H
