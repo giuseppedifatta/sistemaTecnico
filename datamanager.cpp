@@ -390,24 +390,35 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
 
     RSA::PublicKey rsaPublic(rsaPrivate);
 
+    //conversione della chiave pubblica in stringa esadecimale
     ByteQueue queue;
     rsaPublic.Save(queue);
-    HexEncoder encoder;
-    queue.CopyTo(encoder);
-    encoder.MessageEnd();
-    string s;
-    StringSink ss(s);
-    encoder.CopyTo(ss);
-    ss.MessageEnd();
-    cout << "publicKey: " << s << endl;
-    std::stringstream rsaPublicBlob(s);
+
+    string publicKey;
+    StringSink ss1(publicKey);
+    queue.CopyTo(ss1);
+    ss1.MessageEnd();
+    cout << "publicKey: " << publicKey << endl;
+
+    //encoding esadecimale della publicKey
+    string publicKeyEncoded;
+    StringSource ssEncoded(publicKey, true /*pump all*/,
+        new HexEncoder(
+            new StringSink(publicKeyEncoded)
+        ) // HexDecoder
+    ); // StringSource
+    cout << "publicKey encoded: " << publicKeyEncoded << endl;
+
+    //chiave pubblica pronta per essere memorizzata sul DB
+    std::stringstream rsaPublicBlob(publicKeyEncoded);
 
     //calcoliamo dalla password scelta dall'RP una derivedKey per cifrare la privateKey di RP
     string pass = rp->getPassword();
-    string derivedKey = deriveKeyFromPass(pass);
-    cout << "derivedKey ottenuta dalla password di RP: " << derivedKey << endl;
+    string derivedKeyEncoded = deriveKeyFromPass(pass);
+    cout << "derivedKey ottenuta dalla password di RP: " << derivedKeyEncoded << endl;
 
 
+    //codifica della chiave privata in esadecimale
     ByteQueue queue2;
     rsaPrivate.Save(queue2);
     HexEncoder encoder2;
@@ -418,19 +429,20 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
 
     cout << "privateKey IN CHIARO: " << s2 << endl;
 
-    //cifratura della chiave privata, la  ribortiamo in byte
-    string decodedDerivedKey;
-    StringSource ss1(derivedKey,
+    //cifratura della chiave privata
+    string derivedKeyDecoded;
+    StringSource ss2(derivedKeyEncoded,
                     new HexDecoder(
-                        new StringSink(decodedDerivedKey)
+                        new StringSink(derivedKeyDecoded)
                         ) // HexDecoder
                     ); // StringSource
 
-    SecByteBlock key(reinterpret_cast<const byte*>(decodedDerivedKey.data()), decodedDerivedKey.size());
+    SecByteBlock key(reinterpret_cast<const byte*>(derivedKeyDecoded.data()), derivedKeyDecoded.size());
 
     byte iv[AES::MAX_KEYLENGTH];
     memset(iv, 0x00,AES::MAX_KEYLENGTH);
 
+    //cifriamo la chiave privata con chiave simmetrica
     string s2Cifrata = encryptStdString(s2,key,iv);
 
     //rendiamo la chiave cifrata in esadecimale
@@ -441,6 +453,7 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
                           ) // HexEncoder
                       ); // StringSourceEnd();
 
+    //chiave privata cifrata pronta per essere memorizzata sul DB
     std::stringstream rsaPrivateBlob(encodedChiaveRPCifrata);
 
     pstmt=connection->prepareStatement
