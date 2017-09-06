@@ -442,7 +442,7 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
     byte iv[AES::MAX_KEYLENGTH];
     memset(iv, 0x00,AES::MAX_KEYLENGTH);
 
-    //cifriamo la chiave privata con chiave simmetrica
+    //cifriamo la chiave privata di RP con chiave simmetrica
     string s2Cifrata = encryptStdString(s2,key,iv);
 
     //rendiamo la chiave cifrata in esadecimale
