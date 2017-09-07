@@ -738,6 +738,16 @@ void MainWindowTecnico::on_pushButton_completa_scheda_clicked()
     nuovaScheda->setTipoElezione(ui->comboBox_tipo_elezione->currentIndex());
 
     if(nuovaScheda->getCandidati().size()>1){
+        //se sono stati inseriti almeno due candidati alla scheda di voto
+        QMessageBox msgBox(this);
+        msgBox.setInformativeText("Completare la creazione della scheda?");
+        msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
+        msgBox.buttons().at(0)->setText("Conferma");
+        msgBox.buttons().at(1)->setText("Rivedi");
+        int ret = msgBox.exec();
+        if(ret == QMessageBox::Cancel){
+            return;
+        }
         emit schedaPronta(nuovaScheda);
         cout << "emesso il segnale di scheda pronta" << endl;
     }
@@ -1098,6 +1108,7 @@ void MainWindowTecnico::on_lineEdit_cognome_rp_textChanged(const QString &arg1)
 void MainWindowTecnico::on_lineEdit_password_rp_textChanged(const QString &arg1)
 {
     ui->lineEdit_ripeti_password_rp->clear();
+    ui->label_error_password_rp->hide();
     if(arg1==""){
         ui->pushButton_completa_reg_rp->setEnabled(false);
     }
