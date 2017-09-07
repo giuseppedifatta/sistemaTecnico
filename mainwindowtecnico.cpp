@@ -579,7 +579,9 @@ void MainWindowTecnico::pulisciInterfacciaCreazioneScheda(){
     ui->comboBox_seleziona_lista_1->clear();
     ui->comboBox_seleziona_lista_2->clear();
     ui->comboBox_tipo_elezione->clear();
-    ui->spinBox_numero_preferenze->clear();
+    ui->spinBox_numero_preferenze->setMaximum(1);
+    ui->spinBox_numero_preferenze->setMaximum(99);
+
 
 }
 
@@ -734,6 +736,9 @@ void MainWindowTecnico::on_pushButton_conferma_aggiungi_clicked()
 void MainWindowTecnico::on_pushButton_completa_scheda_clicked()
 {
     uint numPref = ui->spinBox_numero_preferenze->text().toUInt();
+    if(numPref == 0){
+        numPref = 1;
+    }
     nuovaScheda->setNumPreferenze(numPref);
     nuovaScheda->setTipoElezione(ui->comboBox_tipo_elezione->currentIndex());
 

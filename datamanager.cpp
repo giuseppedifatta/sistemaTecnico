@@ -239,6 +239,7 @@ void DataManager::storeScheda(SchedaVoto *scheda)
 
     //update file scheda con l'id univoco identificativo come suo campo
     //XMLPrinter printer;
+    printer.ClearBuffer();
     xmlDoc.Print( &printer );
     schedaStr = printer.CStr();
     cout << schedaStr << endl;
