@@ -39,6 +39,7 @@ signals:
     void deleteProcedura(uint idProceduraSelezionata);
     void needSessioni(uint idProceduraSelezionata);
     void needSchedeProcedura(uint idProceduraSelezionata);
+    void checkRangeProcedura(QDateTime inizio, QDateTime fine);
 public slots:
     void showViewSceltaOperazione();
     void passwordErrorMessage();
@@ -51,6 +52,8 @@ public slots:
     void showViewProcedureVoto(QList<ProceduraVoto> procedureVoto);
     void showViewSessioniProcedura(QList<SessioneVoto> sessioni);
     void showViewSchedeProcedura(QList<SchedaVoto> schede);
+    void setPeriodoProcedura(QDateTime inizio, QDateTime termine);
+    void messageProceduraRangeInUse();
 public:
     explicit MainWindowTecnico(QWidget *parent = 0);
     ~MainWindowTecnico();

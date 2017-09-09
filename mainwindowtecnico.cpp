@@ -56,6 +56,10 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
     qRegisterMetaType< QList <SchedaVoto> >("QList <SchedaVoto>");
     QObject::connect(this,SIGNAL(needSchedeProcedura(uint)),model,SLOT(getSchedeProceduraFromDB(uint)),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(readySchede(QList<SchedaVoto>)),this,SLOT(showViewSchedeProcedura(QList<SchedaVoto>)),Qt::QueuedConnection);
+
+    QObject::connect(this,SIGNAL(checkRangeProcedura(QDateTime,QDateTime)),model,SLOT(checkAvailabilityProceduraRange(QDateTime,QDateTime)),Qt::QueuedConnection);
+    QObject::connect(model,SIGNAL(proceduraRangeAvailable(QDateTime,QDateTime)),this,SLOT(setPeriodoProcedura(QDateTime,QDateTime)),Qt::QueuedConnection);
+    QObject::connect(model,SIGNAL(requestedProceduraRangeInUse()),this,SLOT(messageProceduraRangeInUse()),Qt::QueuedConnection);
 }
 
 
@@ -497,8 +501,8 @@ void MainWindowTecnico::pulisciInterfacciaCreazioneProcedura(){
     ui->dateEdit_data_sessione->clear();
     ui->lineEdit_descrizione_procedura->clear();
     ui->spinBox_numero_schede->setValue(1);
-    ui->dateTimeEdit_data_ora_inizio->clear();
-    ui->dateTimeEdit_data_ora_termine->clear();
+    ui->dateTimeEdit_data_ora_inizio->setDate(QDateTime::currentDateTime().date().addDays(1));
+    ui->dateTimeEdit_data_ora_termine->setDate(QDateTime::currentDateTime().date().addDays(1));
     ui->timeEdit_apertura_sessione->clear();
     ui->timeEdit_chiusura_sessione->clear();
     ui->comboBox_idRP->clear();
@@ -886,7 +890,7 @@ void MainWindowTecnico::on_pushButton_memorizza_periodo_procedura_clicked()
     QDateTime termine = ui->dateTimeEdit_data_ora_termine->dateTime();
 
     if(inizio < termine){
-        bool periodoMaiRegistratoPrima = nuovaProcedura->getData_ora_inizio()=="";
+        bool periodoMaiRegistratoPrima = (nuovaProcedura->getData_ora_inizio()=="");
         //cout << periodoMaiRegistratoPrima << endl;
         if( !periodoMaiRegistratoPrima &&
                 (nuovaProcedura->getData_ora_inizio()!=inizio.toString("yyyy/MM/dd hh:mm").toStdString() ||
@@ -896,36 +900,51 @@ void MainWindowTecnico::on_pushButton_memorizza_periodo_procedura_clicked()
             msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
             msgBox.buttons().at(0)->setText("Conferma");
             msgBox.buttons().at(1)->setText("Annulla");
-            int ret =msgBox.exec();
+            int ret = msgBox.exec();
             if(ret == QMessageBox::Cancel){
                 return;
             }
         }
-        //elimina eventuali sessioni memorizzate relative a precedenti periodi di procedura
-        nuovaProcedura->resetSessioni();
-        intervalliSessioni.clear();
-        ui->comboBox_sessioni_inserite->clear();
-        ui->pushButton_elimina_sessione->setEnabled(false);
 
-        //memorizza periodo procedura
-        string strInizio= inizio.toString("yyyy/MM/dd hh:mm").toStdString();
-        //cout << strInizio << endl;
-        nuovaProcedura->setData_ora_inizio(strInizio);
-        string strTermine= termine.toString("yyyy/MM/dd hh:mm").toStdString();
-        nuovaProcedura->setData_ora_termine(strTermine);
+        //TODO conferma che per questo range di date non siano già presenti delle procedure
+        emit checkRangeProcedura(inizio,termine);
 
-        ui->dateEdit_data_sessione->setMinimumDate(inizio.date());
-        ui->dateEdit_data_sessione->setMaximumDate(termine.date());
-        ui->pushButton_aggiungi_sessione->setEnabled(true);
-        ui->dateEdit_data_sessione->setEnabled(true);
-        ui->timeEdit_apertura_sessione->setEnabled(true);
-        ui->timeEdit_chiusura_sessione->setEnabled(true);
+
     }
     else{
         QMessageBox msgBox(this);
-        msgBox.setInformativeText("Selezionare un periodo di tempo valido per lo svolgimento della procedura.");
+        msgBox.setInformativeText("La data di inizio procedura deve precedere quella di termine procedura.");
         msgBox.exec();
     }
+}
+
+void MainWindowTecnico::setPeriodoProcedura(QDateTime inizio, QDateTime termine){
+    //elimina eventuali sessioni memorizzate relative a precedenti periodi di procedura
+    nuovaProcedura->resetSessioni();
+    intervalliSessioni.clear();
+    ui->comboBox_sessioni_inserite->clear();
+    ui->pushButton_elimina_sessione->setEnabled(false);
+
+    //memorizza periodo procedura
+    string strInizio= inizio.toString("yyyy/MM/dd hh:mm").toStdString();
+    //cout << strInizio << endl;
+    nuovaProcedura->setData_ora_inizio(strInizio);
+    string strTermine= termine.toString("yyyy/MM/dd hh:mm").toStdString();
+    nuovaProcedura->setData_ora_termine(strTermine);
+
+    ui->dateEdit_data_sessione->setMinimumDate(inizio.date());
+    ui->dateEdit_data_sessione->setMaximumDate(termine.date());
+    ui->pushButton_aggiungi_sessione->setEnabled(true);
+    ui->dateEdit_data_sessione->setEnabled(true);
+    ui->timeEdit_apertura_sessione->setTime(inizio.time());
+    ui->timeEdit_apertura_sessione->setEnabled(true);
+    ui->timeEdit_chiusura_sessione->setEnabled(true);
+}
+
+void MainWindowTecnico::messageProceduraRangeInUse()
+{
+    QMessageBox::information(this,"Errore","Il range selezionato è sovrapposto con quello di una o più procedure presenti nel sistema");
+
 }
 
 void MainWindowTecnico::on_pushButton_aggiungi_sessione_clicked()

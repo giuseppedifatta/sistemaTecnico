@@ -55,6 +55,8 @@ signals:
     void readySessioni(QList <SessioneVoto> sessioni);
     void readySchede(QList <SchedaVoto> schede);
     void deletedProcedura();
+    void proceduraRangeAvailable(QDateTime inizio, QDateTime termine);
+    void requestedProceduraRangeInUse();
 public slots:
     void checkPassTecnico(QString pass);
     void tryChangeTecnicoPass(QString su_pass, QString newTecnicoPas);
@@ -66,6 +68,7 @@ public slots:
     void getSessioniProceduraFromDB(uint idProcedura);
     void deleteProceduraVoto(uint idProceduraVoto);
     void getSchedeProceduraFromDB(uint idProcedura);
+    void checkAvailabilityProceduraRange(QDateTime inizio,QDateTime termine);
 private:
 
     Driver *driver;

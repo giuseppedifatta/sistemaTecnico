@@ -16,7 +16,7 @@ DataManager::DataManager(QObject *parent) : QObject(parent)
         connection->setAutoCommit(false);
         connection->setSchema("mydb");
     }catch(SQLException &ex){
-        cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
+        cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
     }
 
     //decommentare per impostare le password seguenti come password di tecnico e superuser
@@ -63,7 +63,7 @@ bool DataManager::verifyUserPass(string userid,string userPass){
             storedHashedPassword = resultSet->getString("hashedPassword");
         }
     }catch(SQLException &ex){
-        cout << "Exception occurred: " << ex.getErrorCode() <<endl;
+        cerr << "Exception occurred: " << ex.getErrorCode() <<endl;
     }
     pstmt->close();
     delete pstmt;
@@ -116,7 +116,7 @@ void DataManager::updateUserPassword(string userid,string nuovaPassword){
         pstmt->executeUpdate();
         connection->commit();
     }catch(SQLException &ex){
-        cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
+        cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
     }
     pstmt->close();
     delete pstmt;
@@ -216,7 +216,7 @@ void DataManager::storeScheda(SchedaVoto *scheda)
         connection->commit();
         cout << "Scheda inserita per la procedura: " << scheda->getIdProceduraVoto() << endl;
     }catch(SQLException &ex){
-        cout << "Exception occurred: " << ex.getErrorCode() <<endl;
+        cerr << "Exception occurred: " << ex.getErrorCode() <<endl;
     }
 
     //aggiungiamo l'id univoco della scheda al file xml appena memorizzato nel database
@@ -229,7 +229,7 @@ void DataManager::storeScheda(SchedaVoto *scheda)
         codSchedaVoto = resultSet->getUInt("codSchedaVoto");
 
     }catch(SQLException &ex){
-        cout<<"Exception occurred: "<< ex.getErrorCode()<<endl;
+        cerr << "Exception occurred: "<< ex.getErrorCode()<<endl;
     }
     pElement = xmlDoc.NewElement("id");
     pElement->SetText(codSchedaVoto);
@@ -254,7 +254,7 @@ void DataManager::storeScheda(SchedaVoto *scheda)
         connection->commit();
         cout << "Aggiunto id alla scheda: " << codSchedaVoto << endl;
     }catch(SQLException &ex){
-        cout << "Exception occurred: " << ex.getErrorCode() <<endl;
+        cerr << "Exception occurred: " << ex.getErrorCode() <<endl;
     }
 
 
@@ -276,7 +276,7 @@ void DataManager::storeScheda(SchedaVoto *scheda)
         }
         cout << "Per la procedura: " << scheda->getIdProceduraVoto() << " le schede inserite sono: " << numSchedeInserite << endl;
     }catch(SQLException &ex){
-        cout << "Exception occurred: " << ex.getErrorCode() <<endl;
+        cerr << "Exception occurred: " << ex.getErrorCode() <<endl;
     }
     delete resultSet;
     //verifichiamo il numero di schede richieste per la procedura per cui si è inserita la scheda
@@ -291,7 +291,7 @@ void DataManager::storeScheda(SchedaVoto *scheda)
         }
         cout << "Le schede richieste sono: " << numSchedeRichieste  << endl;
     }catch(SQLException &ex){
-        cout << "Exception occurred: " << ex.getErrorCode() <<endl;
+        cerr << "Exception occurred: " << ex.getErrorCode() <<endl;
     }
     pstmt->close();
     delete pstmt;
@@ -308,14 +308,14 @@ void DataManager::storeScheda(SchedaVoto *scheda)
             pstmt->executeUpdate();
             connection->commit();
         }catch(SQLException &ex){
-            cout << "Exception occurred: " << ex.getErrorCode() <<endl;
+            cerr << "Exception occurred: " << ex.getErrorCode() <<endl;
         }
         pstmt->close();
         delete pstmt;
         cout << "tutte le schede sono state inserite per la procedura: " << scheda->getIdProceduraVoto()  << endl;
     }
     else{
-        cout <<"Aggiornamento del numero di schede inserite" << endl;
+        cout << "Aggiornamento del numero di schede inserite" << endl;
         PreparedStatement * pstmt;
         pstmt = connection->prepareStatement("UPDATE `ProcedureVoto` SET schedeInserite=? WHERE `idProceduraVoto`=?");
         try{
@@ -325,7 +325,7 @@ void DataManager::storeScheda(SchedaVoto *scheda)
             pstmt->executeUpdate();
             connection->commit();
         }catch(SQLException &ex){
-            cout << "Exception occurred: " << ex.getErrorCode() <<endl;
+            cerr << "Exception occurred: " << ex.getErrorCode() <<endl;
         }
         pstmt->close();
         delete pstmt;
@@ -379,7 +379,7 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
             }
         }
     }catch(SQLException &ex){
-        cout << "Exception occurred: " << ex.getErrorCode() <<endl;
+        cerr << "Exception occurred: " << ex.getErrorCode() <<endl;
     }
     delete resultSet;
 
@@ -474,7 +474,7 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
         pstmt->executeUpdate();
         connection->commit();
     }catch(SQLException &ex){
-        cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
+        cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
     }
     pstmt->close();
     delete pstmt;
@@ -577,7 +577,7 @@ void DataManager::getRPSFromDB()
             listRPS.push_back(rp);
         }
     }catch(SQLException &ex){
-        cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
+        cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
     }
     pstmt->close();
     delete pstmt;
@@ -646,7 +646,7 @@ void DataManager::getProcedureVotoFromDB()
                     pstmt2->executeUpdate();
                     connection->commit();
                 }catch(SQLException &ex){
-                    cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
+                    cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
                 }
                 pstmt2->close();
                 delete pstmt2;
@@ -655,7 +655,7 @@ void DataManager::getProcedureVotoFromDB()
         }
 
     }catch(SQLException &ex){
-        cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
+        cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
     }
     pstmt->close();
     delete pstmt;
@@ -693,7 +693,7 @@ void DataManager::getSessioniProceduraFromDB(uint idProcedura)
             sessioni.append(s);
         }
     }catch(SQLException &ex){
-        cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
+        cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
     }
     pstmt->close();
     delete pstmt;
@@ -711,7 +711,7 @@ void DataManager::deleteProceduraVoto(uint idProceduraVoto)
         pstmt->executeQuery();
         connection->commit();
     }catch(SQLException &ex){
-        cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
+        cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
     }
     pstmt->close();
     delete pstmt;
@@ -773,7 +773,7 @@ void DataManager::getSchedeProceduraFromDB(uint idProcedura)
             do{
 
                 int idLista = listaElement->IntAttribute("id");
-                cout <<" --- lista trovata" << endl;
+                cout << " --- lista trovata" << endl;
                 cout << "id Lista: " << idLista << endl;
                 string nomeLista = listaElement->Attribute("nome");
                 cout << "nome: " << nomeLista << endl;
@@ -856,13 +856,69 @@ void DataManager::getSchedeProceduraFromDB(uint idProcedura)
             schede.append(s);
         }
     }catch(SQLException &ex){
-        cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
+        cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
     }
     pstmt->close();
     delete pstmt;
     delete resultSet;
 
     emit readySchede(schede);
+}
+
+void DataManager::checkAvailabilityProceduraRange(QDateTime inizio, QDateTime termine)
+{
+    bool availability = true;
+
+    QString dbDateTimeInizio = inizio.toString("yyyy/MM/dd hh:mm:ss");
+    QString dbDateTimeTermine = termine.toString("yyyy/MM/dd hh:mm:ss");
+    PreparedStatement * pstmt;
+    ResultSet * resultSet;
+    pstmt = connection->prepareStatement("SELECT * FROM ProcedureVoto WHERE "
+                                         "(?>=inizio AND ?<=fine) OR "
+                                         "(?>=inizio AND ?<=fine) OR "
+                                         "(?>=inizio AND ?<=fine) OR "
+                                         "(?<=inizio AND ?>=fine)"
+                                         );
+    try{
+        //inizio <=newInizio <= fine
+        pstmt->setDateTime(1,dbDateTimeInizio.toStdString());
+        pstmt->setDateTime(2,dbDateTimeInizio.toStdString());
+
+        //inizio <=newFine <= fine
+        pstmt->setDateTime(3,dbDateTimeTermine.toStdString());
+        pstmt->setDateTime(4,dbDateTimeTermine.toStdString());
+
+        //newInizio >= inizio AND newFine <= fine
+        pstmt->setDateTime(5,dbDateTimeInizio.toStdString());
+        pstmt->setDateTime(6,dbDateTimeTermine.toStdString());
+
+        //newInizio <= inizio AND newFine >= fine
+        pstmt->setDateTime(7,dbDateTimeInizio.toStdString());
+        pstmt->setDateTime(8,dbDateTimeTermine.toStdString());
+
+        resultSet = pstmt->executeQuery();
+        if(resultSet->next()){
+            availability = false;
+            cout << "Range selezionato sovrapposto ad altre procedure" << endl;
+        }
+        else{
+            cout << "Nuovo range selezionato è disponibile per una nuova procedura: " << dbDateTimeInizio.toStdString() << " - " << dbDateTimeTermine.toStdString() << endl;
+        }
+    }catch(SQLException &ex){
+        cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
+    }
+
+
+    pstmt->close();
+    delete pstmt;
+    delete resultSet;
+
+    if (availability){
+        emit proceduraRangeAvailable(inizio,termine);
+    }
+    else{
+        emit requestedProceduraRangeInUse();
+    }
 }
 
 void DataManager::storePassNewUser(string userid, string pass)
@@ -891,7 +947,7 @@ void DataManager::storePassNewUser(string userid, string pass)
         pstmt->executeUpdate();
         connection->commit();
     }catch(SQLException &ex){
-        cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
+        cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
     }
     pstmt->close();
     delete pstmt;
@@ -917,7 +973,7 @@ void DataManager::storeProcedura(ProceduraVoto *procedura)
         pstmt->executeUpdate();
         connection->commit();
     }catch(SQLException &ex){
-        cout<<"Exception occurred: "<<ex.getErrorCode()<<endl;
+        cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
     }
 
     cout << "after insert procedura" << endl;
@@ -931,7 +987,7 @@ void DataManager::storeProcedura(ProceduraVoto *procedura)
         idProceduraInserita = resultSet->getUInt("idProceduraVoto");
 
     }catch(SQLException &ex){
-        cout<<"Exception occurred: "<< ex.getErrorCode()<<endl;
+        cerr << "Exception occurred: "<< ex.getErrorCode()<<endl;
     }
 
     cout << "La procedura appena inserita ha id: " << idProceduraInserita << endl;
@@ -949,7 +1005,7 @@ void DataManager::storeProcedura(ProceduraVoto *procedura)
             connection->commit();
         }
     }catch(SQLException &ex){
-        cout<<"Exception occurred: "<< ex.getErrorCode()<<endl;
+        cerr << "Exception occurred: "<< ex.getErrorCode()<<endl;
     }
 
     pstmt->close();

@@ -61,8 +61,8 @@ private:
     uint schedeInserite;
     statiProcedura stato;
     uint idRP;
-    string data_ora_inizio;
-    string data_ora_termine;
+    string data_ora_inizio; //format: yyyy/MM/dd hh:mm
+    string data_ora_termine; //format: yyyy/MM/dd hh:mm
     vector <SessioneVoto> sessioni;
     vector <ResponsabileProcedimento> rps;
     uint idProceduraVoto;
