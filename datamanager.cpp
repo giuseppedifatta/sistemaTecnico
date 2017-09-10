@@ -611,19 +611,26 @@ void DataManager::getProcedureVotoFromDB()
             QDateTime dtFine = QDateTime::fromString(qsFine,"yyyy-MM-dd hh:mm:ss");
             pv.setData_ora_termine(dtFine.toString("dd/MM/yyyy hh:mm").toStdString());
 
-            pv.setNumSchedeVoto(resultSet->getUInt("numSchede"));
+            uint numSchedeVoto = resultSet->getUInt("numSchede");
+            pv.setNumSchedeVoto(numSchedeVoto);
+            uint schedeInserite = resultSet->getUInt("schedeInserite");
+            pv.setSchedeInserite(schedeInserite);
+
 
             ProceduraVoto::statiProcedura statoOttenuto = (ProceduraVoto::statiProcedura)resultSet->getUInt("stato");
             QDateTime dtCorrente = QDateTime::currentDateTime();
             ProceduraVoto::statiProcedura statoProceduraAggiornato = statoOttenuto;
+            uint statoVotantiResettato;
             bool correzione = false;
-            if(dtCorrente >= dtInizio && dtCorrente <= dtFine){
+            if((dtCorrente >= dtInizio && dtCorrente <= dtFine)&&(numSchedeVoto==schedeInserite)){
                 if(statoOttenuto!=ProceduraVoto::statiProcedura::in_corso){
                     correzione = true;
                     statoProceduraAggiornato = ProceduraVoto::statiProcedura::in_corso;
+                    //resettiamo lo stato di votanti per la procedura che sta per iniziare
+                    statoVotantiResettato = statoVoto::non_espresso;
                 }
             }
-            else if(dtCorrente > dtFine){
+            else if((dtCorrente > dtFine)&&(numSchedeVoto==schedeInserite)){
                 if(statoOttenuto!=ProceduraVoto::statiProcedura::conclusa){
                     correzione = true;
                     statoProceduraAggiornato = ProceduraVoto::statiProcedura::conclusa;
@@ -631,18 +638,17 @@ void DataManager::getProcedureVotoFromDB()
             }
             pv.setStato(statoProceduraAggiornato);
 
-
-            pv.setSchedeInserite(resultSet->getUInt("schedeInserite"));
-
             listPVs.append(pv);
 
             if(correzione){
                 PreparedStatement *pstmt2;
 
-                pstmt2 = connection->prepareStatement("UPDATE ProcedureVoto SET stato=? WHERE idProceduraVoto=?");
+                pstmt2 = connection->prepareStatement("UPDATE ProcedureVoto SET stato=? WHERE idProceduraVoto=?"
+                                                      "UPDATE Anagrafica SET statoVoto = ?");
                 try{
-                    pstmt2->setUInt(1,statoProceduraAggiornato);
+                    pstmt2->setUInt(1,statoProceduraAggiornato); //in_corso
                     pstmt2->setUInt(2,idProceduraVoto);
+                    pstmt2->setUInt(3,statoVotantiResettato); //non_espresso
                     pstmt2->executeUpdate();
                     connection->commit();
                 }catch(SQLException &ex){

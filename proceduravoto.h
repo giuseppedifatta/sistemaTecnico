@@ -47,6 +47,7 @@ public:
         in_corso,
         conclusa,
         scrutinata,
+        da_eliminare,
         undefined
     };
 

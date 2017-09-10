@@ -168,7 +168,6 @@ private slots:
     void on_pushButton_successiva_clicked();
 
     void on_pushButton_precedente_clicked();
-
 private:
     Ui::MainWindowTecnico *ui;
 

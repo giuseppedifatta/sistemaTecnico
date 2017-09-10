@@ -395,6 +395,12 @@ void MainWindowTecnico::showViewSchedeProcedura(QList<SchedaVoto> schede)
 }
 void MainWindowTecnico::mostraScheda(){
     numSchede = schedeOttenute.size();
+    if(numSchede == 0){
+        QMessageBox msgBox(this);
+        msgBox.setInformativeText("Nessuna scheda inserita, nulla da mostrare.");
+        msgBox.exec();
+
+    }
     if(numSchede == 1){
         ui->pushButton_successiva->setEnabled(false);
         ui->pushButton_precedente->setEnabled(false);
@@ -412,11 +418,11 @@ void MainWindowTecnico::mostraScheda(){
     item->setFont(serifFont);
     uint codScheda = schedaCorrente.getId();
     item = new QListWidgetItem("Codice scheda: " +
-                                                 QString::number(codScheda),ui->listWidget_candidati);
+                               QString::number(codScheda),ui->listWidget_candidati);
     item->setFont(serifFont);
     uint numeroPreferenze = schedaCorrente.getNumPreferenze();
     item = new QListWidgetItem("Numero preferenze: " +
-                                                 QString::number(numeroPreferenze),ui->listWidget_candidati);
+                               QString::number(numeroPreferenze),ui->listWidget_candidati);
     item->setFont(serifFont);
 
     vector <ListaElettorale> liste = schedaCorrente.getListeElettorali();
@@ -1188,16 +1194,18 @@ void MainWindowTecnico::on_tableWidget_lista_procedure_cellClicked(int row, int 
             QString stato = ui->tableWidget_lista_procedure->item(currentRow,8)->text();
             statoProceduraSelezionata = ProceduraVoto::getStatoFromString(stato.toStdString());
             descProceduraSelezionata = ui->tableWidget_lista_procedure->item(currentRow,2)->text();
+            uint numSchedeInserite = ui->tableWidget_lista_procedure->item(currentRow,7)->text().toUInt();
             cout << "id Procedura selezionata: " << idProceduraSelezionata << ", stato: " << ProceduraVoto::getStatoAsString(statoProceduraSelezionata) << endl;
             unsigned int numberRows = ui->tableWidget_lista_procedure->rowCount();
 
+            //se abbiamo selezionato una riga diversa dalla precedente, deselezioniamo qualsiasi selezione precedente
             for (unsigned int rowIndex = 0; rowIndex < numberRows; rowIndex++){
                 if(rowIndex!=currentRow){
                     ui->tableWidget_lista_procedure->item(rowIndex,0)->setCheckState(Qt::Unchecked);
                 }
             }
 
-            ui->widget_azioni_procedura->setEnabled(true);
+
             //            if(statoProceduraSelezionata != ){
             //                ui->pushButton_addSchedaVoto->setEnabled(false);
             //            }
@@ -1207,26 +1215,54 @@ void MainWindowTecnico::on_tableWidget_lista_procedure_cellClicked(int row, int 
             //            else{
             //                ui->pushButton_addSchedaVoto->setEnabled(true);
             //            }
+
+
+
             switch(statoProceduraSelezionata){
-            case ProceduraVoto::statiProcedura::creazione:
-                ui->pushButton_addSchedaVoto->setEnabled(true);
-                ui->pushButton_removeProcedura->setEnabled(true);
-                break;
+//            case ProceduraVoto::statiProcedura::creazione:
+//                ui->pushButton_addSchedaVoto->setEnabled(true);
+//                ui->pushButton_removeProcedura->setEnabled(true);
+//                break;
             case ProceduraVoto::statiProcedura::programmata:
-                ui->pushButton_addSchedaVoto->setEnabled(false);
                 ui->pushButton_removeProcedura->setEnabled(true);
+                ui->pushButton_addSchedaVoto->setEnabled(false);
+                ui->pushButton_visualizza_schede->setEnabled(true);
+                ui->pushButton_visualizzaSessioni->setEnabled(true);
+                ui->pushButton_printSessionKeys->setEnabled(true);
                 break;
             case ProceduraVoto::statiProcedura::in_corso:
+                ui->pushButton_removeProcedura->setEnabled(false);
+                ui->pushButton_addSchedaVoto->setEnabled(false);
+                ui->pushButton_visualizza_schede->setEnabled(true);
+                ui->pushButton_visualizzaSessioni->setEnabled(true);
+                ui->pushButton_printSessionKeys->setEnabled(true);
+                break;
             case ProceduraVoto::statiProcedura::conclusa:
             case ProceduraVoto::statiProcedura::scrutinata:
-                ui->pushButton_addSchedaVoto->setEnabled(false);
                 ui->pushButton_removeProcedura->setEnabled(false);
+                ui->pushButton_addSchedaVoto->setEnabled(false);
+                ui->pushButton_visualizza_schede->setEnabled(true);
+                ui->pushButton_visualizzaSessioni->setEnabled(true);
+                ui->pushButton_printSessionKeys->setEnabled(false);
                 break;
-            case ProceduraVoto::statiProcedura::undefined:
-                ui->widget_azioni_procedura->setEnabled(true);
+            case ProceduraVoto::statiProcedura::da_eliminare:
+                ui->pushButton_removeProcedura->setEnabled(true);
+                ui->pushButton_addSchedaVoto->setEnabled(false);
+                ui->pushButton_visualizza_schede->setEnabled(false);
+                ui->pushButton_visualizzaSessioni->setEnabled(false);
+                ui->pushButton_printSessionKeys->setEnabled(false);
+                break;
+            default:
                 break;
             }
+            if(numSchedeInserite==0){
+                ui->pushButton_visualizza_schede->setEnabled(false);
+            }
+            else{
+                ui->pushButton_visualizza_schede->setEnabled(false);
+            }
 
+            ui->widget_azioni_procedura->setEnabled(true);
         }
         else if(ui->tableWidget_lista_procedure->item(row,0)->checkState() == Qt::Unchecked){
             uint idProceduraDeselezionata = ui->tableWidget_lista_procedure->item(currentRow,1)->text().toUInt();
@@ -1366,3 +1402,5 @@ void MainWindowTecnico::on_pushButton_precedente_clicked()
     }
     mostraScheda();
 }
+
+

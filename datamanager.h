@@ -69,6 +69,11 @@ public slots:
     void deleteProceduraVoto(uint idProceduraVoto);
     void getSchedeProceduraFromDB(uint idProcedura);
     void checkAvailabilityProceduraRange(QDateTime inizio,QDateTime termine);
+    enum statoVoto{
+            non_espresso,
+            votando,
+            espresso
+        };
 private:
 
     Driver *driver;
