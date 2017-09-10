@@ -42,6 +42,11 @@ public:
     DataManager(QObject *parent = 0);
     ~DataManager();
 
+    enum statoVoto{
+            non_espresso,
+            votando,
+            espresso
+        };
 signals:
     void passOK();
     void wrongTecnicoPass();
@@ -69,11 +74,7 @@ public slots:
     void deleteProceduraVoto(uint idProceduraVoto);
     void getSchedeProceduraFromDB(uint idProcedura);
     void checkAvailabilityProceduraRange(QDateTime inizio,QDateTime termine);
-    enum statoVoto{
-            non_espresso,
-            votando,
-            espresso
-        };
+
 private:
 
     Driver *driver;
