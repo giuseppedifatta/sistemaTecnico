@@ -623,25 +623,40 @@ void DataManager::getProcedureVotoFromDB()
             uint statoVotantiResettato;
             bool correzione = false;
             bool resetStatoVotanti = false;
-            if((dtCorrente >= dtInizio && dtCorrente <= dtFine)&&(numSchedeVoto==schedeInserite)){
-                if(statoOttenuto!=ProceduraVoto::statiProcedura::in_corso){
+            if((dtCorrente >= dtInizio && dtCorrente <= dtFine)&&(statoOttenuto!=ProceduraVoto::statiProcedura::in_corso)){
+                //correzione necessaria, verifichiamo quale
+                if(numSchedeVoto==schedeInserite){
                     correzione = true;
                     statoProceduraAggiornato = ProceduraVoto::statiProcedura::in_corso;
                     //resettiamo lo stato di votanti per la procedura che sta per iniziare
                     statoVotantiResettato = statoVoto::non_espresso;
                     resetStatoVotanti = true;
                 }
-            }
-            else if((dtCorrente > dtFine)&&(numSchedeVoto==schedeInserite)){
-                if(statoOttenuto!=ProceduraVoto::statiProcedura::conclusa){
+                else{
                     correzione = true;
-                    statoProceduraAggiornato = ProceduraVoto::statiProcedura::conclusa;
+                    statoProceduraAggiornato = ProceduraVoto::statiProcedura::da_eliminare;
                 }
             }
+            else if(dtCorrente > dtFine){
+                if(numSchedeVoto==schedeInserite){
+                    if((statoOttenuto!=ProceduraVoto::statiProcedura::conclusa)&&(statoOttenuto!=ProceduraVoto::statiProcedura::scrutinata)){
+                        correzione = true;
+                        statoProceduraAggiornato = ProceduraVoto::statiProcedura::conclusa;
+                    }
+                }
+                else{
+                    correzione = true;
+                    statoProceduraAggiornato = ProceduraVoto::statiProcedura::da_eliminare;
+                }
+            }
+
+            //setta nella procedura da restituire alla view lo stato eventualmente corretto
+            //a seguire, l'eventuale aggiornamento sul model
             pv.setStato(statoProceduraAggiornato);
 
             listPVs.append(pv);
 
+            //aggiornamento sul model dello stato della procedura corretto
             if(correzione){
                 cout << "Correzione stato procedura: " << statoProceduraAggiornato << endl;
                 PreparedStatement *pstmt2;
