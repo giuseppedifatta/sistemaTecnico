@@ -622,12 +622,14 @@ void DataManager::getProcedureVotoFromDB()
             ProceduraVoto::statiProcedura statoProceduraAggiornato = statoOttenuto;
             uint statoVotantiResettato;
             bool correzione = false;
+            bool resetStatoVotanti = false;
             if((dtCorrente >= dtInizio && dtCorrente <= dtFine)&&(numSchedeVoto==schedeInserite)){
                 if(statoOttenuto!=ProceduraVoto::statiProcedura::in_corso){
                     correzione = true;
                     statoProceduraAggiornato = ProceduraVoto::statiProcedura::in_corso;
                     //resettiamo lo stato di votanti per la procedura che sta per iniziare
                     statoVotantiResettato = statoVoto::non_espresso;
+                    resetStatoVotanti = true;
                 }
             }
             else if((dtCorrente > dtFine)&&(numSchedeVoto==schedeInserite)){
@@ -641,14 +643,14 @@ void DataManager::getProcedureVotoFromDB()
             listPVs.append(pv);
 
             if(correzione){
+                cout << "Correzione stato procedura: " << statoProceduraAggiornato << endl;
                 PreparedStatement *pstmt2;
 
-                pstmt2 = connection->prepareStatement("UPDATE ProcedureVoto SET stato=? WHERE idProceduraVoto=?"
-                                                      "UPDATE Anagrafica SET statoVoto = ?");
+                pstmt2 = connection->prepareStatement("UPDATE ProcedureVoto SET stato=? WHERE idProceduraVoto=?");
                 try{
                     pstmt2->setUInt(1,statoProceduraAggiornato); //in_corso
                     pstmt2->setUInt(2,idProceduraVoto);
-                    pstmt2->setUInt(3,statoVotantiResettato); //non_espresso
+
                     pstmt2->executeUpdate();
                     connection->commit();
                 }catch(SQLException &ex){
@@ -657,6 +659,21 @@ void DataManager::getProcedureVotoFromDB()
                 pstmt2->close();
                 delete pstmt2;
 
+            }
+            if(resetStatoVotanti){
+                cout << "Una nuova procedura è in corso. Reset stato votanti: " << statoVotantiResettato << endl;
+                PreparedStatement *pstmt2;
+
+                pstmt2 = connection->prepareStatement("UPDATE Anagrafica SET statoVoto = ?");
+                try{
+                    pstmt2->setUInt(3,statoVotantiResettato); //non_espresso
+                    pstmt2->executeUpdate();
+                    connection->commit();
+                }catch(SQLException &ex){
+                    cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
+                }
+                pstmt2->close();
+                delete pstmt2;
             }
         }
 
