@@ -666,7 +666,7 @@ void DataManager::getProcedureVotoFromDB()
 
                 pstmt2 = connection->prepareStatement("UPDATE Anagrafica SET statoVoto = ?");
                 try{
-                    pstmt2->setUInt(3,statoVotantiResettato); //non_espresso
+                    pstmt2->setUInt(1,statoVotantiResettato); //non_espresso
                     pstmt2->executeUpdate();
                     connection->commit();
                 }catch(SQLException &ex){
