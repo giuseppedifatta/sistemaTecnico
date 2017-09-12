@@ -68,7 +68,7 @@ background-color: rgb(49, 149, 255);
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>11</number>
       </property>
       <widget class="QWidget" name="login_urna_page">
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1386,36 +1386,49 @@ background-color: rgb(49, 149, 255);
       <widget class="QWidget" name="visualizzazione_schede_page">
        <layout class="QVBoxLayout" name="verticalLayout_9">
         <item>
-         <layout class="QGridLayout" name="gridLayout_Liste">
+         <layout class="QGridLayout" name="gridLayout_6" rowstretch="0,1,0,0">
+          <property name="bottomMargin">
+           <number>10</number>
+          </property>
+          <item row="3" column="0">
+           <widget class="QPushButton" name="pushButton_backToProcedure">
+            <property name="text">
+             <string>Torna alla visualizzazione delle procedure</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_12">
+            <item>
+             <widget class="QPushButton" name="pushButton_precedente">
+              <property name="text">
+               <string>Precedente</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_successiva">
+              <property name="text">
+               <string>Successiva</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
           <item row="1" column="0">
            <widget class="QListWidget" name="listWidget_candidati"/>
           </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_12">
-          <item>
-           <widget class="QPushButton" name="pushButton_precedente">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>Precedente</string>
+             <string>VISUALIZZAZIONE SCHEDE PROCEDURA: </string>
             </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButton_successiva">
-            <property name="text">
-             <string>Successiva</string>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
          </layout>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_backToProcedure">
-          <property name="text">
-           <string>Torna alla visualizzazione delle procedure</string>
-          </property>
-         </widget>
         </item>
        </layout>
       </widget>
