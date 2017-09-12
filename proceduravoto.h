@@ -52,9 +52,11 @@ public:
     };
 
     statiProcedura getStato() const;
+    void setStato(const uint &stato);
     void setStato(const statiProcedura &value);
     static string getStatoAsString(statiProcedura stato);
     static statiProcedura getStatoFromString(string stato);
+
 
 private:
     string descrizione;
