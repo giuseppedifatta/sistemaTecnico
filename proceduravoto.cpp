@@ -139,7 +139,7 @@ void ProceduraVoto::setStato(const statiProcedura &value)
     stato = value;
 }
 
-void ProceduraVoto::setStato(uint &stato){
+void ProceduraVoto::setStato(const uint &stato){
     switch(stato){
     case ProceduraVoto::statiProcedura::creazione:
         this->stato =  ProceduraVoto::statiProcedura::creazione;
