@@ -130,14 +130,6 @@ void DataManager::storeScheda(SchedaVoto *scheda)
     XMLNode * pRoot = xmlDoc.NewElement("SchedaVoto");
     xmlDoc.InsertFirstChild(pRoot);
     XMLElement * pElement;
-    //    std::ostringstream s;
-    //    s << idProceduraVoto;
-    //    const std::string i_as_string(s.str());
-
-    //    uint idScheda = 1;
-    //    pElement = xmlDoc.NewElement("idScheda");
-    //    pElement->SetText(idScheda);
-    //    pRoot->InsertEndChild(pElement);
 
     uint idProceduraVoto = scheda->getIdProceduraVoto();
     pElement = xmlDoc.NewElement("idProcedura");
