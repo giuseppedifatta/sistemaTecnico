@@ -622,6 +622,10 @@ void MainWindowTecnico::pulisciInterfacciaCreazioneScheda(){
 
 void MainWindowTecnico::on_pushButton_addSchedaVoto_clicked()
 {
+    QDate resetDate = QDate::currentDate().addYears(-18);
+    ui->dateEdit_data_nascita_c->setDate(resetDate);
+    ui->dateEdit_data_nascita_c->setMaximumDate(resetDate);
+
     QMessageBox msgBox(this);
     msgBox.setWindowTitle("Creazione nuova scheda");
     msgBox.setInformativeText("Stai per inserire una scheda di voto per la procedura con id: " + QString::number(idProceduraSelezionata));
@@ -809,16 +813,38 @@ void MainWindowTecnico::on_pushButton_rimuovi_candidato_clicked()
 {
     if(ui->comboBox_seleziona_candidato->currentText()!=""){
         int index = ui->comboBox_seleziona_candidato->currentIndex();
-        //vector <Candidato> listCandidati = nuovaScheda->getListCandidati();
-        //        uint index;
-        //        for (uint i = 0; i < listCandidati.size(); i++){
-        //            if((listCandidati[i].getNominativo()) == entry.toStdString()){
-        //                index = i;
-        //                break;
-        //            }
-        //        }
         nuovaScheda->removeCandidatoFromLista(index);
         ui->comboBox_seleziona_candidato->removeItem(index);
+
+        if(ui->comboBox_seleziona_candidato->count()==0){
+            if(ui->comboBox_seleziona_lista_2->currentText()=="nessuna lista"){
+                //dobbiamo anche eliminare la procedura fittizzia
+
+                vector <ListaElettorale> listElettorali = nuovaScheda->getListeElettorali();
+                uint index;
+                //troviamo l'indidce della lista di rimuovere
+                QString entry = ui->comboBox_seleziona_lista_2->currentText();
+                for (uint i = 0; i < listElettorali.size(); i++){
+                    if(listElettorali.at(i).getNome() == entry.toStdString()){
+                        index = i;
+                        break;
+                    }
+                }
+                vector <Candidato> candidatiDaRimuovere =  nuovaScheda->removeLista(index);
+                nuovaScheda->removeCandidatiFromScheda(candidatiDaRimuovere);
+
+                ui->comboBox_seleziona_lista_2->removeItem(index);
+                if(ui->comboBox_seleziona_lista_2->count() == 0){
+                    //era stato disabilitato nel caso di creazione scheda senza liste
+                    ui->pushButton_aggiungi_lista->setEnabled(true);
+                }
+            }
+        }
+
+        //se
+        if(ui->comboBox_seleziona_lista_2->count()==0){
+            ui->pushButton_aggiungi_lista->setEnabled(true);
+        }
     }
     else{
         QMessageBox msb(this);
@@ -829,25 +855,31 @@ void MainWindowTecnico::on_pushButton_rimuovi_candidato_clicked()
 
 void MainWindowTecnico::on_pushButton_rimuovi_gruppo_clicked()
 {
-    //informiamo l'utente dell'effettivo effetto dell'operazione, e chiediamo conferma prima di proseguire
-    QMessageBox msgBox(this);
-    msgBox.setWindowTitle("Attenzione!");
-    msgBox.setInformativeText("Se rimuovi una lista, verranno eliminati tutti i candidati associati alla lista. Vuoi proseguire?");
-    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Cancel);
-    msgBox.buttons().at(0)->setText("Si");
-    msgBox.buttons().at(1)->setText("No");
-    //msgBox.setDefaultButton(QMessageBox::Save);
-    int ret = msgBox.exec();
-    //se è stato cliccato il tasto cancel, interrompiamo l'operazione
-    if (ret==QMessageBox::Cancel){
-        return;
+   if(ui->comboBox_seleziona_lista_2->currentText()==""){
+        QMessageBox msb(this);
+        msb.setText("Nulla da eliminare");
+        msb.exec();
     }
-
-
-    if(ui->comboBox_seleziona_lista_2->currentText()!=""){
+    else{
         QString entry = ui->comboBox_seleziona_lista_2->currentText();
+        //informiamo l'utente dell'effettivo effetto dell'operazione, e chiediamo conferma prima di proseguire
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle("Attenzione!");
+        msgBox.setInformativeText("Stai eliminando la lista: " + entry +". Se rimuovi la lista, verranno eliminati tutti i candidati associati ad essa. Vuoi proseguire?");
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Cancel);
+        msgBox.buttons().at(0)->setText("Si");
+        msgBox.buttons().at(1)->setText("No");
+        //msgBox.setDefaultButton(QMessageBox::Save);
+        int ret = msgBox.exec();
+        //se è stato cliccato il tasto cancel, interrompiamo l'operazione
+        if (ret==QMessageBox::Cancel){
+            return;
+        }
+
+
         vector <ListaElettorale> listElettorali = nuovaScheda->getListeElettorali();
         uint index;
+
         //troviamo l'indidce della lista di rimuovere
         for (uint i = 0; i < listElettorali.size(); i++){
             if(listElettorali.at(i).getNome() == entry.toStdString()){
@@ -876,11 +908,6 @@ void MainWindowTecnico::on_pushButton_rimuovi_gruppo_clicked()
         }
 
     }
-    else{
-        QMessageBox msb(this);
-        msb.setText("Nulla da eliminare");
-        msb.exec();
-    }
 }
 
 void MainWindowTecnico::on_pushButton_annulla_aggiungi_clicked()
@@ -906,8 +933,15 @@ void MainWindowTecnico::hideBoxAggiungi(){
     ui->pushButton_completa_scheda->setEnabled(true);
     ui->pushButton_rimuovi_candidato->setEnabled(true);
     ui->pushButton_rimuovi_gruppo->setEnabled(true);
-    ui->pushButton_aggiungi_lista->setEnabled(true);
+
     ui->pushButton_aggiungi_candidato->setEnabled(true);
+
+    if(ui->comboBox_seleziona_lista_2->currentText()=="nessuna lista"){
+        ui->pushButton_aggiungi_lista->setEnabled(false);
+    }
+    else{
+        ui->pushButton_aggiungi_lista->setEnabled(false);
+    }
 }
 
 void MainWindowTecnico::on_lineEdit_nome_c_textChanged(const QString &arg1)
