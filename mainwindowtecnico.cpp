@@ -382,28 +382,28 @@ void MainWindowTecnico::showViewSessioniProcedura(QList <SessioneVoto> sessioni)
         QTableWidgetItem *item = new QTableWidgetItem(QString::number(idSessione));
         item->setTextAlignment(Qt::AlignCenter);
         item->setFlags(Qt::NoItemFlags);
-                item->setTextColor(Qt::black);
+        item->setTextColor(Qt::black);
         ui->tableWidget_sessioni->setItem(rigaAggiunta,0,item);
 
         string data = sessioni.at(row).getData();
         item = new QTableWidgetItem(QString::fromStdString(data));
         item->setTextAlignment(Qt::AlignCenter);
         item->setFlags(Qt::NoItemFlags);
-                item->setTextColor(Qt::black);
+        item->setTextColor(Qt::black);
         ui->tableWidget_sessioni->setItem(rigaAggiunta,1,item);
 
         string apertura = sessioni.at(row).getOraApertura();
         item = new QTableWidgetItem(QString::fromStdString(apertura));
         item->setTextAlignment(Qt::AlignCenter);
         item->setFlags(Qt::NoItemFlags);
-                item->setTextColor(Qt::black);
+        item->setTextColor(Qt::black);
         ui->tableWidget_sessioni->setItem(rigaAggiunta,2,item);
 
         string chiusura = sessioni.at(row).getOraChiusura();
         item = new QTableWidgetItem(QString::fromStdString(chiusura));
         item->setTextAlignment(Qt::AlignCenter);
         item->setFlags(Qt::NoItemFlags);
-                item->setTextColor(Qt::black);
+        item->setTextColor(Qt::black);
         ui->tableWidget_sessioni->setItem(rigaAggiunta,3,item);
     }
 
@@ -639,6 +639,7 @@ void MainWindowTecnico::on_pushButton_addSchedaVoto_clicked()
     ui->formWidget_lista->hide();
     ui->pushButton_annulla_aggiungi->hide();
     ui->pushButton_conferma_aggiungi->hide();
+    ui->pushButton_aggiungi_lista->setEnabled(true);
 
 
 
@@ -706,15 +707,22 @@ void MainWindowTecnico::on_pushButton_conferma_aggiungi_clicked()
     uint mod = nuovaScheda->getModalitaAdd();
 
     if(mod == SchedaVoto::modoAdd::candidato){
-
-
-
+        QString matricola = ui->lineEdit_matricola->text();
+        string strMatricola = matricola.toStdString();
+        QRegExp re("\\d*");  // a digit (\d), zero or more times (*)
+        if (!(re.exactMatch(matricola))){
+            QMessageBox msgBox(this);
+            msgBox.setWindowTitle("Errore");
+            msgBox.setInformativeText("Matricola inserita non valida. La matricola deve essere numerica");
+            msgBox.exec();
+            return;
+        }
 
         QString lista = ui->comboBox_seleziona_lista_1->currentText();
         string strLista = lista.toStdString();
         if(strLista == ""){
             QMessageBox msgBox(this);
-            msgBox.setInformativeText("Vuoi inserire un candidato senza lista? Il candidato verrà aggiunto alla lista <nessuna lista>");
+            msgBox.setInformativeText("Vuoi inserire un candidato senza lista? Il candidato verrà aggiunto alla lista <nessuna lista> e non sarà possibile aggiungere delle liste");
             //msgBox.setInformativeText("Do you want to save your changes?");
             msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Cancel);
             msgBox.buttons().at(0)->setText("Si");
@@ -728,6 +736,7 @@ void MainWindowTecnico::on_pushButton_conferma_aggiungi_clicked()
             else{
                 strLista = "nessuna lista";
                 ui->comboBox_seleziona_lista_2->addItem(QString::fromStdString(strLista));
+                ui->pushButton_aggiungi_lista->setEnabled(false);
             }
         }
 
@@ -741,8 +750,7 @@ void MainWindowTecnico::on_pushButton_conferma_aggiungi_clicked()
 
         QString luogoNascita = ui->lineEdit_luogo_nascita_c->text();
         string strLuogoNascita = luogoNascita.toStdString();
-        QString matricola = ui->lineEdit_matricola->text();
-        string strMatricola = matricola.toStdString();
+
 
         if(nuovaScheda->addCandidato(strMatricola,strNome,strCognome,strLista,strDataNascita,strLuogoNascita)){
             ui->comboBox_seleziona_candidato->addItem(matricola + ", " + nome + " " + cognome);
@@ -821,10 +829,26 @@ void MainWindowTecnico::on_pushButton_rimuovi_candidato_clicked()
 
 void MainWindowTecnico::on_pushButton_rimuovi_gruppo_clicked()
 {
+    //informiamo l'utente dell'effettivo effetto dell'operazione, e chiediamo conferma prima di proseguire
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle("Attenzione!");
+    msgBox.setInformativeText("Se rimuovi una lista, verranno eliminati tutti i candidati associati alla lista. Vuoi proseguire?");
+    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Cancel);
+    msgBox.buttons().at(0)->setText("Si");
+    msgBox.buttons().at(1)->setText("No");
+    //msgBox.setDefaultButton(QMessageBox::Save);
+    int ret = msgBox.exec();
+    //se è stato cliccato il tasto cancel, interrompiamo l'operazione
+    if (ret==QMessageBox::Cancel){
+        return;
+    }
+
+
     if(ui->comboBox_seleziona_lista_2->currentText()!=""){
         QString entry = ui->comboBox_seleziona_lista_2->currentText();
         vector <ListaElettorale> listElettorali = nuovaScheda->getListeElettorali();
         uint index;
+        //troviamo l'indidce della lista di rimuovere
         for (uint i = 0; i < listElettorali.size(); i++){
             if(listElettorali.at(i).getNome() == entry.toStdString()){
                 index = i;
@@ -835,7 +859,10 @@ void MainWindowTecnico::on_pushButton_rimuovi_gruppo_clicked()
         nuovaScheda->removeCandidatiFromScheda(candidatiDaRimuovere);
 
         ui->comboBox_seleziona_lista_2->removeItem(index);
-
+        if(ui->comboBox_seleziona_lista_2->count() == 0){
+            //era stato disabilitato nel caso di creazione scheda senza liste
+            ui->pushButton_aggiungi_lista->setEnabled(true);
+        }
         //aggiornamento comboBoxListaCandidati
         ui->comboBox_seleziona_candidato->clear();
 
@@ -870,6 +897,7 @@ void MainWindowTecnico::hideBoxAggiungi(){
     ui->lineEdit_cognome_c->clear();
     QDate resetDate = QDate::currentDate().addYears(-18);
     ui->dateEdit_data_nascita_c->setDate(resetDate);
+    ui->dateEdit_data_nascita_c->setMaximumDate(resetDate);
     ui->lineEdit_luogo_nascita_c->clear();
     ui->pushButton_annulla_aggiungi->hide();
     ui->pushButton_conferma_aggiungi->hide();
@@ -1096,7 +1124,9 @@ void MainWindowTecnico::on_pushButton_annulla_rp_clicked()
 void MainWindowTecnico::pulisciInterfacciaCreazioneRP(){
     ui->lineEdit_nome_rp->clear();
     ui->lineEdit_cognome_rp->clear();
-    ui->dateEdit_data_nascita_rp->setDate(QDate::currentDate().addYears(-18));
+    QDate maggiorenne = QDate::currentDate().addYears(-18);
+    ui->dateEdit_data_nascita_rp->setDate(maggiorenne);
+    ui->dateEdit_data_nascita_rp->setMaximumDate(maggiorenne);
     ui->lineEdit_luogo_nascita_rp->clear();
     ui->lineEdit_password_rp->clear();
     ui->lineEdit_ripeti_password_rp->clear();
@@ -1260,14 +1290,14 @@ void MainWindowTecnico::on_tableWidget_lista_procedure_cellClicked(int row, int 
                 case ProceduraVoto::statiProcedura::in_corso:
                     ui->pushButton_removeProcedura->setEnabled(false);
                     ui->pushButton_addSchedaVoto->setEnabled(false);
-                                        ui->pushButton_visualizzaSessioni->setEnabled(true);
+                    ui->pushButton_visualizzaSessioni->setEnabled(true);
                     ui->pushButton_printSessionKeys->setEnabled(true);
                     break;
                 case ProceduraVoto::statiProcedura::conclusa:
                 case ProceduraVoto::statiProcedura::scrutinata:
                     ui->pushButton_removeProcedura->setEnabled(false);
                     ui->pushButton_addSchedaVoto->setEnabled(false);
-                                        ui->pushButton_visualizzaSessioni->setEnabled(true);
+                    ui->pushButton_visualizzaSessioni->setEnabled(true);
                     ui->pushButton_printSessionKeys->setEnabled(false);
                     break;
                 case ProceduraVoto::statiProcedura::da_eliminare:
@@ -1277,6 +1307,14 @@ void MainWindowTecnico::on_tableWidget_lista_procedure_cellClicked(int row, int 
                     ui->pushButton_visualizzaSessioni->setEnabled(false);
                     ui->pushButton_printSessionKeys->setEnabled(false);
                     break;
+                case ProceduraVoto::statiProcedura::creazione:
+                    ui->pushButton_removeProcedura->setEnabled(true);
+                    ui->pushButton_addSchedaVoto->setEnabled(true);
+
+                    ui->pushButton_visualizzaSessioni->setEnabled(true);
+                    ui->pushButton_printSessionKeys->setEnabled(true);
+                    break;
+
                 default:
                     break;
                 }
