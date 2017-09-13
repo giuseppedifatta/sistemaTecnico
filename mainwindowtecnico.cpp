@@ -77,12 +77,14 @@ void MainWindowTecnico::setTables(){
     //ui->tableWidget_lista_procedure->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableWidget_lista_procedure->resizeColumnsToContents();
     ui->tableWidget_lista_procedure->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->tableWidget_lista_procedure->setFocusPolicy(Qt::NoFocus);
 
     QStringList tableHeaders2;
     tableHeaders2 << "id Sessione" << "data Sessione" << "apertura Seggi" << "chiusura Seggi";
     ui->tableWidget_sessioni->setHorizontalHeaderLabels(tableHeaders2);
     ui->tableWidget_sessioni->resizeColumnsToContents();
     ui->tableWidget_sessioni->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->tableWidget_sessioni->setFocusPolicy(Qt::NoFocus);
 }
 
 //void MainWindowSeggio::on_token_tableWidget_clicked(const QModelIndex &index)
@@ -302,43 +304,58 @@ void MainWindowTecnico::showViewProcedureVoto(QList <ProceduraVoto> procedureVot
         uint idProcedura = procedureVoto.at(row).getIdProceduraVoto();
         QTableWidgetItem *item = new QTableWidgetItem(QString::number(idProcedura));
         item->setTextAlignment(Qt::AlignCenter);
+        item->setFlags(Qt::NoItemFlags);
+        item->setTextColor(Qt::black);
         ui->tableWidget_lista_procedure->setItem(rigaAggiunta,1,item);
 
         QString descrizione = QString::fromStdString(procedureVoto.at(row).getDescrizione());
         item = new QTableWidgetItem(descrizione);
         item->setTextAlignment(Qt::AlignCenter);
+        item->setFlags(Qt::NoItemFlags);
+        item->setTextColor(Qt::black);
         ui->tableWidget_lista_procedure->setItem(rigaAggiunta,2,item);
 
         uint idRP = procedureVoto.at(row).getIdRP();
         item = new QTableWidgetItem(QString::number(idRP));
         item->setTextAlignment(Qt::AlignCenter);
+        item->setFlags(Qt::NoItemFlags);
+        item->setTextColor(Qt::black);
         ui->tableWidget_lista_procedure->setItem(rigaAggiunta,3,item);
 
         QString qsInizio = QString::fromStdString(procedureVoto.at(row).getData_ora_inizio());
         item = new QTableWidgetItem(qsInizio);
         item->setTextAlignment(Qt::AlignCenter);
+        item->setFlags(Qt::NoItemFlags);
+        item->setTextColor(Qt::black);
         ui->tableWidget_lista_procedure->setItem(rigaAggiunta,4,item);
 
         QString qsTermine = QString::fromStdString(procedureVoto.at(row).getData_ora_termine());
         item = new QTableWidgetItem(qsTermine);
         item->setTextAlignment(Qt::AlignCenter);
+        item->setFlags(Qt::NoItemFlags);
+        item->setTextColor(Qt::black);
         ui->tableWidget_lista_procedure->setItem(rigaAggiunta,5,item);
 
         uint numSchede = procedureVoto.at(row).getNumSchedeVoto();
         item = new QTableWidgetItem(QString::number(numSchede));
         item->setTextAlignment(Qt::AlignCenter);
+        item->setFlags(Qt::NoItemFlags);
+        item->setTextColor(Qt::black);
         ui->tableWidget_lista_procedure->setItem(rigaAggiunta,6,item);
 
         uint schedeInserite = procedureVoto.at(row).getSchedeInserite();
         item = new QTableWidgetItem(QString::number(schedeInserite));
         item->setTextAlignment(Qt::AlignCenter);
+        item->setFlags(Qt::NoItemFlags);
+        item->setTextColor(Qt::black);
         ui->tableWidget_lista_procedure->setItem(rigaAggiunta,7,item);
 
         ProceduraVoto::statiProcedura statoProcedura = procedureVoto.at(row).getStato();
         QString stato = QString::fromStdString(ProceduraVoto::getStatoAsString(statoProcedura));
-
         item = new QTableWidgetItem(stato);
         item->setTextAlignment(Qt::AlignCenter);
+        item->setFlags(Qt::NoItemFlags);
+        item->setTextColor(Qt::black);
         ui->tableWidget_lista_procedure->setItem(rigaAggiunta,8,item);
 
     }
@@ -364,21 +381,29 @@ void MainWindowTecnico::showViewSessioniProcedura(QList <SessioneVoto> sessioni)
         uint idSessione = sessioni.at(row).getIdSessione();
         QTableWidgetItem *item = new QTableWidgetItem(QString::number(idSessione));
         item->setTextAlignment(Qt::AlignCenter);
+        item->setFlags(Qt::NoItemFlags);
+                item->setTextColor(Qt::black);
         ui->tableWidget_sessioni->setItem(rigaAggiunta,0,item);
 
         string data = sessioni.at(row).getData();
         item = new QTableWidgetItem(QString::fromStdString(data));
         item->setTextAlignment(Qt::AlignCenter);
+        item->setFlags(Qt::NoItemFlags);
+                item->setTextColor(Qt::black);
         ui->tableWidget_sessioni->setItem(rigaAggiunta,1,item);
 
         string apertura = sessioni.at(row).getOraApertura();
         item = new QTableWidgetItem(QString::fromStdString(apertura));
         item->setTextAlignment(Qt::AlignCenter);
+        item->setFlags(Qt::NoItemFlags);
+                item->setTextColor(Qt::black);
         ui->tableWidget_sessioni->setItem(rigaAggiunta,2,item);
 
         string chiusura = sessioni.at(row).getOraChiusura();
         item = new QTableWidgetItem(QString::fromStdString(chiusura));
         item->setTextAlignment(Qt::AlignCenter);
+        item->setFlags(Qt::NoItemFlags);
+                item->setTextColor(Qt::black);
         ui->tableWidget_sessioni->setItem(rigaAggiunta,3,item);
     }
 
@@ -1189,80 +1214,76 @@ void MainWindowTecnico::on_tableWidget_lista_procedure_cellClicked(int row, int 
     unsigned int currentRow = row;
     if(column==0){
         if(ui->tableWidget_lista_procedure->item(row,0)->checkState() == Qt::Checked){
+            uint tempID = ui->tableWidget_lista_procedure->item(currentRow,1)->text().toUInt();
+            if(tempID!=idProceduraSelezionata){
+                idProceduraSelezionata = tempID;
 
-            idProceduraSelezionata = ui->tableWidget_lista_procedure->item(currentRow,1)->text().toUInt();
-            QString stato = ui->tableWidget_lista_procedure->item(currentRow,8)->text();
-            statoProceduraSelezionata = ProceduraVoto::getStatoFromString(stato.toStdString());
-            descProceduraSelezionata = ui->tableWidget_lista_procedure->item(currentRow,2)->text();
-            uint numSchedeInserite = ui->tableWidget_lista_procedure->item(currentRow,7)->text().toUInt();
-            cout << "id Procedura selezionata: " << idProceduraSelezionata << ", stato: " << ProceduraVoto::getStatoAsString(statoProceduraSelezionata) << endl;
-            unsigned int numberRows = ui->tableWidget_lista_procedure->rowCount();
+                QString stato = ui->tableWidget_lista_procedure->item(currentRow,8)->text();
+                statoProceduraSelezionata = ProceduraVoto::getStatoFromString(stato.toStdString());
+                descProceduraSelezionata = ui->tableWidget_lista_procedure->item(currentRow,2)->text();
+                uint numSchedeInserite = ui->tableWidget_lista_procedure->item(currentRow,7)->text().toUInt();
+                cout << "id Procedura selezionata: " << idProceduraSelezionata << ", stato: " << ProceduraVoto::getStatoAsString(statoProceduraSelezionata) << endl;
+                unsigned int numberRows = ui->tableWidget_lista_procedure->rowCount();
 
-            //se abbiamo selezionato una riga diversa dalla precedente, deselezioniamo qualsiasi selezione precedente
-            for (unsigned int rowIndex = 0; rowIndex < numberRows; rowIndex++){
-                if(rowIndex!=currentRow){
-                    ui->tableWidget_lista_procedure->item(rowIndex,0)->setCheckState(Qt::Unchecked);
+                //se abbiamo selezionato una riga diversa dalla precedente, deselezioniamo qualsiasi selezione precedente
+                for (unsigned int rowIndex = 0; rowIndex < numberRows; rowIndex++){
+                    if(rowIndex!=currentRow){
+                        ui->tableWidget_lista_procedure->item(rowIndex,0)->setCheckState(Qt::Unchecked);
+                    }
                 }
+
+
+                //            if(statoProceduraSelezionata != ){
+                //                ui->pushButton_addSchedaVoto->setEnabled(false);
+                //            }
+                //            if(statoProceduraSelezionata=="in corso" || statoProceduraSelezionata == "conclusa" || statoProceduraSelezionata == "scrutinata"){
+                //                ui->pushButton_removeProcedura->setEnabled(false);
+                //            }
+                //            else{
+                //                ui->pushButton_addSchedaVoto->setEnabled(true);
+                //            }
+
+                if(numSchedeInserite==0){
+                    ui->pushButton_visualizza_schede->setEnabled(false);
+                }
+                else{
+                    ui->pushButton_visualizza_schede->setEnabled(true);
+                }
+
+                switch(statoProceduraSelezionata){
+                case ProceduraVoto::statiProcedura::programmata:
+                    ui->pushButton_removeProcedura->setEnabled(true);
+                    ui->pushButton_addSchedaVoto->setEnabled(false);
+                    ui->pushButton_visualizzaSessioni->setEnabled(true);
+                    ui->pushButton_printSessionKeys->setEnabled(true);
+                    break;
+                case ProceduraVoto::statiProcedura::in_corso:
+                    ui->pushButton_removeProcedura->setEnabled(false);
+                    ui->pushButton_addSchedaVoto->setEnabled(false);
+                                        ui->pushButton_visualizzaSessioni->setEnabled(true);
+                    ui->pushButton_printSessionKeys->setEnabled(true);
+                    break;
+                case ProceduraVoto::statiProcedura::conclusa:
+                case ProceduraVoto::statiProcedura::scrutinata:
+                    ui->pushButton_removeProcedura->setEnabled(false);
+                    ui->pushButton_addSchedaVoto->setEnabled(false);
+                                        ui->pushButton_visualizzaSessioni->setEnabled(true);
+                    ui->pushButton_printSessionKeys->setEnabled(false);
+                    break;
+                case ProceduraVoto::statiProcedura::da_eliminare:
+                    ui->pushButton_removeProcedura->setEnabled(true);
+                    ui->pushButton_addSchedaVoto->setEnabled(false);
+                    ui->pushButton_visualizza_schede->setEnabled(false);
+                    ui->pushButton_visualizzaSessioni->setEnabled(false);
+                    ui->pushButton_printSessionKeys->setEnabled(false);
+                    break;
+                default:
+                    break;
+                }
+
+
+                ui->widget_azioni_procedura->setEnabled(true);
             }
-
-
-            //            if(statoProceduraSelezionata != ){
-            //                ui->pushButton_addSchedaVoto->setEnabled(false);
-            //            }
-            //            if(statoProceduraSelezionata=="in corso" || statoProceduraSelezionata == "conclusa" || statoProceduraSelezionata == "scrutinata"){
-            //                ui->pushButton_removeProcedura->setEnabled(false);
-            //            }
-            //            else{
-            //                ui->pushButton_addSchedaVoto->setEnabled(true);
-            //            }
-
-
-
-            switch(statoProceduraSelezionata){
-//            case ProceduraVoto::statiProcedura::creazione:
-//                ui->pushButton_addSchedaVoto->setEnabled(true);
-//                ui->pushButton_removeProcedura->setEnabled(true);
-//                break;
-            case ProceduraVoto::statiProcedura::programmata:
-                ui->pushButton_removeProcedura->setEnabled(true);
-                ui->pushButton_addSchedaVoto->setEnabled(false);
-                ui->pushButton_visualizza_schede->setEnabled(true);
-                ui->pushButton_visualizzaSessioni->setEnabled(true);
-                ui->pushButton_printSessionKeys->setEnabled(true);
-                break;
-            case ProceduraVoto::statiProcedura::in_corso:
-                ui->pushButton_removeProcedura->setEnabled(false);
-                ui->pushButton_addSchedaVoto->setEnabled(false);
-                ui->pushButton_visualizza_schede->setEnabled(true);
-                ui->pushButton_visualizzaSessioni->setEnabled(true);
-                ui->pushButton_printSessionKeys->setEnabled(true);
-                break;
-            case ProceduraVoto::statiProcedura::conclusa:
-            case ProceduraVoto::statiProcedura::scrutinata:
-                ui->pushButton_removeProcedura->setEnabled(false);
-                ui->pushButton_addSchedaVoto->setEnabled(false);
-                ui->pushButton_visualizza_schede->setEnabled(true);
-                ui->pushButton_visualizzaSessioni->setEnabled(true);
-                ui->pushButton_printSessionKeys->setEnabled(false);
-                break;
-            case ProceduraVoto::statiProcedura::da_eliminare:
-                ui->pushButton_removeProcedura->setEnabled(true);
-                ui->pushButton_addSchedaVoto->setEnabled(false);
-                ui->pushButton_visualizza_schede->setEnabled(false);
-                ui->pushButton_visualizzaSessioni->setEnabled(false);
-                ui->pushButton_printSessionKeys->setEnabled(false);
-                break;
-            default:
-                break;
-            }
-            if(numSchedeInserite==0){
-                ui->pushButton_visualizza_schede->setEnabled(false);
-            }
-            else{
-                ui->pushButton_visualizza_schede->setEnabled(false);
-            }
-
-            ui->widget_azioni_procedura->setEnabled(true);
         }
         else if(ui->tableWidget_lista_procedure->item(row,0)->checkState() == Qt::Unchecked){
             uint idProceduraDeselezionata = ui->tableWidget_lista_procedure->item(currentRow,1)->text().toUInt();
