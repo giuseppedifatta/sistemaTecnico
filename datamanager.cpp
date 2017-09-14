@@ -500,7 +500,8 @@ string DataManager::encryptStdString(string plaintext, SecByteBlock key, byte* i
 
     return ciphertext;
 }
-string DataManager::decryptStdString(string ciphertext, SecByteBlock key, SecByteBlock iv){
+
+string DataManager::decryptStdString(string ciphertext, SecByteBlock key, byte* iv){
     string decryptedtext;
     CryptoPP::AES::Decryption aesDecryption(key,CryptoPP::AES::DEFAULT_KEYLENGTH);
 
