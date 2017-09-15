@@ -481,24 +481,137 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
     //emetto il segnale che l'RP è stato memorizzato e gli passo l'userid di RP come parametro
     emit storedRP(qsUserid);
 }
-string DataManager::encryptStdString(string plaintext, SecByteBlock key, byte* iv) {
-
-    string ciphertext;
-    //settaggio parametri di cifratura
-    //impostazione della chiave che sarà utilizzata da AES
-    CryptoPP::AES::Encryption aesEncryption(key,CryptoPP::AES::DEFAULT_KEYLENGTH);
-
-    //impostazione dell'iv per il cifrario a blocchi
-    CryptoPP::CBC_Mode_ExternalCipher::Encryption cbcEncryption(aesEncryption, iv);
-
-    //impostazione variabile di destinazione del testo cifrato
-    StreamTransformationFilter stfEncryptor(cbcEncryption,new StringSink(ciphertext));
-    //cifratura del plaintext
-    stfEncryptor.Put(reinterpret_cast<const unsigned char*>(plaintext.c_str()),plaintext.length() + 1);
-    stfEncryptor.MessageEnd();
+string DataManager::encryptStdString(string plain, SecByteBlock key, byte* iv) {
 
 
-    return ciphertext;
+    string cipher, encoded;
+
+    /*********************************\
+    \*********************************/
+
+    // Pretty print key
+    encoded.clear();
+    StringSource(key, key.size(), true,
+                 new HexEncoder(
+                     new StringSink(encoded)
+                     ) // HexEncoder
+                 ); // StringSource
+    cout << "key: " << encoded << endl;
+
+    // Pretty print iv
+    encoded.clear();
+    std::string s_iv( reinterpret_cast< char const* >(iv) ) ;
+    StringSource(s_iv, true,
+                 new HexEncoder(
+                     new StringSink(encoded)
+                     ) // HexEncoder
+                 ); // StringSource
+    cout << "iv: " << encoded << endl;
+
+    /*********************************\
+    \*********************************/
+
+    try
+    {
+        cout << "plain text: " << plain << endl;
+
+        CBC_Mode< AES >::Encryption aesEncryptor;
+        aesEncryptor.SetKeyWithIV(key, key.size(), iv);
+
+        // The StreamTransformationFilter removes
+        //  padding as required.
+        StringSource (plain, true,
+                      new StreamTransformationFilter(aesEncryptor,
+                                                     new StringSink(cipher)
+                                                     ) // StreamTransformationFilter
+                      ); // StringSource
+
+
+    }
+    catch(const CryptoPP::Exception& e)
+    {
+        cerr << "Caught exception :" << e.what() << endl;
+    }
+
+    /*********************************\
+    \*********************************/
+
+    // Pretty print
+    encoded.clear();
+    StringSource(cipher, true,
+                 new HexEncoder(
+                     new StringSink(encoded)
+                     ) // HexEncoder
+                 ); // StringSource
+    cout << "cipher text: " << encoded << endl;
+
+    return cipher;
+}
+
+string DataManager::encryptStdString(string plain, SecByteBlock key, SecByteBlock  iv) {
+
+
+    string cipher, encoded;
+
+    /*********************************\
+    \*********************************/
+
+    // Pretty print key
+    encoded.clear();
+    StringSource(key, key.size(), true,
+                 new HexEncoder(
+                     new StringSink(encoded)
+                     ) // HexEncoder
+                 ); // StringSource
+    cout << "key: " << encoded << endl;
+
+    // Pretty print iv
+    encoded.clear();
+    StringSource(iv,iv.size(),true,
+                 new HexEncoder(
+                     new StringSink(encoded)
+                     ) // HexEncoder
+                 ); // StringSource
+    cout << "iv: " << encoded << endl;
+
+    /*********************************\
+    \*********************************/
+
+    try
+    {
+        cout << "plain text: " << plain << endl;
+
+        CBC_Mode< AES >::Encryption aesEncryptor;
+        aesEncryptor.SetKeyWithIV(key, key.size(), iv);
+
+        // The StreamTransformationFilter removes
+        //  padding as required.
+        StringSource (plain, true,
+                      new StreamTransformationFilter(aesEncryptor,
+                                                     new StringSink(cipher)
+                                                     ) // StreamTransformationFilter
+                      ); // StringSource
+
+
+    }
+    catch(const CryptoPP::Exception& e)
+    {
+        cerr << "Caught exception :" << e.what() << endl;
+    }
+
+    /*********************************\
+    \*********************************/
+
+    // Pretty print
+    encoded.clear();
+    StringSource(cipher, true,
+                 new HexEncoder(
+                     new StringSink(encoded)
+                     ) // HexEncoder
+                 ); // StringSource
+    cout << "cipher text: " << encoded << endl;
+
+    return cipher;
 }
 
 string DataManager::decryptStdString(string ciphertext, SecByteBlock key, byte* iv){
