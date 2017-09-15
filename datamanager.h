@@ -86,10 +86,10 @@ private:
     bool verifyUserPass(string userid, string userPass);
     void updateUserPassword(string userid, string nuovaPassword);
     string deriveKeyFromPass(string password);
-    string encryptStdString(string plain, SecByteBlock key, byte* iv);
-    string decryptStdString(string cipher, SecByteBlock key, byte *iv);
-    string encryptStdString(string plain, SecByteBlock key, SecByteBlock iv);
-    string decryptStdString(string cipher, SecByteBlock key, SecByteBlock iv);
+    string AESencryptStdString(string plain, SecByteBlock key, byte* iv);
+    string AESdecryptStdString(string encodedCipher, SecByteBlock key, byte *iv);
+    string AESencryptStdString(string plain, SecByteBlock key, SecByteBlock iv);
+    string AESdecryptStdString(string encodedCipher, SecByteBlock key, SecByteBlock iv);
 };
 
 #endif // DATAMANAGER_H

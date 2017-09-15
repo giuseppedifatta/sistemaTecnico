@@ -356,7 +356,7 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
             resultSet=pstmt->executeQuery();
 
             //resultSet avrà al più un elemento perché userid è chiave primaria nel db
-            while(resultSet->next()){
+            if(resultSet->next()){
                 //userid già presente
                 useridJustExist = true;
                 cout << "L'userid: " << userid << " è già presente." << endl;
@@ -376,10 +376,10 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
     delete resultSet;
 
     //genera coppia di chiavi asimmetriche
-    AutoSeededRandomPool rnd;
+    AutoSeededRandomPool rng;
 
     RSA::PrivateKey rsaPrivate;
-    rsaPrivate.GenerateRandomWithKeySize(rnd, 3072);
+    rsaPrivate.GenerateRandomWithKeySize(rng, 3072);
 
     RSA::PublicKey rsaPublic(rsaPrivate);
 
@@ -405,21 +405,24 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
     //chiave pubblica pronta per essere memorizzata sul DB
     std::stringstream rsaPublicBlob(publicKeyEncoded);
 
+
+
+    //copio la chiave privata in un buffer ByteQueue
+    ByteQueue queue2;
+    rsaPublic.Save(queue2);
+
+    //copiamo la privateKey dal ByteQueue in una stringa
+    string privateKey;
+    StringSink ss2(privateKey);
+    queue.CopyTo(ss2);
+    ss2.MessageEnd();
+    cout << "privateKey: " << privateKey << endl; //formato byte
+
     //calcoliamo dalla password scelta dall'RP una derivedKey per cifrare la privateKey di RP
     string pass = rp->getPassword();
     string derivedKeyEncoded = deriveKeyFromPass(pass);
     cout << "derivedKey ottenuta dalla password di RP: " << derivedKeyEncoded << endl;
 
-
-    //copio la chiave privata in una stringa
-    ByteQueue queue2;
-    rsaPublic.Save(queue2);
-
-    string privateKey;
-    StringSink ss2(privateKey);
-    queue.CopyTo(ss2);
-    ss2.MessageEnd();
-    cout << "privateKey: " << privateKey << endl;
 
     //---cifratura della chiave privata----
     //decodifica della chiave derivata dalla password di RP
@@ -438,19 +441,11 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
     memset(iv, 0x01,AES::BLOCKSIZE);
 
     //cifriamo la chiave privata di RP con chiave simmetrica
-    string privateKeyCifrata = encryptStdString(privateKey,key,iv);
+    string encodedPrivateKeyRPCifrata = AESencryptStdString(privateKey,key,iv);
 
-    //rendiamo la chiave cifrata in esadecimale
-    string encodedChiaveRPCifrata;
-    StringSource (privateKeyCifrata, true,
-                  new HexEncoder(
-                      new StringSink(encodedChiaveRPCifrata)
-                      ) // HexEncoder
-                  ); // StringSourceEnd();
-
-    cout << "privateKey cifrata encoded: " << encodedChiaveRPCifrata << endl;
+    cout << "privateKey cifrata encoded: " << encodedPrivateKeyRPCifrata << endl;
     //chiave privata cifrata pronta per essere memorizzata sul DB
-    std::stringstream rsaPrivateBlob(encodedChiaveRPCifrata);
+    std::stringstream rsaPrivateBlob(encodedPrivateKeyRPCifrata);
 
     pstmt=connection->prepareStatement
             ("INSERT INTO ResponsabiliProcedimento ( userid, nome, cognome, dataNascita, luogoNascita,publicKey,encryptedPrivateKey ) VALUES (?,?,?,?,?,?,?)");
@@ -481,7 +476,7 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
     //emetto il segnale che l'RP è stato memorizzato e gli passo l'userid di RP come parametro
     emit storedRP(qsUserid);
 }
-string DataManager::encryptStdString(string plain, SecByteBlock key, byte* iv) {
+string DataManager::AESencryptStdString(string plain, SecByteBlock key, byte* iv) {
 
 
     string cipher, encoded;
@@ -537,18 +532,19 @@ string DataManager::encryptStdString(string plain, SecByteBlock key, byte* iv) {
     \*********************************/
 
     // Pretty print
-    encoded.clear();
+    // Pretty print
+    string encodedCipher;
     StringSource(cipher, true,
                  new HexEncoder(
-                     new StringSink(encoded)
+                     new StringSink(encodedCipher)
                      ) // HexEncoder
                  ); // StringSource
-    cout << "cipher text: " << encoded << endl;
+    cout << "cipher text encoded: " << encodedCipher << endl;
 
-    return cipher;
+    return encodedCipher;
 }
 
-string DataManager::encryptStdString(string plain, SecByteBlock key, SecByteBlock  iv) {
+string DataManager::AESencryptStdString(string plain, SecByteBlock key, SecByteBlock  iv) {
 
 
     string cipher, encoded;
@@ -603,18 +599,18 @@ string DataManager::encryptStdString(string plain, SecByteBlock key, SecByteBloc
     \*********************************/
 
     // Pretty print
-    encoded.clear();
+    string encodedCipher;
     StringSource(cipher, true,
                  new HexEncoder(
-                     new StringSink(encoded)
+                     new StringSink(encodedCipher)
                      ) // HexEncoder
                  ); // StringSource
-    cout << "cipher text: " << encoded << endl;
+    cout << "cipher text encoded: " << encodedCipher << endl;
 
-    return cipher;
+    return encodedCipher;
 }
 
-string DataManager::decryptStdString(string cipher, SecByteBlock key, byte* iv){
+string DataManager::AESdecryptStdString(string encodedCipher, SecByteBlock key, byte* iv){
     string encoded,recovered;
     encoded.clear();
     StringSource(key, key.size(), true,
@@ -633,6 +629,14 @@ string DataManager::decryptStdString(string cipher, SecByteBlock key, byte* iv){
                      ) // HexEncoder
                  ); // StringSource
     cout << "iv: " << encoded << endl;
+
+    string cipher;
+    StringSource(encodedCipher,true,
+                 new HexDecoder(
+                     new StringSink(cipher)
+                     ) // HexEncoder
+                 ); // StringSource
+    cout << "cipher: " << cipher << endl;
     try
     {
 
@@ -653,10 +657,11 @@ string DataManager::decryptStdString(string cipher, SecByteBlock key, byte* iv){
     {
         cerr << "Caught exception :" << e.what() << endl;
     }
+
     return recovered;
 }
 
-string DataManager::decryptStdString(string cipher, SecByteBlock key, SecByteBlock iv){
+string DataManager::AESdecryptStdString(string encodedCipher, SecByteBlock key, SecByteBlock iv){
     string encoded,recovered;
     encoded.clear();
     StringSource(key, key.size(), true,
@@ -674,6 +679,14 @@ string DataManager::decryptStdString(string cipher, SecByteBlock key, SecByteBlo
                      ) // HexEncoder
                  ); // StringSource
     cout << "iv: " << encoded << endl;
+
+    string cipher;
+    StringSource(encodedCipher,true,
+                 new HexDecoder(
+                     new StringSink(cipher)
+                     ) // HexEncoder
+                 ); // StringSource
+    cout << "cipher: " << cipher << endl;
     try
     {
 
@@ -682,7 +695,7 @@ string DataManager::decryptStdString(string cipher, SecByteBlock key, SecByteBlo
 
         // The StreamTransformationFilter removes
         //  padding as required.
-        StringSource (cipher, true,
+        StringSource (encodedCipher, true,
                       new StreamTransformationFilter(aesDecryptor,
                                                      new StringSink(recovered)
                                                      ) // StreamTransformationFilter
@@ -699,39 +712,43 @@ string DataManager::decryptStdString(string cipher, SecByteBlock key, SecByteBlo
 
 
 string DataManager::deriveKeyFromPass(string password){
-    string derivedKey;
+    // KDF parameters
+    unsigned int iterations = 15000;
+    char purpose = 0; // unused by Crypto++
+
+
+    SecByteBlock derived(AES::MAX_KEYLENGTH);
     try {
 
-        // KDF parameters
-        unsigned int iterations = 15000;
-        char purpose = 0; // unused by Crypto++
 
-        // 32 bytes of derived material. Used to key the cipher.
-        //   16 bytes are for the key, and 16 bytes are for the iv.
-        SecByteBlock derived(AES::MAX_KEYLENGTH);
 
         // KDF function
         PKCS5_PBKDF2_HMAC<SHA256> kdf;
         kdf.DeriveKey(derived.data(), derived.size(), purpose, (byte*)password.data(), password.size(), NULL, 0, iterations);
 
 
-
-
-        // Encode derived
-        HexEncoder hex(new StringSink(derivedKey));
-        hex.Put(derived.data(), derived.size());
-        hex.MessageEnd();
-
-        // Print stuff
-        cout << "pass: " << password << endl;
-        //cout << "derived key: " << derivedKey << endl;
-
     }
     catch(CryptoPP::Exception& ex)
     {
         cerr << ex.what() << endl;
     }
-    return derivedKey;
+
+    // Encode derived
+    std::string derivedKey = std::string(reinterpret_cast<const char*>(derived.data()), derived.size());
+    string encodedDerivedKey;
+    StringSource(derivedKey,true,
+                 new HexEncoder(new StringSink(encodedDerivedKey)
+                                )//HexEncoder
+                 );//StringSource
+
+    // Print stuff
+    cout << "pass: " << password << endl;
+    cout << "derived key: " << encodedDerivedKey << endl;
+
+    return encodedDerivedKey;
+
+
+    return encodedDerivedKey;
 }
 
 void DataManager::getRPSFromDB()
