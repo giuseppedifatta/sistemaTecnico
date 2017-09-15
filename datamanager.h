@@ -87,8 +87,9 @@ private:
     void updateUserPassword(string userid, string nuovaPassword);
     string deriveKeyFromPass(string password);
     string encryptStdString(string plain, SecByteBlock key, byte* iv);
-    string decryptStdString(string ciphertext, SecByteBlock key, byte *iv);
+    string decryptStdString(string cipher, SecByteBlock key, byte *iv);
     string encryptStdString(string plain, SecByteBlock key, SecByteBlock iv);
+    string decryptStdString(string cipher, SecByteBlock key, SecByteBlock iv);
 };
 
 #endif // DATAMANAGER_H

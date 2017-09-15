@@ -435,7 +435,7 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
 
     //Questo IV deve essere lo stesso in fase di decifratura
     byte iv[AES::MAX_KEYLENGTH];
-    memset(iv, 0x00,AES::MAX_KEYLENGTH);
+    memset(iv, 0x01,AES::BLOCKSIZE);
 
     //cifriamo la chiave privata di RP con chiave simmetrica
     string privateKeyCifrata = encryptStdString(privateKey,key,iv);
@@ -614,18 +614,90 @@ string DataManager::encryptStdString(string plain, SecByteBlock key, SecByteBloc
     return cipher;
 }
 
-string DataManager::decryptStdString(string ciphertext, SecByteBlock key, byte* iv){
-    string decryptedtext;
-    CryptoPP::AES::Decryption aesDecryption(key,CryptoPP::AES::DEFAULT_KEYLENGTH);
+string DataManager::decryptStdString(string cipher, SecByteBlock key, byte* iv){
+    string encoded,recovered;
+    encoded.clear();
+    StringSource(key, key.size(), true,
+                 new HexEncoder(
+                     new StringSink(encoded)
+                     ) // HexEncoder
+                 ); // StringSource
+    cout << "key: " << encoded << endl;
 
-    CryptoPP::CBC_Mode_ExternalCipher::Decryption cbcDecryption(aesDecryption,iv);
+    // Pretty print iv
+    encoded.clear();
+    std::string s_iv( reinterpret_cast< char const* >(iv) ) ;
+    StringSource(s_iv, true,
+                 new HexEncoder(
+                     new StringSink(encoded)
+                     ) // HexEncoder
+                 ); // StringSource
+    cout << "iv: " << encoded << endl;
+    try
+    {
 
-    CryptoPP::StreamTransformationFilter stfDecryptor(cbcDecryption,new CryptoPP::StringSink(decryptedtext));
-    stfDecryptor.Put(reinterpret_cast<const unsigned char*>(ciphertext.c_str()),ciphertext.size());
-    stfDecryptor.MessageEnd();
+        CBC_Mode< AES >::Decryption aesDecryptor;
+        aesDecryptor.SetKeyWithIV(key, key.size(), iv);
 
-    return decryptedtext;
+        // The StreamTransformationFilter removes
+        //  padding as required.
+        StringSource (cipher, true,
+                      new StreamTransformationFilter(aesDecryptor,
+                                                     new StringSink(recovered)
+                                                     ) // StreamTransformationFilter
+                      ); // StringSource
+
+        cout << "recovered text: " << recovered << endl;
+    }
+    catch(const CryptoPP::Exception& e)
+    {
+        cerr << "Caught exception :" << e.what() << endl;
+    }
+    return recovered;
 }
+
+string DataManager::decryptStdString(string cipher, SecByteBlock key, SecByteBlock iv){
+    string encoded,recovered;
+    encoded.clear();
+    StringSource(key, key.size(), true,
+                 new HexEncoder(
+                     new StringSink(encoded)
+                     ) // HexEncoder
+                 ); // StringSource
+    cout << "key: " << encoded << endl;
+
+    // Pretty print iv
+    encoded.clear();
+    StringSource(iv,iv.size(),true,
+                 new HexEncoder(
+                     new StringSink(encoded)
+                     ) // HexEncoder
+                 ); // StringSource
+    cout << "iv: " << encoded << endl;
+    try
+    {
+
+        CBC_Mode< AES >::Decryption aesDecryptor;
+        aesDecryptor.SetKeyWithIV(key, key.size(), iv);
+
+        // The StreamTransformationFilter removes
+        //  padding as required.
+        StringSource (cipher, true,
+                      new StreamTransformationFilter(aesDecryptor,
+                                                     new StringSink(recovered)
+                                                     ) // StreamTransformationFilter
+                      ); // StringSource
+
+        cout << "recovered text: " << recovered << endl;
+    }
+    catch(const CryptoPP::Exception& e)
+    {
+        cerr << "Caught exception :" << e.what() << endl;
+    }
+    return recovered;
+}
+
+
 string DataManager::deriveKeyFromPass(string password){
     string derivedKey;
     try {
