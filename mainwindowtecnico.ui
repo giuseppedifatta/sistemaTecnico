@@ -68,7 +68,7 @@ background-color: rgb(49, 149, 255);
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>6</number>
+       <number>9</number>
       </property>
       <widget class="QWidget" name="login_urna_page">
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1298,7 +1298,50 @@ background-color: rgb(49, 149, 255);
        </layout>
       </widget>
       <widget class="QWidget" name="creazione_seggio_page">
-       <layout class="QVBoxLayout" name="verticalLayout_2"/>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <layout class="QGridLayout" name="gridLayout_8" rowstretch="0,1">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>CREAZIONE SEGGIO</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <layout class="QFormLayout" name="formLayout_13">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_sedeSeggio">
+              <property name="text">
+               <string>Sede del Seggio</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="lineEdit_denominazioneIndirizzo">
+              <property name="placeholderText">
+               <string>Denominazione sede, indirizzo</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_selezionaIP">
+              <property name="text">
+               <string>Seleziona Indirizzo IP del Seggio</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QComboBox" name="comboBox_ipSeggioDisponibili"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="aggiunta_token_seggio_page"/>
       <widget class="QWidget" name="visualizzazione_sessioni_page">

@@ -340,7 +340,9 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
 {
     string userid;
     string vergin_userid = rp->getNome() + "." + rp->getCognome();
+    //rimuoviamo gli spazi
     remove_copy( vergin_userid.begin() , vergin_userid.end() , back_inserter( userid ) , ' ');
+    //trasformiamo in soli caratteri minuscoli
     transform(userid.begin(), userid.end(), userid.begin(), ::tolower);
     //verifichiamo che l'userid sia già presente, in caso positivo va aggiunto un digit random alla fine e si riprova
     bool useridJustExist = true; //supponiamo inizialmente che esista
@@ -409,17 +411,18 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
 
     //copio la chiave privata in un buffer ByteQueue
     ByteQueue queue2;
-    rsaPublic.Save(queue2);
+    rsaPrivate.Save(queue2);
 
     //copiamo la privateKey dal ByteQueue in una stringa
     string privateKey;
     StringSink ss2(privateKey);
-    queue.CopyTo(ss2);
+    queue2.CopyTo(ss2);
     ss2.MessageEnd();
     cout << "privateKey: " << privateKey << endl; //formato byte
 
     //calcoliamo dalla password scelta dall'RP una derivedKey per cifrare la privateKey di RP
     string pass = rp->getPassword();
+    cout <<"Password RP: " << pass << endl;
     string derivedKeyEncoded = deriveKeyFromPass(pass);
     cout << "derivedKey ottenuta dalla password di RP: " << derivedKeyEncoded << endl;
 
@@ -437,9 +440,9 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
 
 
     //Questo IV deve essere lo stesso in fase di decifratura
-    byte iv[AES::MAX_KEYLENGTH];
+    byte iv[AES::BLOCKSIZE];
     memset(iv, 0x01,AES::BLOCKSIZE);
-
+    cout << "privateKey: " << privateKey << endl;
     //cifriamo la chiave privata di RP con chiave simmetrica
     string encodedPrivateKeyRPCifrata = AESencryptStdString(privateKey,key,iv);
 
@@ -575,7 +578,7 @@ string DataManager::AESencryptStdString(string plain, SecByteBlock key, SecByteB
 
     try
     {
-        cout << "plain text: " << plain << endl;
+        //cout << "plain text: " << plain << endl;
 
         CBC_Mode< AES >::Encryption aesEncryptor;
         aesEncryptor.SetKeyWithIV(key, key.size(), iv);
@@ -605,7 +608,7 @@ string DataManager::AESencryptStdString(string plain, SecByteBlock key, SecByteB
                      new StringSink(encodedCipher)
                      ) // HexEncoder
                  ); // StringSource
-    cout << "cipher text encoded: " << encodedCipher << endl;
+    //cout << "cipher text encoded: " << encodedCipher << endl;
 
     return encodedCipher;
 }
@@ -742,11 +745,8 @@ string DataManager::deriveKeyFromPass(string password){
                  );//StringSource
 
     // Print stuff
-    cout << "pass: " << password << endl;
-    cout << "derived key: " << encodedDerivedKey << endl;
-
-    return encodedDerivedKey;
-
+    //cout << "pass: " << password << endl;
+    //cout << "derived key: " << encodedDerivedKey << endl;
 
     return encodedDerivedKey;
 }
