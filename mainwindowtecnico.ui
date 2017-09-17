@@ -68,7 +68,7 @@ background-color: rgb(49, 149, 255);
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>9</number>
+       <number>6</number>
       </property>
       <widget class="QWidget" name="login_urna_page">
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -594,7 +594,7 @@ background-color: rgb(49, 149, 255);
         <item>
          <widget class="QLabel" name="label">
           <property name="text">
-           <string>Seleziona u no dei responsabili di procedimento nell'elenco sottostante</string>
+           <string>Seleziona uno dei responsabili di procedimento nell'elenco sottostante</string>
           </property>
          </widget>
         </item>

@@ -68,6 +68,10 @@ public:
     //void setListeElettorali(const std::vector<ListaElettorale> &value);
 
     void removeCandidatiFromScheda(vector<Candidato> &candidatiDaRimuovere);
+    bool soloCandidatiMode() const;
+    void soloCandidatiOn();
+    void soloCandidatiOff();
+
 private:
     unsigned int idProceduraVoto;
     unsigned int id;
@@ -81,6 +85,7 @@ private:
     std::vector <Candidato> candidati;
 
     unsigned int tipoElezione;
+    bool soloCandidati;
 
 };
 

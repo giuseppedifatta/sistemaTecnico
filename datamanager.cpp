@@ -249,12 +249,6 @@ void DataManager::storeScheda(SchedaVoto *scheda)
         cerr << "Exception occurred: " << ex.getErrorCode() <<endl;
     }
 
-
-
-    //"+to_string(idScheda)+"
-    string nomeFile = "schedaVoto.xml";
-    XMLError eResult = xmlDoc.SaveFile(nomeFile.c_str());
-
     //verifichiamo il numero di schede inserite per la procedura per cui si è inserita la scheda
     uint numSchedeInserite = 0;
     //ResultSet * resultSet;
@@ -266,11 +260,12 @@ void DataManager::storeScheda(SchedaVoto *scheda)
         while(resultSet->next()){
             numSchedeInserite++;
         }
-        cout << "Per la procedura: " << scheda->getIdProceduraVoto() << " le schede inserite sono: " << numSchedeInserite << endl;
+        cout << "Procedura: " << scheda->getIdProceduraVoto() << ", schede inserite: " << numSchedeInserite << endl;
     }catch(SQLException &ex){
         cerr << "Exception occurred: " << ex.getErrorCode() <<endl;
     }
     delete resultSet;
+
     //verifichiamo il numero di schede richieste per la procedura per cui si è inserita la scheda
 
     uint numSchedeRichieste = 0;
@@ -288,15 +283,16 @@ void DataManager::storeScheda(SchedaVoto *scheda)
     pstmt->close();
     delete pstmt;
 
-    //se il numero di schede è quello richiesto, aggiorniamo lo stato della procedura su: programmata
+    //se il numero di schede è quello richiesto, aggiorniamo lo stato della procedura su: programmata e il numero di schede inserite al numero di schede contate sull'apposita tabella nella query precedente
     if(numSchedeInserite==numSchedeRichieste){
         cout << "Aggiornamento numero schede inserite e stato della procedura su <programmata>" << endl;
         PreparedStatement * pstmt;
-        pstmt = connection->prepareStatement("UPDATE `ProcedureVoto` SET stato=?, schedeInserite=? WHERE idProceduraVoto=?");
+        pstmt = connection->prepareStatement("UPDATE `ProcedureVoto` SET stato=?,ultimaModifica=?, schedeInserite=? WHERE idProceduraVoto=?");
         try{
             pstmt->setUInt(1,ProceduraVoto::statiProcedura::programmata);
-            pstmt->setUInt(2,numSchedeInserite);
-            pstmt->setUInt(3,scheda->getIdProceduraVoto());
+            pstmt->setDateTime(2,this->currentTimeDbFormatted());
+            pstmt->setUInt(3,numSchedeInserite);
+            pstmt->setUInt(4,scheda->getIdProceduraVoto());
             pstmt->executeUpdate();
             connection->commit();
         }catch(SQLException &ex){
@@ -309,11 +305,12 @@ void DataManager::storeScheda(SchedaVoto *scheda)
     else{
         cout << "Aggiornamento del numero di schede inserite" << endl;
         PreparedStatement * pstmt;
-        pstmt = connection->prepareStatement("UPDATE `ProcedureVoto` SET schedeInserite=? WHERE `idProceduraVoto`=?");
+        pstmt = connection->prepareStatement("UPDATE `ProcedureVoto` SET schedeInserite=?,ultimaModifica=? WHERE `idProceduraVoto`=?");
         try{
 
             pstmt->setUInt(1,numSchedeInserite);
-            pstmt->setUInt(2,scheda->getIdProceduraVoto());
+            pstmt->setDateTime(2,this->currentTimeDbFormatted());
+            pstmt->setUInt(3,scheda->getIdProceduraVoto());
             pstmt->executeUpdate();
             connection->commit();
         }catch(SQLException &ex){
@@ -322,18 +319,7 @@ void DataManager::storeScheda(SchedaVoto *scheda)
         pstmt->close();
         delete pstmt;
     }
-
-
-
-
-
-    if (eResult != XML_SUCCESS) {
-        printf("XMLError: %i\n", eResult);
-    }
-    else{
-        emit storedSchedaVoto();
-    }
-
+    emit storedSchedaVoto();
 }
 
 void DataManager::storeRP(ResponsabileProcedimento *rp)
@@ -407,8 +393,6 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
     //chiave pubblica pronta per essere memorizzata sul DB
     std::stringstream rsaPublicBlob(publicKeyEncoded);
 
-
-
     //copio la chiave privata in un buffer ByteQueue
     ByteQueue queue2;
     rsaPrivate.Save(queue2);
@@ -442,7 +426,8 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
     //Questo IV deve essere lo stesso in fase di decifratura
     byte iv[AES::BLOCKSIZE];
     memset(iv, 0x01,AES::BLOCKSIZE);
-    cout << "privateKey: " << privateKey << endl;
+
+
     //cifriamo la chiave privata di RP con chiave simmetrica
     string encodedPrivateKeyRPCifrata = AESencryptStdString(privateKey,key,iv);
 
@@ -511,7 +496,7 @@ string DataManager::AESencryptStdString(string plain, SecByteBlock key, byte* iv
 
     try
     {
-        cout << "plain text: " << plain << endl;
+        //cout << "plain text: " << plain << endl;
 
         CBC_Mode< AES >::Encryption aesEncryptor;
         aesEncryptor.SetKeyWithIV(key, key.size(), iv);
@@ -542,7 +527,7 @@ string DataManager::AESencryptStdString(string plain, SecByteBlock key, byte* iv
                      new StringSink(encodedCipher)
                      ) // HexEncoder
                  ); // StringSource
-    cout << "cipher text encoded: " << encodedCipher << endl;
+    //cout << "cipher text encoded: " << encodedCipher << endl;
 
     return encodedCipher;
 }
@@ -856,10 +841,11 @@ void DataManager::getProcedureVotoFromDB()
                 cout << "Correzione stato procedura: " << statoProceduraAggiornato << endl;
                 PreparedStatement *pstmt2;
 
-                pstmt2 = connection->prepareStatement("UPDATE ProcedureVoto SET stato=? WHERE idProceduraVoto=?");
+                pstmt2 = connection->prepareStatement("UPDATE ProcedureVoto SET stato=?,ultimaModifica=? WHERE idProceduraVoto=?");
                 try{
                     pstmt2->setUInt(1,statoProceduraAggiornato); //in_corso
-                    pstmt2->setUInt(2,idProceduraVoto);
+                    pstmt2->setDateTime(2,this->currentTimeDbFormatted());
+                    pstmt2->setUInt(3,idProceduraVoto);
 
                     pstmt2->executeUpdate();
                     connection->commit();
@@ -1265,3 +1251,16 @@ string DataManager::hashPassword( string plainPass, string salt){
 
 }
 
+string DataManager::currentTimeDbFormatted() {
+    time_t now = time(0);
+    string dt  = ctime(&now);
+    tm *ltm = localtime(&now);
+    //	int anno = ltm->tm_year +1900;
+    //	int mese = ltm->tm_mon + 1;
+    //	int day = ltm->tm_mday;
+    char buffer[20];
+    //date formatted for sql db comparing
+    strftime(buffer,20,"%Y-%m-%d %X",ltm); //%F equivalent to %Y-%m-%d 2001-08-23 , %X equivalent to %T 14:55:02
+    string currentTime = buffer;
+    return currentTime;
+}

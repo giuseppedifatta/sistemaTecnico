@@ -211,7 +211,7 @@ void MainWindowTecnico::startCreationProcedura(vector<ResponsabileProcedimento> 
     if(rps.size()>0){
         nuovaProcedura->setRps(rps);
         for (unsigned int i = 0; i < rps.size(); i++){
-            QString rp = QString::number(rps.at(i).getIdRP()) + ", " + QString::fromStdString(rps.at(i).getNome()) + " " + QString::fromStdString(rps.at(i).getCognome());
+            QString rp = /*QString::number(rps.at(i).getIdRP()) + ", " + */QString::fromStdString(rps.at(i).getNome()) + " " + QString::fromStdString(rps.at(i).getCognome());
             ui->comboBox_idRP->addItem(rp);
         }
         ui->pushButton_visualizzaInfoRP->setEnabled(true);
@@ -741,6 +741,7 @@ void MainWindowTecnico::on_pushButton_conferma_aggiungi_clicked()
                 strLista = "nessuna lista";
                 ui->comboBox_seleziona_lista_2->addItem(QString::fromStdString(strLista));
                 ui->pushButton_aggiungi_lista->setEnabled(false);
+                nuovaScheda->soloCandidatiOn();
             }
         }
 
@@ -776,6 +777,7 @@ void MainWindowTecnico::on_pushButton_conferma_aggiungi_clicked()
         nuovaScheda->addLista(strLista);
         ui->comboBox_seleziona_lista_2->addItem(lista);
         hideBoxAggiungi();
+        ui->pushButton_aggiungi_lista->setEnabled(true);
     }
 
 }
@@ -880,25 +882,30 @@ void MainWindowTecnico::on_pushButton_rimuovi_gruppo_clicked()
         vector <ListaElettorale> listElettorali = nuovaScheda->getListeElettorali();
         uint index;
 
-        //troviamo l'indidce della lista di rimuovere
+        //troviamo l'indice della lista da rimuovere
         for (uint i = 0; i < listElettorali.size(); i++){
             if(listElettorali.at(i).getNome() == entry.toStdString()){
                 index = i;
                 break;
             }
         }
+
         vector <Candidato> candidatiDaRimuovere =  nuovaScheda->removeLista(index);
+        if(nuovaScheda->getListeElettorali().size() == 0){
+            nuovaScheda->soloCandidatiOff();
+        }
         nuovaScheda->removeCandidatiFromScheda(candidatiDaRimuovere);
+
 
         ui->comboBox_seleziona_lista_2->removeItem(index);
         if(ui->comboBox_seleziona_lista_2->count() == 0){
             //era stato disabilitato nel caso di creazione scheda senza liste
             ui->pushButton_aggiungi_lista->setEnabled(true);
         }
+
+
         //aggiornamento comboBoxListaCandidati
         ui->comboBox_seleziona_candidato->clear();
-
-
         vector <Candidato> candidati = nuovaScheda->getCandidati();
         for(unsigned i=0; i< candidati.size(); ++i){
             QString nome = QString::fromStdString(candidati.at(i).getNome());
@@ -913,6 +920,9 @@ void MainWindowTecnico::on_pushButton_rimuovi_gruppo_clicked()
 void MainWindowTecnico::on_pushButton_annulla_aggiungi_clicked()
 {
     hideBoxAggiungi();
+    if(nuovaScheda->getModalitaAdd()==SchedaVoto::modoAdd::lista){
+        ui->pushButton_aggiungi_lista->setEnabled(true);
+    }
 }
 
 void MainWindowTecnico::hideBoxAggiungi(){
@@ -941,6 +951,10 @@ void MainWindowTecnico::hideBoxAggiungi(){
     }
     else{
         ui->pushButton_aggiungi_lista->setEnabled(false);
+    }
+
+    if(!nuovaScheda->soloCandidatiMode()){
+        ui->pushButton_aggiungi_lista->setEnabled(true);
     }
 }
 

@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
-
+#include <time.h>
 
 #include "schedavoto.h"
 #include "proceduravoto.h"
@@ -90,6 +90,7 @@ private:
     string AESdecryptStdString(string encodedCipher, SecByteBlock key, byte *iv);
     string AESencryptStdString(string plain, SecByteBlock key, SecByteBlock iv);
     string AESdecryptStdString(string encodedCipher, SecByteBlock key, SecByteBlock iv);
+    string currentTimeDbFormatted();
 };
 
 #endif // DATAMANAGER_H

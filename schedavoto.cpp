@@ -40,20 +40,6 @@ void SchedaVoto::addLista(std::string nomeLista)
 vector <Candidato> SchedaVoto::removeLista(uint index)
 {
 
-    //    std::string gruppo = this->listListe.at(index);
-    //    for (uint i = 0; i < listCandidati.size(); i++){
-    //        if(listCandidati.at(i).getLista() == gruppo){
-    //            cout << listCandidati.at(i).getLista();
-    //            removeCandidato(i);
-    //            //riprendi la scansione dall'elemento precedente, poichè il vettore avrà un elemento in meno dopo la rimozione dell'elemento di posizione i
-    //            i--;
-
-    //        }
-    //    }
-
-    //    this->listListe.erase(listListe.begin()+index);
-
-
     //restituisce il vettore dei candidati da rimuovere dalla struttura schedaVoto
     ListaElettorale listaToRemove  = listeElettorali.at(index);
 
@@ -190,3 +176,17 @@ void SchedaVoto::setIdProceduraVoto(unsigned int value)
 }
 
 
+bool SchedaVoto::soloCandidatiMode() const
+{
+    return soloCandidati;
+}
+
+void SchedaVoto::soloCandidatiOn()
+{
+    this->soloCandidati = true;
+}
+
+void SchedaVoto::soloCandidatiOff()
+{
+    this->soloCandidati = false;
+}
