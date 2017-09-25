@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui printsupport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     candidato.cpp \
     sessioniqt.cpp \
     responsabileprocedimento.cpp \
-    listaelettorale.cpp
+    listaelettorale.cpp \
+    infoseggio.cpp
 
 HEADERS  += mainwindowtecnico.h \
     datamanager.h \
@@ -31,7 +32,8 @@ HEADERS  += mainwindowtecnico.h \
     candidato.h \
     sessioniqt.h \
     responsabileprocedimento.h \
-    listaelettorale.h
+    listaelettorale.h \
+    infoseggio.h
 
 FORMS += \
     mainwindowtecnico.ui

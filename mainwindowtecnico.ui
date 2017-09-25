@@ -68,7 +68,7 @@ background-color: rgb(49, 149, 255);
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>6</number>
+       <number>9</number>
       </property>
       <widget class="QWidget" name="login_urna_page">
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1300,9 +1300,9 @@ background-color: rgb(49, 149, 255);
       <widget class="QWidget" name="creazione_seggio_page">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <layout class="QGridLayout" name="gridLayout_8" rowstretch="0,1">
+         <layout class="QGridLayout" name="gridLayout_8" rowstretch="0,1,0,1,0">
           <item row="0" column="0">
-           <widget class="QLabel" name="label_3">
+           <widget class="QLabel" name="label_creazioneSeggio">
             <property name="text">
              <string>CREAZIONE SEGGIO</string>
             </property>
@@ -1337,13 +1337,214 @@ background-color: rgb(49, 149, 255);
             <item row="1" column="1">
              <widget class="QComboBox" name="comboBox_ipSeggioDisponibili"/>
             </item>
+            <item row="2" column="1">
+             <widget class="QPushButton" name="pushButton_aggiungiSeggio">
+              <property name="text">
+               <string>Aggiungi Seggio</string>
+              </property>
+             </widget>
+            </item>
            </layout>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_rimozioneSeggio">
+            <property name="text">
+             <string>RIMOZIONE SEGGIO</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <layout class="QFormLayout" name="formLayout_15">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_selezionaSeggio">
+              <property name="text">
+               <string>Seleziona Seggio da eliminare</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="comboBox_selezionaSeggioDaRimuovere"/>
+            </item>
+            <item row="1" column="1">
+             <widget class="QPushButton" name="pushButton_eliminaSeggio">
+              <property name="text">
+               <string>Elimina Seggio</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="4" column="0">
+           <widget class="QPushButton" name="pushButton_backToOperation">
+            <property name="text">
+             <string>Indietro</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="aggiunta_token_seggio_page"/>
+      <widget class="QWidget" name="aggiunta_token_seggio_page">
+       <layout class="QVBoxLayout" name="verticalLayout_13">
+        <item>
+         <layout class="QGridLayout" name="gridLayout_9" rowstretch="0,0,1,1,0">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>TEST E AGGIUNTA DEGLI HARDWARE TOKEN</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QTableWidget" name="tableWidget_hardwareToken">
+            <column>
+             <property name="text">
+              <string>New Column</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>New Column</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>New Column</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>New Column</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_13">
+            <property name="spacing">
+             <number>50</number>
+            </property>
+            <property name="leftMargin">
+             <number>50</number>
+            </property>
+            <property name="rightMargin">
+             <number>50</number>
+            </property>
+            <item>
+             <widget class="QPushButton" name="pushButton_annullaCreazioneSeggio">
+              <property name="text">
+               <string>Annulla Creazione Seggio</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_completaCreazioneSeggio">
+              <property name="text">
+               <string>Completa Creazione Seggio</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>ATTENZIONE!!! E' necessario aggiungere 5 hardware token per completare la creazione del seggio.</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QWidget" name="formWidget_testHT" native="true">
+            <layout class="QFormLayout" name="formLayout_14">
+             <property name="leftMargin">
+              <number>150</number>
+             </property>
+             <property name="rightMargin">
+              <number>150</number>
+             </property>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_SN">
+               <property name="text">
+                <string>S/N Hardware Token</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="lineEdit_SN">
+               <property name="placeholderText">
+                <string>inserire serial number identificativo dell'hardware token</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_usernameHT">
+               <property name="text">
+                <string>username</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_passwordHT">
+               <property name="text">
+                <string>password</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_codiceOTP">
+               <property name="text">
+                <string>Codice OTP</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QLineEdit" name="lineEdit_OTP">
+               <property name="placeholderText">
+                <string>cliccare sul generatore di otp e digitare il codice visualizzato</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLineEdit" name="lineEdit_passwordHT">
+               <property name="placeholderText">
+                <string>inserire password account dell'hardware token</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLineEdit" name="lineEdit_usernameHT">
+               <property name="placeholderText">
+                <string>inserire username account dell'hardware token</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0" colspan="2">
+              <widget class="QPushButton" name="pushButton_testOTP">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Testa e aggiungi hardware token</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="visualizzazione_sessioni_page">
        <layout class="QVBoxLayout" name="verticalLayout">
         <property name="spacing">

@@ -9,7 +9,9 @@
 #include <vector>
 #include <QMessageBox>
 #include <QCheckBox>
-
+#include <QPrinter>
+#include <QPrintDialog>
+#include <sstream>
 
 #include "datamanager.h"
 #include "proceduravoto.h"
@@ -18,6 +20,7 @@
 #include "candidato.h"
 #include "sessioniqt.h"
 #include "responsabileprocedimento.h"
+#include "infoseggio.h"
 
 using namespace std;
 
@@ -40,6 +43,12 @@ signals:
     void needSessioni(uint idProceduraSelezionata);
     void needSchedeProcedura(uint idProceduraSelezionata);
     void checkRangeProcedura(QDateTime inizio, QDateTime fine);
+    void needInfoSeggi();
+    void seggioToDelete(uint idSeggio);
+    void postazioniToAdd(vector <string> ipPostazioni, string descrizioneSeggio);
+    void rollbackNuovoSeggio();
+    void commitNuovoSeggio();
+    void testAndRecord(uint sn,string user,string pass,uint otp,uint idSeggio);
 public slots:
     void showViewSceltaOperazione();
     void passwordErrorMessage();
@@ -54,6 +63,13 @@ public slots:
     void showViewSchedeProcedura(QList<SchedaVoto> schede);
     void setPeriodoProcedura(QDateTime inizio, QDateTime termine);
     void messageProceduraRangeInUse();
+    void showViewSeggi(vector <InfoSeggio> seggiPresenti);
+    void addGeneratoriOTP(uint idSeggio);
+    void showMessaggeSeggioCreato();
+    void showMessageCreazioneSeggioAnnullata();
+    void addTokenToTable(uint sn, string user, string pass, uint idSeggio);
+    void showMessageTokenNotAvailable();
+    void showMessageTestTokenFail();
 public:
     explicit MainWindowTecnico(QWidget *parent = 0);
     ~MainWindowTecnico();
@@ -168,6 +184,20 @@ private slots:
     void on_pushButton_successiva_clicked();
 
     void on_pushButton_precedente_clicked();
+    void on_pushButton_printSessionKeys_clicked();
+
+    void on_pushButton_eliminaSeggio_clicked();
+
+    void on_pushButton_backToOperation_clicked();
+
+    void on_pushButton_aggiungiSeggio_clicked();
+
+    void on_pushButton_testOTP_clicked();
+
+    void on_pushButton_annullaCreazioneSeggio_clicked();
+
+    void on_pushButton_completaCreazioneSeggio_clicked();
+
 private:
     Ui::MainWindowTecnico *ui;
 
@@ -185,6 +215,9 @@ private:
     uint numeroSchedaDaMostrare;
     uint numSchede;
     QList <SchedaVoto> schedeOttenute;
+    vector<InfoSeggio> seggiOttenuti;
+    uint idNuovoSeggio;
+    uint numHTaggiunti;
 
     enum InterfacceTecnico{
         loginUrna,
@@ -209,6 +242,7 @@ private:
     void pulisciInterfacciaCreazioneRP();
     void setTables();
     void mostraScheda();
+    void initTableHT();
 };
 
 #endif // MAINWINDOWTECNICO_H

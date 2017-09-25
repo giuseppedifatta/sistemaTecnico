@@ -1,6 +1,6 @@
 #include "mainwindowtecnico.h"
 #include "ui_mainwindowtecnico.h"
-
+#include <QPainter>
 
 
 using namespace std;
@@ -22,6 +22,8 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
 
     cout << "inizializzazione model..." << endl;
     model = new DataManager(this);
+    idNuovoSeggio = 0;
+    numHTaggiunti = 0;
 
     QObject::connect(this,SIGNAL(tecnicoPass(QString)),model,SLOT(checkPassTecnico(QString)),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(passOK()),this,SLOT(showViewSceltaOperazione()),Qt::QueuedConnection);
@@ -60,6 +62,22 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
     QObject::connect(this,SIGNAL(checkRangeProcedura(QDateTime,QDateTime)),model,SLOT(checkAvailabilityProceduraRange(QDateTime,QDateTime)),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(proceduraRangeAvailable(QDateTime,QDateTime)),this,SLOT(setPeriodoProcedura(QDateTime,QDateTime)),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(requestedProceduraRangeInUse()),this,SLOT(messageProceduraRangeInUse()),Qt::QueuedConnection);
+
+    qRegisterMetaType< vector <InfoSeggio> >("vector <InfoSeggio>");
+    QObject::connect(this,SIGNAL(needInfoSeggi()),model,SLOT(getInfoSeggi()),Qt::QueuedConnection);
+    QObject::connect(model,SIGNAL(readyInfoSeggi(vector<InfoSeggio>)),this,SLOT(showViewSeggi(vector<InfoSeggio>)),Qt::QueuedConnection);
+    QObject::connect(this,SIGNAL(seggioToDelete(uint)),model,SLOT(deleteSeggio(uint)),Qt::QueuedConnection);
+
+    QObject::connect(this, SIGNAL(postazioniToAdd(vector<string>,string)),model,SLOT(addPostazioniNoCommit(vector<string>,string)),Qt::QueuedConnection);
+    QObject::connect(model,SIGNAL(idSeggioCreating(uint)),this,SLOT(addGeneratoriOTP(uint)),Qt::QueuedConnection);
+    QObject::connect(this,SIGNAL(rollbackNuovoSeggio()),model,SLOT(rollbackSeggio()),Qt::QueuedConnection);
+    QObject::connect(this,SIGNAL(commitNuovoSeggio()),model,SLOT(commitSeggio()),Qt::QueuedConnection);
+    QObject::connect(this,SIGNAL(testAndRecord(uint,string,string,uint,uint)),model,SLOT(testTokenAndStoreNoCommit(uint,string,string,uint,uint)),Qt::QueuedConnection);
+    QObject::connect(model,SIGNAL(abortedSeggio()),this,SLOT(showMessageCreazioneSeggioAnnullata()),Qt::QueuedConnection);
+    QObject::connect(model,SIGNAL(storedSeggio()),this,SLOT(showMessaggeSeggioCreato()),Qt::QueuedConnection);
+    QObject::connect(model,SIGNAL(tokenStored(uint,string,string,uint)),this,SLOT(addTokenToTable(uint,string,string,uint)),Qt::QueuedConnection);
+    QObject::connect(model,SIGNAL(tokenNotAvailable()),this,SLOT(showMessageTokenNotAvailable()),Qt::QueuedConnection);
+    QObject::connect(model,SIGNAL(testTokenFail()),this,SLOT(showMessageTestTokenFail()),Qt::QueuedConnection);
 }
 
 
@@ -87,33 +105,24 @@ void MainWindowTecnico::setTables(){
     ui->tableWidget_sessioni->setFocusPolicy(Qt::NoFocus);
 }
 
-//void MainWindowSeggio::on_token_tableWidget_clicked(const QModelIndex &index)
-//{
-//    int colonnaCliccata=index.column();
-//    if(colonnaCliccata==1)
-//            ui->token_tableWidget->removeRow(index.row());
-//}
 
 
-//void MainWindowSeggio::initTableHT(){
-//ui->token_tableWidget->verticalHeader()->setVisible(false);
-//ui->token_tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
-//ui->token_tableWidget->setSelectionMode(QAbstractItemView::NoSelection);
-//QStringList tableHeaders;
-//tableHeaders << "S/N hardware token" << "Azione";
-//ui->token_tableWidget->setColumnCount(2);
-//ui->token_tableWidget->setHorizontalHeaderLabels(tableHeaders);
 
-//ui->token_tableWidget->horizontalHeader()->setSectionResizeMode(0,QHeaderView::Stretch);
-//ui->token_tableWidget->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
-//QFont font = ui->token_tableWidget->horizontalHeader()->font();
-//font.setPointSize(18);
-//ui->token_tableWidget->horizontalHeader()->setFont( font );
-//ui->token_tableWidget->horizontalHeader()->setStyleSheet(".QHeaderView{}");
+void MainWindowTecnico::initTableHT(){
+    ui->tableWidget_hardwareToken->verticalHeader()->setVisible(false);
+    ui->tableWidget_hardwareToken->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->tableWidget_hardwareToken->setSelectionMode(QAbstractItemView::NoSelection);
+    QStringList tableHeaders;
+    tableHeaders << "S/N hardware token" << "username" << "password" << "id Seggio" ;
 
-//QFont fontItem("Sans Serif",18);
-//ui->token_tableWidget->setFont(fontItem);
-//}
+    ui->tableWidget_hardwareToken->setHorizontalHeaderLabels(tableHeaders);
+
+    ui->tableWidget_hardwareToken->horizontalHeader()->setSectionResizeMode(0,QHeaderView::Stretch);
+    ui->tableWidget_hardwareToken->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
+    ui->tableWidget_hardwareToken->horizontalHeader()->setSectionResizeMode(3,QHeaderView::Stretch);
+
+    ui->tableWidget_hardwareToken->model()->removeRows(0,ui->tableWidget_hardwareToken->rowCount());
+}
 
 void MainWindowTecnico::on_pushButton_exit_clicked()
 {
@@ -516,7 +525,8 @@ void MainWindowTecnico::on_pushButton_logout_clicked()
 
 void MainWindowTecnico::on_pushButton_crea_seggio_clicked()
 {
-    ui->stackedWidget->setCurrentIndex(InterfacceTecnico::creazioneSeggio);
+    emit needInfoSeggi();
+
 }
 
 void MainWindowTecnico::on_pushButton_annulla_procedura_clicked()
@@ -735,6 +745,7 @@ void MainWindowTecnico::on_pushButton_conferma_aggiungi_clicked()
             int ret = msgBox.exec();
 
             if (ret==QMessageBox::Cancel){
+                //si è scelto di non aggiungere il candidato senza una lista, non si conferma l'aggiunzione del candidato
                 return;
             }
             else{
@@ -758,7 +769,11 @@ void MainWindowTecnico::on_pushButton_conferma_aggiungi_clicked()
 
 
         if(nuovaScheda->addCandidato(strMatricola,strNome,strCognome,strLista,strDataNascita,strLuogoNascita)){
-            ui->comboBox_seleziona_candidato->addItem(matricola + ", " + nome + " " + cognome);
+            QString itemCandidato = matricola + ", " + nome + " " + cognome;
+            if(strLista!="nessuna lista"){
+                itemCandidato = itemCandidato +  " - " + QString::fromStdString(strLista);
+            }
+            ui->comboBox_seleziona_candidato->addItem(itemCandidato);
             hideBoxAggiungi();
             QMessageBox msgBox(this);
             msgBox.setInformativeText("Il candidato con matricola " + matricola + " è stato aggiunto correttamente alla lista: " + QString::fromStdString(strLista) );
@@ -838,6 +853,7 @@ void MainWindowTecnico::on_pushButton_rimuovi_candidato_clicked()
                 ui->comboBox_seleziona_lista_2->removeItem(index);
                 if(ui->comboBox_seleziona_lista_2->count() == 0){
                     //era stato disabilitato nel caso di creazione scheda senza liste
+                    nuovaScheda->soloCandidatiOff();
                     ui->pushButton_aggiungi_lista->setEnabled(true);
                 }
             }
@@ -845,6 +861,7 @@ void MainWindowTecnico::on_pushButton_rimuovi_candidato_clicked()
 
         //se
         if(ui->comboBox_seleziona_lista_2->count()==0){
+            nuovaScheda->soloCandidatiOff();
             ui->pushButton_aggiungi_lista->setEnabled(true);
         }
     }
@@ -857,7 +874,7 @@ void MainWindowTecnico::on_pushButton_rimuovi_candidato_clicked()
 
 void MainWindowTecnico::on_pushButton_rimuovi_gruppo_clicked()
 {
-   if(ui->comboBox_seleziona_lista_2->currentText()==""){
+    if(ui->comboBox_seleziona_lista_2->currentText()==""){
         QMessageBox msb(this);
         msb.setText("Nulla da eliminare");
         msb.exec();
@@ -1052,6 +1069,145 @@ void MainWindowTecnico::messageProceduraRangeInUse()
 {
     QMessageBox::information(this,"Errore","Il range selezionato è sovrapposto con quello di una o più procedure presenti nel sistema");
 
+}
+
+void MainWindowTecnico::showViewSeggi(vector<InfoSeggio> seggiPresenti)
+{
+    ui->lineEdit_denominazioneIndirizzo->clear();
+    ui->comboBox_selezionaSeggioDaRimuovere->clear();
+    QString item;
+    seggiOttenuti = seggiPresenti;
+    for(uint i = 0; i < seggiPresenti.size(); i++){
+        string desc = seggiPresenti.at(i).getDescrizione();
+        string ip = seggiPresenti.at(i).getIp();
+        item = QString::fromStdString(desc) + ", IP: " + QString::fromStdString(ip);
+        ui->comboBox_selezionaSeggioDaRimuovere->addItem(item);
+    }
+
+    int byte1, byte2, byte3, byte4;
+    char dot;
+    string subnetSeggi = "192.168.56.0";
+    istringstream s(subnetSeggi);  // input stream that now contains the ip address string
+
+    s >> byte1 >> dot >> byte2 >> dot >> byte3 >> dot >> byte4 >> dot;
+
+    //calcolo di tutti i possibili ip  di Seggio nella sotto rete
+    vector <string> ipSeggiDisponibili;
+    for (uint i = 4; i <=252 ; i=i+4){
+        string ipSeggio = to_string(byte1) + "." + to_string(byte2) + "." + to_string(byte3) + "." +to_string(i);
+        ipSeggiDisponibili.push_back(ipSeggio);
+    }
+
+    //esclusione degli ip già impegnati da altri seggi
+    for(uint i = 0; i < seggiPresenti.size(); i++){
+        string ip = seggiPresenti.at(i).getIp();
+        for(uint j = 0; j < ipSeggiDisponibili.size();j++){
+            if(ip == ipSeggiDisponibili.at(j)){
+                cout << "trovato ipSeggio già presente, lo elimino dai disponibili" << endl;
+                ipSeggiDisponibili.erase(ipSeggiDisponibili.begin()+j);
+                break;
+            }
+        }
+    }
+
+    //riempio il combo box degli ip di seggio disponibili
+    ui->comboBox_ipSeggioDisponibili->clear();
+    for (uint i = 0; i < ipSeggiDisponibili.size(); i++){
+        ui->comboBox_ipSeggioDisponibili->addItem(
+                    QString::fromStdString(
+                        ipSeggiDisponibili.at(i)));
+    }
+
+
+
+
+    ui->stackedWidget->setCurrentIndex(InterfacceTecnico::creazioneSeggio);
+}
+
+void MainWindowTecnico::addGeneratoriOTP(uint idSeggio){
+    initTableHT();
+    idNuovoSeggio = idSeggio;
+    numHTaggiunti = 0;
+    ui->pushButton_completaCreazioneSeggio->setEnabled(false);
+    ui->stackedWidget->setCurrentIndex(InterfacceTecnico::aggiuntaTokenSeggio);
+
+}
+
+void MainWindowTecnico::showMessaggeSeggioCreato()
+{
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle("Success");
+    msgBox.setInformativeText("Creazione del seggio completata.");
+    msgBox.exec();
+    ui->stackedWidget->setCurrentIndex(InterfacceTecnico::sceltaOperazione);
+}
+
+void MainWindowTecnico::showMessageCreazioneSeggioAnnullata()
+{
+    QMessageBox msgBox(this);
+    msgBox.setInformativeText("Creazione seggio annullata");
+    msgBox.exec();
+    return;
+}
+
+void MainWindowTecnico::addTokenToTable(uint sn, string user, string pass, uint idSeggio)
+{
+
+    ui->tableWidget_hardwareToken->insertRow(ui->tableWidget_lista_procedure->rowCount());
+    int rigaAggiunta = ui->tableWidget_hardwareToken->rowCount()-1;
+
+
+    QTableWidgetItem *item = new QTableWidgetItem(QString::number(sn));
+    item->setTextAlignment(Qt::AlignCenter);
+    item->setFlags(Qt::NoItemFlags);
+    item->setTextColor(Qt::black);
+    ui->tableWidget_hardwareToken->setItem(rigaAggiunta,0,item);
+
+    QString username = QString::fromStdString(user);
+    item = new QTableWidgetItem(username);
+    item->setTextAlignment(Qt::AlignCenter);
+    item->setFlags(Qt::NoItemFlags);
+    item->setTextColor(Qt::black);
+    ui->tableWidget_hardwareToken->setItem(rigaAggiunta,1,item);
+
+    item = new QTableWidgetItem(QString::fromStdString(pass));
+    item->setTextAlignment(Qt::AlignCenter);
+    item->setFlags(Qt::NoItemFlags);
+    item->setTextColor(Qt::black);
+    ui->tableWidget_hardwareToken->setItem(rigaAggiunta,2,item);
+
+    item = new QTableWidgetItem(QString::number(idSeggio));
+    item->setTextAlignment(Qt::AlignCenter);
+    item->setFlags(Qt::NoItemFlags);
+    item->setTextColor(Qt::black);
+    ui->tableWidget_hardwareToken->setItem(rigaAggiunta,3,item);
+
+
+    numHTaggiunti++;
+    ui->formWidget_testHT->clearMask();
+    if(numHTaggiunti == 5){
+        ui->pushButton_testOTP->setEnabled(false);
+        ui->formWidget_testHT->setEnabled(false);
+        ui->pushButton_completaCreazioneSeggio->setEnabled(true);
+    }
+}
+
+void MainWindowTecnico::showMessageTokenNotAvailable()
+{
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle("Errore");
+    msgBox.setInformativeText("Token non disponibile, è già stato associato ad un altro seggio.");
+    msgBox.exec();
+    return;
+}
+
+void MainWindowTecnico::showMessageTestTokenFail()
+{
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle("Errore");
+    msgBox.setInformativeText("Test del token fallito. Ricontrollare i dati inseriti e riprovare.");
+    msgBox.exec();
+    return;
 }
 
 void MainWindowTecnico::on_pushButton_aggiungi_sessione_clicked()
@@ -1511,3 +1667,123 @@ void MainWindowTecnico::on_pushButton_precedente_clicked()
 }
 
 
+
+void MainWindowTecnico::on_pushButton_printSessionKeys_clicked()
+{
+    //TODO richiedere al model i dati sulle chiavi di sessione per le postazioni, divise per seggio
+    QPrinter printer;
+    printer.setPrinterName("desired printer name");
+    QPrintDialog dialog(&printer, this);
+    if(dialog.exec()==QDialog::Rejected){
+        return;
+    }else{
+
+        QPainter painter;
+        if (! painter.begin(&printer)) { // failed to open file
+            qWarning("failed to open file, is it writable?");
+
+        }
+        painter.drawText(10, 10, "Test");
+        painter.drawText(10, 10, "Test 2"); //la seconda draw text sovrascrive la prima...
+        if (! printer.newPage()) {
+            qWarning("failed in flushing page to disk, disk full?");
+
+        }
+        painter.drawText(10, 10, "Test 2");
+        painter.end();
+    }
+}
+
+void MainWindowTecnico::on_pushButton_eliminaSeggio_clicked()
+{
+    uint index = ui->comboBox_selezionaSeggioDaRimuovere->currentIndex();
+
+    uint idSeggio = seggiOttenuti.at(index).getIdSeggio();
+
+    QMessageBox msgBox(this);
+
+    QString text = ui->comboBox_selezionaSeggioDaRimuovere->currentText();
+    msgBox.setInformativeText("Sei sicuro di volere eliminare il seggio: "+ text + "? Verranno eliminate anche le postazioni associate e i relativi hardware token.");
+    msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Abort);
+    msgBox.buttons().at(0)->setText("Elimina Seggio");
+    msgBox.buttons().at(1)->setText("Annulla");
+    int ret = msgBox.exec();
+    if(ret == QMessageBox::Abort){
+        return;
+    }
+    else{
+        emit seggioToDelete(idSeggio);
+    }
+
+
+}
+
+void MainWindowTecnico::on_pushButton_backToOperation_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(InterfacceTecnico::sceltaOperazione);
+}
+
+void MainWindowTecnico::on_pushButton_aggiungiSeggio_clicked()
+{
+
+    QString ipSeggio = ui->comboBox_ipSeggioDisponibili->currentText();
+    string ipNuovoSeggio = ipSeggio.toStdString();
+
+    int byte1, byte2, byte3, byte4;
+    char dot;
+    istringstream s(ipNuovoSeggio);  // input stream that now contains the ip address string
+
+    s >> byte1 >> dot >> byte2 >> dot >> byte3 >> dot >> byte4 >> dot;
+
+    vector <string> ipPostazioni;
+    ipPostazioni.push_back(ipNuovoSeggio);
+
+    //genero gli ip delle postazioni
+    for(uint i=1; i<=3; i++){
+        string ipSeggio = to_string(byte1) + "." + to_string(byte2) + "." + to_string(byte3) + "." +to_string(byte4+i);
+        ipPostazioni.push_back(ipSeggio);
+    }
+    QString desc = ui->lineEdit_denominazioneIndirizzo->text();
+    string descrizioneSeggio = desc.toStdString();
+    emit postazioniToAdd(ipPostazioni, descrizioneSeggio);
+}
+
+void MainWindowTecnico::on_pushButton_testOTP_clicked()
+{
+    QString sn = ui->lineEdit_SN->text();
+    string strSN = sn.toStdString();
+    QRegExp re("\\d*");  // a digit (\d), zero or more times (*)
+    if (!(re.exactMatch(sn))){
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle("Errore");
+        msgBox.setInformativeText("Serial Number non valido. Il Serial Number deve essere costituito da soli caratteri numerici");
+        msgBox.exec();
+        return;
+    }
+    QString username = ui->lineEdit_usernameHT->text();
+    string user = username.toStdString();
+    QString password = ui->lineEdit_passwordHT->text();
+    string pass = password.toStdString();
+    QString otp = ui->lineEdit_OTP->text();
+    if (!(re.exactMatch(otp))){
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle("Errore");
+        msgBox.setInformativeText("L'otp deve contenere solo caratteri numerici");
+        msgBox.exec();
+        return;
+    }
+    string otpStr = otp.toStdString();
+    emit testAndRecord(atoi(strSN.c_str()),user,pass,atoi(otpStr.c_str()),idNuovoSeggio);
+    ui->formWidget_testHT->clearMask();
+}
+
+void MainWindowTecnico::on_pushButton_annullaCreazioneSeggio_clicked()
+{
+    idNuovoSeggio = 0;
+    emit rollbackNuovoSeggio();
+}
+
+void MainWindowTecnico::on_pushButton_completaCreazioneSeggio_clicked()
+{
+    emit commitNuovoSeggio();
+}

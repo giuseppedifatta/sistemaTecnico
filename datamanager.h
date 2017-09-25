@@ -13,6 +13,7 @@
 #include "schedavoto.h"
 #include "proceduravoto.h"
 #include "responsabileprocedimento.h"
+#include "infoseggio.h"
 
 
 #include <cryptopp/pwdbased.h>
@@ -62,6 +63,13 @@ signals:
     void deletedProcedura();
     void proceduraRangeAvailable(QDateTime inizio, QDateTime termine);
     void requestedProceduraRangeInUse();
+    void readyInfoSeggi(vector<InfoSeggio> seggiPresenti);
+    void idSeggioCreating(uint idSeggio);
+    void abortedSeggio();
+    void storedSeggio();
+    void tokenStored(uint sn, string user, string pass, uint idSeggio);
+    void tokenNotAvailable();
+    void testTokenFail();
 public slots:
     void checkPassTecnico(QString pass);
     void tryChangeTecnicoPass(QString su_pass, QString newTecnicoPas);
@@ -74,7 +82,12 @@ public slots:
     void deleteProceduraVoto(uint idProceduraVoto);
     void getSchedeProceduraFromDB(uint idProcedura);
     void checkAvailabilityProceduraRange(QDateTime inizio,QDateTime termine);
-
+    void getInfoSeggi();
+    void deleteSeggio(uint idSeggio);
+    void addPostazioniNoCommit(vector <string> ipPostazioni, string descrizioneSeggio);
+    void rollbackSeggio();
+    void commitSeggio();
+    void testTokenAndStoreNoCommit(uint sn,string user,string pass,uint otp,uint idSeggio);
 private:
 
     Driver *driver;

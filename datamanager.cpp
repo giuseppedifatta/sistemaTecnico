@@ -1129,6 +1129,7 @@ void DataManager::checkAvailabilityProceduraRange(QDateTime inizio, QDateTime te
 
 
     pstmt->close();
+    resultSet->close();
     delete pstmt;
     delete resultSet;
 
@@ -1138,6 +1139,194 @@ void DataManager::checkAvailabilityProceduraRange(QDateTime inizio, QDateTime te
     else{
         emit requestedProceduraRangeInUse();
     }
+}
+
+void DataManager::getInfoSeggi()
+{
+    vector <InfoSeggio> seggiPresenti;
+    PreparedStatement * pstmt;
+    ResultSet * resultSet;
+    pstmt = connection->prepareStatement("SELECT * FROM Seggi");
+    try{
+        resultSet = pstmt->executeQuery();
+        while(resultSet->next()){
+            InfoSeggio is;
+            uint idSeggio = resultSet->getUInt("idSeggio");
+            is.setIdSeggio(idSeggio);
+            string sede = resultSet->getString("sede");
+            is.setDescrizione(sede);
+            string ip = resultSet->getString("ipSeggio");
+            is.setIp(ip);
+            seggiPresenti.push_back(is);
+        }
+
+    }catch(SQLException &ex){
+        cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
+    }
+
+
+    pstmt->close();
+    resultSet->close();
+    delete pstmt;
+    delete resultSet;
+
+    emit readyInfoSeggi(seggiPresenti);
+}
+
+void DataManager::deleteSeggio(uint idSeggio)
+{
+    PreparedStatement * pstmt;
+    pstmt = connection->prepareStatement("DELETE FROM Seggi WHERE idSeggio = ?");
+    try{
+        pstmt->setUInt(1,idSeggio);
+        pstmt->executeUpdate();
+        connection->commit();
+
+    }catch(SQLException &ex){
+        cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
+    }
+
+
+    pstmt->close();
+    delete pstmt;
+
+    getInfoSeggi();
+}
+
+void DataManager::addPostazioniNoCommit(vector<string> ipPostazioni,string descrizioneSeggio)
+{
+    PreparedStatement *pstmt;
+    string ipSeggio = ipPostazioni.at(0);
+    pstmt = connection->prepareStatement("INSERT INTO Seggi (ipSeggio,sede) VALUES(?,?)");
+    try{
+        pstmt->setString(1,ipSeggio);
+        pstmt->setString(2,descrizioneSeggio);
+        pstmt->executeUpdate();
+        //commit rimandata al momento dell'inserimento degli hardware token
+
+    }catch(SQLException &ex){
+        cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
+    }
+    pstmt->close();
+    delete pstmt;
+
+    pstmt = connection->prepareStatement("SELECT LAST_INSERT_ID() AS idSeggio");
+    ResultSet *resultSet;
+    uint idSeggio;
+    try{
+        resultSet = pstmt->executeQuery();
+        resultSet->next();//accediamo al primo e unico valore del resultSet
+        idSeggio = resultSet->getUInt("idSeggio");
+        cout << "id Seggio: " << idSeggio << endl;
+    }catch(SQLException &ex){
+        cerr << "Exception occurred: "<< ex.getErrorCode()<<endl;
+    }
+    pstmt->close();
+    resultSet->close();
+    delete pstmt;
+    delete resultSet;
+
+
+    for (uint i = 0; i <=3 ; i++){
+        pstmt = connection->prepareStatement("INSERT INTO Postazioni (idSeggio,ipPostazione) VALUES(?,?)");
+        try{
+            pstmt->setUInt(1,idSeggio);
+            pstmt->setString(2,ipPostazioni.at(i));
+            pstmt->executeUpdate();
+            //commit rimandata al momento dell'inserimento degli hardware token
+
+        }catch(SQLException &ex){
+            cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
+        }
+        pstmt->close();
+        delete pstmt;
+    }
+
+    emit idSeggioCreating(idSeggio);
+
+}
+
+void DataManager::rollbackSeggio()
+{
+    try{
+        connection->rollback();
+    }
+    catch(SQLException &ex){
+        cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
+    }
+    emit abortedSeggio();
+}
+
+void DataManager::commitSeggio()
+{
+    try{
+        connection->commit();
+    }
+    catch(SQLException &ex){
+        cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
+    }
+    emit storedSeggio();
+}
+
+void DataManager::testTokenAndStoreNoCommit(uint sn, string user, string pass, uint otp, uint idSeggio)
+{
+    //controlliamo se il token è già utilizzato per un altro seggio, in questo caso i passaggi successivi vanno saltati
+    bool tokenAlredyUsed = true;
+
+    PreparedStatement *pstmt;
+    ResultSet *resultSet;
+    pstmt = connection->prepareStatement("SELECT idToken FROM Token WHERE idToken = ?");
+    try{
+        pstmt->setUInt(1,sn);
+        resultSet = pstmt->executeQuery();
+        if(!(resultSet->next())){
+            tokenAlredyUsed = false;
+        }
+    }
+    catch(SQLException &ex){
+        cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
+    }
+    pstmt->close();
+    resultSet->close();
+    delete pstmt;
+    delete resultSet;
+
+    if(tokenAlredyUsed){
+        emit tokenNotAvailable();
+        return;
+    }
+
+    //TODO test token
+    bool testOk = false;
+
+
+
+
+    //se il test non ha avuto successo, interrompiamo
+    if(!testOk){
+        emit testTokenFail();
+        return;
+    }
+
+    //memorizzazione hardware token
+    pstmt = connection->prepareStatement("INSERT INTO Token (idToken,username,password,idSeggio) VALUES(?,?,?,?)");
+    try{
+        pstmt->setUInt(1,sn);
+        pstmt->setString(2,user);
+        pstmt->setString(3,pass);
+        pstmt->setUInt(4,idSeggio);
+        pstmt->executeUpdate();
+        //commit rimandata al completamento del seggio
+    }
+    catch(SQLException &ex){
+        cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
+    }
+
+    pstmt->close();
+    delete pstmt;
+
+    emit tokenStored(sn, user,pass, idSeggio);
+
 }
 
 void DataManager::storePassNewUser(string userid, string pass)
