@@ -103,7 +103,8 @@ private:
     string AESdecryptStdString(string encodedCipher, SecByteBlock key, byte *iv);
     string AESencryptStdString(string plain, SecByteBlock key, SecByteBlock iv);
     string AESdecryptStdString(string encodedCipher, SecByteBlock key, SecByteBlock iv);
-    string currentTimeDbFormatted();
+    string currentTimeDbFormatted(string user,string pass,uint otp);
+    void validateOTP(string user,string pass,uint otp);
 };
 
 #endif // DATAMANAGER_H

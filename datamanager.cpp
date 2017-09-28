@@ -1299,6 +1299,7 @@ void DataManager::testTokenAndStoreNoCommit(uint sn, string user, string pass, u
     //TODO test token
     bool testOk = false;
 
+    testOk = this->validateOTP(user,pass,otp);
 
 
 
@@ -1452,4 +1453,39 @@ string DataManager::currentTimeDbFormatted() {
     strftime(buffer,20,"%Y-%m-%d %X",ltm); //%F equivalent to %Y-%m-%d 2001-08-23 , %X equivalent to %T 14:55:02
     string currentTime = buffer;
     return currentTime;
+}
+
+
+void DataManager::validateOTP(string user,string pass,uint otp){
+
+   //contattare otpServer per verificare il token rispetto all'account relativo al token associato alla postazione voto
+    string url = "https://147.163.26.229:8443/openotp/";
+    string username = user;
+    string password = pass;
+
+    char * writableURL = new char[url.size() + 1];
+    std::copy(url.begin(), url.end(), writableURL);
+    writableURL[url.size()] = '\0'; // don't forget the terminating 0
+
+    char * writableUsername = new char[username.size() + 1];
+    std::copy(username.begin(), username.end(), writableUsername);
+    writableUsername[username.size()] = '\0'; // don't forget the terminating 0
+
+    char * writablePassword = new char[password.size() + 1];
+    std::copy(password.begin(), password.end(), writablePassword);
+    writablePassword[password.size()] = '\0'; // don't forget the terminating 0
+
+    string otpStr = /*otp.toStdString();*/otp;
+    char * writableOTP = new char[otpStr.size() + 1];
+    std::copy(otpStr.begin(), otpStr.end(), writableOTP);
+    writableOTP[otpStr.size()] = '\0'; // don't forget the terminating 0
+
+    bool success= otp_login(writableURL,writableUsername,writablePassword,writableOTP);
+    delete[] writableURL;
+    delete[] writableUsername;
+    delete[] writablePassword;
+    delete[] writableOTP;
+
+    return success;
+
 }
