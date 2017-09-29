@@ -721,6 +721,24 @@ string DataManager::AESdecryptStdString(string encodedCipher, SecByteBlock key, 
     return recovered;
 }
 
+string DataManager::generaSharedKey()
+{
+    string sharedKey;
+
+    AutoSeededRandomPool rng;
+    SecByteBlock key(16);
+    rng.GenerateBlock( key, key.size() );
+
+    StringSource(key, key.size(), true,
+                 new HexEncoder(
+                     new StringSink(sharedKey)
+                     ) // HexEncoder
+                 ); // StringSource
+
+
+    return sharedKey;
+}
+
 
 string DataManager::deriveKeyFromPass(string password){
     // KDF parameters
@@ -1473,7 +1491,7 @@ void DataManager::storeProcedura(ProceduraVoto *procedura)
     cout << "after insert procedura" << endl;
 
     pstmt = connection->prepareStatement("SELECT LAST_INSERT_ID() AS idProceduraVoto");
-    ResultSet *resultSet=NULL;
+    ResultSet *resultSet;
     uint idProceduraInserita;
     try{
         resultSet = pstmt->executeQuery();
@@ -1502,6 +1520,75 @@ void DataManager::storeProcedura(ProceduraVoto *procedura)
         cerr << "Exception occurred: "<< ex.getErrorCode()<<endl;
     }
 
+    pstmt->close();
+    delete pstmt;
+    resultSet->close();
+    delete resultSet;
+
+
+    //----generazione chiavi di sessione per le postazioni presenti----
+    //1. ottieni id delle sessioni
+    pstmt = connection->prepareStatement("SELECT idSessione FROM Sessioni WHERE idProceduraVoto=?");
+    vector <uint> idSessioni;
+    try{
+
+        pstmt->setUInt(1,idProceduraInserita);
+        resultSet = pstmt->executeQuery();
+        while(resultSet->next()){
+            idSessioni.push_back(resultSet->getUInt("idSessione"));
+        }
+
+    }catch(SQLException &ex){
+        cerr << "Exception occurred: "<< ex.getErrorCode()<<endl;
+    }
+
+    pstmt->close();
+    delete pstmt;
+    resultSet->close();
+    delete resultSet;
+
+    //ottieni id delle postazioni
+    pstmt = connection->prepareStatement("SELECT idPostazione FROM Postazioni");
+    vector <uint> idPostazioni;
+    try{
+        resultSet = pstmt->executeQuery();
+        while(resultSet->next()){
+            idPostazioni.push_back(resultSet->getUInt("idPostazione"));
+        }
+
+    }catch(SQLException &ex){
+        cerr << "Exception occurred: "<< ex.getErrorCode()<<endl;
+    }
+
+    pstmt->close();
+    delete pstmt;
+    resultSet->close();
+    delete resultSet;
+
+
+
+    //3.per ogni sessione e per ogni postazione genera una chiave e memorizzala sul db
+    pstmt = connection->prepareStatement("INSERT INTO ChiaviSessione (idPostazione,idSessione,sharedKey) VALUES(?,?,?)");
+    string sharedKey;
+    for (uint s=0; s< idSessioni.size(); s++){
+        for (uint p = 0; p < idPostazioni.size();p++ ){
+
+            try{
+                sharedKey = generaSharedKey();
+                pstmt->setUInt(1,idPostazioni.at(p));
+                pstmt->setUInt(2,idSessioni.at(s));
+                pstmt->setString(3,sharedKey);
+                pstmt->executeUpdate();
+                connection->commit();
+
+            }catch(SQLException &ex){
+                cerr << "Exception occurred: "<< ex.getErrorCode()<<endl;
+            }
+
+
+        }
+
+    }
     pstmt->close();
     delete pstmt;
 
@@ -1543,7 +1630,7 @@ string DataManager::currentTimeDbFormatted() {
 
 bool DataManager::validateOTP(string user,string pass,uint otp){
 
-   //contattare otpServer per verificare il token rispetto all'account relativo al token associato alla postazione voto
+    //contattare otpServer per verificare il token rispetto all'account relativo al token associato alla postazione voto
     string url = "https://147.163.26.229:8443/openotp/";
     string username = user;
     string password = pass;

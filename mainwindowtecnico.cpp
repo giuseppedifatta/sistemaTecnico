@@ -451,6 +451,7 @@ void MainWindowTecnico::mostraScheda(){
     }
 
     ui->listWidget_candidati->clear();
+
     QFont serifFont("Times", 20, QFont::Bold);
     SchedaVoto schedaCorrente = schedeOttenute.at(numeroSchedaDaMostrare);
     uint codProcedura = schedaCorrente.getIdProceduraVoto();

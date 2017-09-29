@@ -108,6 +108,7 @@ private:
     string AESdecryptStdString(string encodedCipher, SecByteBlock key, byte *iv);
     string AESencryptStdString(string plain, SecByteBlock key, SecByteBlock iv);
     string AESdecryptStdString(string encodedCipher, SecByteBlock key, SecByteBlock iv);
+    string generaSharedKey();
     string currentTimeDbFormatted();
     bool validateOTP(string user,string pass,uint otp);
 };
