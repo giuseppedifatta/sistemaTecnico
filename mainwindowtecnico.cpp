@@ -1600,17 +1600,30 @@ void MainWindowTecnico::on_pushButton_removeProcedura_clicked()
 {
     QMessageBox msgBox(this);
     msgBox.setWindowTitle("Eliminazione Procedura");
-    msgBox.setInformativeText("Sei sicuro di voler eliminare la procedura con id: " + QString::number(idProceduraSelezionata));
+    msgBox.setInformativeText("Stai per eliminare la procedura con id: " + QString::number(idProceduraSelezionata));
     msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-    msgBox.buttons().at(0)->setText("Sì");
-    msgBox.buttons().at(1)->setText("No");
+    msgBox.buttons().at(0)->setText("Prosegui");
+    msgBox.buttons().at(1)->setText("Annulla");
     int ret = msgBox.exec();
 
     if (ret==QMessageBox::Cancel){
         return;
     }
     else{
-        emit deleteProcedura(idProceduraSelezionata);
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle("Attenzione: eliminazione procedura in corso");
+        msgBox.setInformativeText("Sei sicuro di voler eliminare la procedura con id: " + QString::number(idProceduraSelezionata) + " ? Tutti i dati di creazione della procedura stanno per essere eliminati. ");
+        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+        msgBox.buttons().at(0)->setText("Si");
+        msgBox.buttons().at(1)->setText("NO");
+        int ret = msgBox.exec();
+        if (ret==QMessageBox::Ok){
+            emit deleteProcedura(idProceduraSelezionata);
+
+        }
+        else{
+            return;
+        }
     }
 }
 
