@@ -21,6 +21,7 @@
 #include "sessioniqt.h"
 #include "responsabileprocedimento.h"
 #include "infoseggio.h"
+#include "tipovotante.h"
 
 using namespace std;
 
@@ -48,7 +49,8 @@ signals:
     void postazioniToAdd(vector <string> ipPostazioni, string descrizioneSeggio);
     void rollbackNuovoSeggio();
     void commitNuovoSeggio();
-    void testAndRecord(uint sn,string user,string pass,uint otp,uint idSeggio);
+    void testAndRecord(string sn,string user,string pass,uint otp,uint idSeggio);
+    void needTipiVotanti();
 public slots:
     void showViewSceltaOperazione();
     void passwordErrorMessage();
@@ -67,9 +69,10 @@ public slots:
     void addGeneratoriOTP(uint idSeggio);
     void showMessaggeSeggioCreato();
     void showMessageCreazioneSeggioAnnullata();
-    void addTokenToTable(uint sn, string user, string pass, uint idSeggio);
+    void addTokenToTable(string sn, string user, string pass, uint idSeggio);
     void showMessageTokenNotAvailable();
     void showMessageTestTokenFail();
+    void createScheda(vector<TipoVotante> tipiVotanti);
 public:
     explicit MainWindowTecnico(QWidget *parent = 0);
     ~MainWindowTecnico();
@@ -128,8 +131,6 @@ private slots:
     void on_pushButton_annulla_aggiungi_clicked();
 
     void on_pushButton_rimuovi_gruppo_clicked();
-
-    void on_lineEdit_nome_c_textChanged(const QString &arg1);
 
     void on_lineEdit_nuova_lista_textChanged(const QString &arg1);
 
@@ -198,6 +199,8 @@ private slots:
 
     void on_pushButton_completaCreazioneSeggio_clicked();
 
+    void on_listWidget_tipoVotanti_itemChanged(QListWidgetItem *item);
+
 private:
     Ui::MainWindowTecnico *ui;
 
@@ -218,6 +221,7 @@ private:
     vector<InfoSeggio> seggiOttenuti;
     uint idNuovoSeggio;
     uint numHTaggiunti;
+    uint numTipoVotantiChecked;
 
     enum InterfacceTecnico{
         loginUrna,

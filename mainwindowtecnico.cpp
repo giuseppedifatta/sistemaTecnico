@@ -24,6 +24,7 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
     model = new DataManager(this);
     idNuovoSeggio = 0;
     numHTaggiunti = 0;
+    this->numTipoVotantiChecked = 0;
 
     QObject::connect(this,SIGNAL(tecnicoPass(QString)),model,SLOT(checkPassTecnico(QString)),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(passOK()),this,SLOT(showViewSceltaOperazione()),Qt::QueuedConnection);
@@ -68,16 +69,22 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
     QObject::connect(model,SIGNAL(readyInfoSeggi(vector<InfoSeggio>)),this,SLOT(showViewSeggi(vector<InfoSeggio>)),Qt::QueuedConnection);
     QObject::connect(this,SIGNAL(seggioToDelete(uint)),model,SLOT(deleteSeggio(uint)),Qt::QueuedConnection);
 
-    QObject::connect(this, SIGNAL(postazioniToAdd(vector<string>,string)),model,SLOT(addPostazioniNoCommit(vector<string>,string)),Qt::QueuedConnection);
+    qRegisterMetaType< vector <string> >("vector <string>");
+    qRegisterMetaType<string>("string");
+    QObject::connect(this, SIGNAL(postazioniToAdd(vector <string>,string)),model,SLOT(addPostazioniNoCommit(vector<string>,string)),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(idSeggioCreating(uint)),this,SLOT(addGeneratoriOTP(uint)),Qt::QueuedConnection);
     QObject::connect(this,SIGNAL(rollbackNuovoSeggio()),model,SLOT(rollbackSeggio()),Qt::QueuedConnection);
     QObject::connect(this,SIGNAL(commitNuovoSeggio()),model,SLOT(commitSeggio()),Qt::QueuedConnection);
-    QObject::connect(this,SIGNAL(testAndRecord(uint,string,string,uint,uint)),model,SLOT(testTokenAndStoreNoCommit(uint,string,string,uint,uint)),Qt::QueuedConnection);
+    QObject::connect(this,SIGNAL(testAndRecord(string,string,string,uint,uint)),model,SLOT(testTokenAndStoreNoCommit(string,string,string,uint,uint)),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(abortedSeggio()),this,SLOT(showMessageCreazioneSeggioAnnullata()),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(storedSeggio()),this,SLOT(showMessaggeSeggioCreato()),Qt::QueuedConnection);
-    QObject::connect(model,SIGNAL(tokenStored(uint,string,string,uint)),this,SLOT(addTokenToTable(uint,string,string,uint)),Qt::QueuedConnection);
+    QObject::connect(model,SIGNAL(tokenStored(string,string,string,uint)),this,SLOT(addTokenToTable(string,string,string,uint)),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(tokenNotAvailable()),this,SLOT(showMessageTokenNotAvailable()),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(testTokenFail()),this,SLOT(showMessageTestTokenFail()),Qt::QueuedConnection);
+
+    qRegisterMetaType<vector <TipoVotante> >("vector <TipoVotante>");
+    QObject::connect(model,SIGNAL(readyTipiVotanti(vector<TipoVotante>)),this,SLOT(createScheda(vector<TipoVotante>)),Qt::QueuedConnection);
+    QObject::connect(this,SIGNAL(needTipiVotanti()),model,SLOT(getTipiVotanti()),Qt::QueuedConnection);
 }
 
 
@@ -450,9 +457,10 @@ void MainWindowTecnico::mostraScheda(){
     QListWidgetItem * item = new QListWidgetItem("id Procedura: " +
                                                  QString::number(codProcedura),ui->listWidget_candidati);
     item->setFont(serifFont);
-    uint codScheda = schedaCorrente.getId();
-    item = new QListWidgetItem("Codice scheda: " +
-                               QString::number(codScheda),ui->listWidget_candidati);
+    string descScheda = schedaCorrente.getDescrizioneElezione();
+    item = new QListWidgetItem("Descrizione scheda: " +
+                               QString::fromStdString(descScheda),ui->listWidget_candidati);
+
     item->setFont(serifFont);
     uint numeroPreferenze = schedaCorrente.getNumPreferenze();
     item = new QListWidgetItem("Numero preferenze: " +
@@ -623,7 +631,7 @@ void MainWindowTecnico::pulisciInterfacciaCreazioneScheda(){
     ui->comboBox_seleziona_candidato->clear();
     ui->comboBox_seleziona_lista_1->clear();
     ui->comboBox_seleziona_lista_2->clear();
-    ui->comboBox_tipo_elezione->clear();
+    //ui->comboBox_tipo_elezione->clear();
     ui->spinBox_numero_preferenze->setMaximum(1);
     ui->spinBox_numero_preferenze->setMaximum(99);
 
@@ -657,15 +665,44 @@ void MainWindowTecnico::on_pushButton_addSchedaVoto_clicked()
 
 
 
-    ui->comboBox_tipo_elezione->clear();
-    QStringList strList;
-    strList << "Senato Accademico" << "Consiglio di Amministrazione" << "Rappresentanti del Personale T.A." << "Consiglio di Corso di Studio" << "Consiglio di Interclasse" << "Consiglio di Dipartimento" ;
-    ui->comboBox_tipo_elezione->addItems(strList);
+    //    ui->comboBox_tipo_elezione->clear();
+    //    QStringList strList;
+    //    strList << "Senato Accademico" << "Consiglio di Amministrazione" << "Rappresentanti del Personale T.A." << "Consiglio di Corso di Studio" << "Consiglio di Interclasse" << "Consiglio di Dipartimento" ;
+    //    ui->comboBox_tipo_elezione->addItems(strList);
+
+    emit needTipiVotanti();
+
+}
+
+void MainWindowTecnico::createScheda(vector<TipoVotante> tipiVotanti){
+
+    //disconnettiamo temporaneamente l'evento che controlla il numero di tipo votanti selezionati
+    QObject::disconnect(ui->listWidget_tipoVotanti,SIGNAL(itemChanged(QListWidgetItem*)),this,SLOT(on_listWidget_tipoVotanti_itemChanged(QListWidgetItem*)));
+    //svuotiamo il listWidget_tipoVotanti da eventuali dati precedenti
+    ui->listWidget_tipoVotanti->clear();
+    for (uint i = 0; i < tipiVotanti.size(); i++ ){
+
+        QString descrizione = QString::fromStdString(tipiVotanti.at(i).getDescrizione());
+
+        uint id = tipiVotanti.at(i).getId();
+
+        QListWidgetItem* item = new QListWidgetItem(descrizione);
+        item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
+        //item->setFlags(item->flags() & !Qt::ItemIsEditable);
+        item->setCheckState(Qt::Unchecked);
+        QVariant idVariant(QString::number(id));
+        item->setData(Qt::UserRole,idVariant);
+        ui->listWidget_tipoVotanti->addItem(item);
+
+    }
+
 
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::creazioneSchede);
 
     nuovaScheda = new SchedaVoto();
     nuovaScheda->setIdProceduraVoto(this->idProceduraSelezionata);
+    QObject::connect(ui->listWidget_tipoVotanti,SIGNAL(itemChanged(QListWidgetItem*)),this,SLOT(on_listWidget_tipoVotanti_itemChanged(QListWidgetItem*)));
+
 }
 
 void MainWindowTecnico::on_pushButton_aggiungi_candidato_clicked()
@@ -675,7 +712,7 @@ void MainWindowTecnico::on_pushButton_aggiungi_candidato_clicked()
     ui->pushButton_rimuovi_gruppo->setEnabled(false);
     ui->pushButton_aggiungi_lista->setEnabled(false);
     ui->pushButton_aggiungi_candidato->setEnabled(false);
-    ui->pushButton_conferma_aggiungi->setEnabled(false);
+    ui->pushButton_conferma_aggiungi->setEnabled(true);
 
     nuovaScheda->setModalitaAdd(SchedaVoto::modoAdd::candidato);
 
@@ -723,6 +760,25 @@ void MainWindowTecnico::on_pushButton_conferma_aggiungi_clicked()
     if(mod == SchedaVoto::modoAdd::candidato){
         QString matricola = ui->lineEdit_matricola->text();
         string strMatricola = matricola.toStdString();
+
+        QString nome = ui->lineEdit_nome_c->text();
+        string strNome = nome.toStdString();
+        QString cognome = ui->lineEdit_cognome_c->text();
+        string strCognome = cognome.toStdString();
+        QString luogoNascita = ui->lineEdit_luogo_nascita_c->text();
+        string strLuogoNascita = luogoNascita.toStdString();
+
+        if(strNome =="" || strCognome == "" || strLuogoNascita =="" || strMatricola==""){
+            QMessageBox msgBox(this);
+            msgBox.setWindowTitle("Attenzione");
+            msgBox.setInformativeText("Compilare tutti i campi del candidato");
+            msgBox.exec();
+            return;
+        }
+
+
+
+
         QRegExp re("\\d*");  // a digit (\d), zero or more times (*)
         if (!(re.exactMatch(matricola))){
             QMessageBox msgBox(this);
@@ -756,16 +812,9 @@ void MainWindowTecnico::on_pushButton_conferma_aggiungi_clicked()
             }
         }
 
-        QString nome = ui->lineEdit_nome_c->text();
-        string strNome = nome.toStdString();
-        QString cognome = ui->lineEdit_cognome_c->text();
-        string strCognome = cognome.toStdString();
+
         QDate dataNascita = ui->dateEdit_data_nascita_c->date();
         string strDataNascita = dataNascita.toString("dd/MM/yyyy").toStdString();
-
-
-        QString luogoNascita = ui->lineEdit_luogo_nascita_c->text();
-        string strLuogoNascita = luogoNascita.toStdString();
 
 
         if(nuovaScheda->addCandidato(strMatricola,strNome,strCognome,strLista,strDataNascita,strLuogoNascita)){
@@ -804,8 +853,23 @@ void MainWindowTecnico::on_pushButton_completa_scheda_clicked()
         numPref = 1;
     }
     nuovaScheda->setNumPreferenze(numPref);
-    nuovaScheda->setTipoElezione(ui->comboBox_tipo_elezione->currentIndex());
+    nuovaScheda->setDescrizioneElezione(ui->lineEdit_descrizioneQuesitoScheda->text().toStdString());
 
+    if(this->numTipoVotantiChecked ==0){
+        QMessageBox::information(this,"Error Message","Selezionate almeno un tipo di votante per la scheda corrente");
+        return;
+    }
+    else{
+        //aggiungo alla scheda di voto gli idi dei tipi di votanti che possono compilare questa scheda
+        for(int i = 0; i < ui->listWidget_tipoVotanti->count(); ++i)
+        {
+            QListWidgetItem* item = ui->listWidget_tipoVotanti->item(i);
+            if(item->checkState()==Qt::CheckState::Checked){
+                QVariant var = item->data(Qt::UserRole);
+                nuovaScheda->addIdTipiVotantiConsentiti(var.toUInt());
+            }
+        }
+    }
     if(nuovaScheda->getCandidati().size()>1){
         //se sono stati inseriti almeno due candidati alla scheda di voto
         QMessageBox msgBox(this);
@@ -975,16 +1039,6 @@ void MainWindowTecnico::hideBoxAggiungi(){
     }
 }
 
-void MainWindowTecnico::on_lineEdit_nome_c_textChanged(const QString &arg1)
-{
-    if(arg1==""){
-        ui->pushButton_conferma_aggiungi->setEnabled(false);
-    }
-    else{
-        ui->pushButton_conferma_aggiungi->setEnabled(true);
-
-    }
-}
 
 void MainWindowTecnico::on_lineEdit_nuova_lista_textChanged(const QString &arg1)
 {
@@ -1139,6 +1193,7 @@ void MainWindowTecnico::showMessaggeSeggioCreato()
     msgBox.setWindowTitle("Success");
     msgBox.setInformativeText("Creazione del seggio completata.");
     msgBox.exec();
+
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::sceltaOperazione);
 }
 
@@ -1147,17 +1202,17 @@ void MainWindowTecnico::showMessageCreazioneSeggioAnnullata()
     QMessageBox msgBox(this);
     msgBox.setInformativeText("Creazione seggio annullata");
     msgBox.exec();
+    ui->stackedWidget->setCurrentIndex(InterfacceTecnico::sceltaOperazione);
     return;
 }
 
-void MainWindowTecnico::addTokenToTable(uint sn, string user, string pass, uint idSeggio)
-{
+void MainWindowTecnico::addTokenToTable(string sn, string user, string pass, uint idSeggio){
 
     ui->tableWidget_hardwareToken->insertRow(ui->tableWidget_lista_procedure->rowCount());
     int rigaAggiunta = ui->tableWidget_hardwareToken->rowCount()-1;
 
 
-    QTableWidgetItem *item = new QTableWidgetItem(QString::number(sn));
+    QTableWidgetItem *item = new QTableWidgetItem(QString::fromStdString(sn));
     item->setTextAlignment(Qt::AlignCenter);
     item->setFlags(Qt::NoItemFlags);
     item->setTextColor(Qt::black);
@@ -1269,10 +1324,10 @@ void MainWindowTecnico::on_pushButton_aggiungi_sessione_clicked()
     else{
         bool sovrapposizione = false;
         for(uint i = 0; i < intervalliSessioni.size(); i++){
-            bool type1 = (dtAperturaSessione >= intervalliSessioni.at(i).getInizio()) && (dtChiusuraSessione <= intervalliSessioni.at(i).getInizio()) ;
-            bool type2 = (dtAperturaSessione >= intervalliSessioni.at(i).getFine()) && (dtChiusuraSessione <= intervalliSessioni.at(i).getFine());
-            bool type3 = (dtAperturaSessione <= intervalliSessioni.at(i).getInizio()) && (dtChiusuraSessione >= intervalliSessioni.at(i).getFine());
-            bool type4 = (dtAperturaSessione >= intervalliSessioni.at(i).getInizio()) && (dtChiusuraSessione <= intervalliSessioni.at(i).getFine());
+            bool type1 = (dtAperturaSessione <= intervalliSessioni.at(i).getInizio()) && (dtChiusuraSessione >= intervalliSessioni.at(i).getFine()); //
+            bool type2 = (dtAperturaSessione >= intervalliSessioni.at(i).getInizio()) && (dtChiusuraSessione <= intervalliSessioni.at(i).getFine()); //
+            bool type3 = (dtChiusuraSessione >= intervalliSessioni.at(i).getInizio()) && (dtChiusuraSessione <= intervalliSessioni.at(i).getFine());//
+            bool type4 = (dtAperturaSessione >= intervalliSessioni.at(i).getInizio()) && (dtAperturaSessione <= intervalliSessioni.at(i).getFine());//
             if(type1 || type2 || type3 ||type4){
                 cout << "sovrapposizioni sessioni rilevate" << endl;
                 sovrapposizione = true;
@@ -1773,7 +1828,7 @@ void MainWindowTecnico::on_pushButton_testOTP_clicked()
         return;
     }
     string otpStr = otp.toStdString();
-    emit testAndRecord(atoi(strSN.c_str()),user,pass,atoi(otpStr.c_str()),idNuovoSeggio);
+    emit testAndRecord(strSN,user,pass,atoi(otpStr.c_str()),idNuovoSeggio);
     ui->formWidget_testHT->clearMask();
 }
 
@@ -1786,4 +1841,20 @@ void MainWindowTecnico::on_pushButton_annullaCreazioneSeggio_clicked()
 void MainWindowTecnico::on_pushButton_completaCreazioneSeggio_clicked()
 {
     emit commitNuovoSeggio();
+}
+
+void MainWindowTecnico::on_listWidget_tipoVotanti_itemChanged(QListWidgetItem *item)
+{
+    QVariant var = item->data(Qt::UserRole);
+    string id = var.toString().toStdString();
+    cout << "View: Item's id: " << id << endl;
+    if(item->checkState()==Qt::CheckState::Checked){
+        this->numTipoVotantiChecked++;
+
+    }
+    else if (item->checkState()==Qt::CheckState::Unchecked){
+        this->numTipoVotantiChecked--;
+    }
+
+    cout << "View: numero tipi votanti selezionati: " << numTipoVotantiChecked << endl;
 }

@@ -27,29 +27,12 @@ public:
     unsigned int getModalitaAdd() const;
     void setModalitaAdd(unsigned int value);
 
-    enum tipologieElettoratoAttivo{
-        studente,
-        professore,
-        amministrativo,
-        senatoAccademico
-    };
 
     enum modoAdd{
         candidato,
         lista
     };
 
-    //e se fosse il sistema a decidere le tipologie di elettorato attivo?
-    //basandosi sulla tipologia di elettorato Passivo
-    enum tipologieElezioni{
-        SA, //Senato Accademico
-        CA, //Consiglio di Amministrazione
-        TA, //Rappresentanti del Personale Tecnico Amministrativo
-        CCDS, //Consiglio di Corso di Studio
-        CI, //Consiglio di Interclasse
-        CD, //Consiglio di Dipartimento
-
-    };
 
 
     std::vector<Candidato> getCandidati() const;
@@ -61,8 +44,6 @@ public:
 //    std::vector<std::string> getListListe() const;
 //    void setListListe(const std::vector<std::string> &value);
 
-    unsigned int getTipoElezione() const;
-    void setTipoElezione(unsigned int value);
 
     std::vector<ListaElettorale> getListeElettorali() const;
     //void setListeElettorali(const std::vector<ListaElettorale> &value);
@@ -71,6 +52,13 @@ public:
     bool soloCandidatiMode() const;
     void soloCandidatiOn();
     void soloCandidatiOff();
+
+    std::vector<uint> getIdTipiVotantiConsentiti() const;
+    void setIdTipiVotantiConsentiti(const std::vector<uint> &value);
+    void addIdTipiVotantiConsentiti(uint id);
+
+    string getDescrizioneElezione() const;
+    void setDescrizioneElezione(const string &value);
 
 private:
     unsigned int idProceduraVoto;
@@ -84,7 +72,8 @@ private:
     //candidati
     std::vector <Candidato> candidati;
 
-    unsigned int tipoElezione;
+    string descrizioneElezione;
+    std::vector <uint> idTipiVotantiConsentiti;
     bool soloCandidati;
 
 };

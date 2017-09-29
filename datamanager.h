@@ -14,6 +14,8 @@
 #include "proceduravoto.h"
 #include "responsabileprocedimento.h"
 #include "infoseggio.h"
+#include "openotp_login.h"
+#include "tipovotante.h"
 
 
 #include <cryptopp/pwdbased.h>
@@ -64,10 +66,11 @@ signals:
     void proceduraRangeAvailable(QDateTime inizio, QDateTime termine);
     void requestedProceduraRangeInUse();
     void readyInfoSeggi(vector<InfoSeggio> seggiPresenti);
+    void readyTipiVotanti(vector<TipoVotante> tipiVotanti);
     void idSeggioCreating(uint idSeggio);
     void abortedSeggio();
     void storedSeggio();
-    void tokenStored(uint sn, string user, string pass, uint idSeggio);
+    void tokenStored(string sn, string user, string pass, uint idSeggio);
     void tokenNotAvailable();
     void testTokenFail();
 public slots:
@@ -79,6 +82,7 @@ public slots:
     void getRPSFromDB();
     void getProcedureVotoFromDB();
     void getSessioniProceduraFromDB(uint idProcedura);
+    void getTipiVotanti();
     void deleteProceduraVoto(uint idProceduraVoto);
     void getSchedeProceduraFromDB(uint idProcedura);
     void checkAvailabilityProceduraRange(QDateTime inizio,QDateTime termine);
@@ -87,11 +91,12 @@ public slots:
     void addPostazioniNoCommit(vector <string> ipPostazioni, string descrizioneSeggio);
     void rollbackSeggio();
     void commitSeggio();
-    void testTokenAndStoreNoCommit(uint sn,string user,string pass,uint otp,uint idSeggio);
+    void testTokenAndStoreNoCommit(string sn,string user,string pass,uint otp,uint idSeggio);
 private:
 
     Driver *driver;
     Connection *connection;
+    Connection * connectionAnagrafica;
 
 
     void storePassNewUser(string userid, string pass);
@@ -103,8 +108,8 @@ private:
     string AESdecryptStdString(string encodedCipher, SecByteBlock key, byte *iv);
     string AESencryptStdString(string plain, SecByteBlock key, SecByteBlock iv);
     string AESdecryptStdString(string encodedCipher, SecByteBlock key, SecByteBlock iv);
-    string currentTimeDbFormatted(string user,string pass,uint otp);
-    void validateOTP(string user,string pass,uint otp);
+    string currentTimeDbFormatted();
+    bool validateOTP(string user,string pass,uint otp);
 };
 
 #endif // DATAMANAGER_H

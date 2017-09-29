@@ -22,7 +22,9 @@ SOURCES += main.cpp\
     sessioniqt.cpp \
     responsabileprocedimento.cpp \
     listaelettorale.cpp \
-    infoseggio.cpp
+    infoseggio.cpp \
+    openotp_login.cpp \
+    tipovotante.cpp
 
 HEADERS  += mainwindowtecnico.h \
     datamanager.h \
@@ -33,7 +35,9 @@ HEADERS  += mainwindowtecnico.h \
     sessioniqt.h \
     responsabileprocedimento.h \
     listaelettorale.h \
-    infoseggio.h
+    infoseggio.h \
+    openotp_login.h \
+    tipovotante.h
 
 FORMS += \
     mainwindowtecnico.ui

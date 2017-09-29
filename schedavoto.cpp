@@ -49,35 +49,14 @@ vector <Candidato> SchedaVoto::removeLista(uint index)
 
 
 
-//std::vector<std::string> SchedaVoto::getListListe() const
-//{
-//    return listListe;
-//}
 
-//void SchedaVoto::setListListe(const std::vector<std::string> &value)
-//{
-//    listListe = value;
-//}
-
-unsigned int SchedaVoto::getTipoElezione() const
-{
-    return tipoElezione;
-}
-
-void SchedaVoto::setTipoElezione(unsigned int value)
-{
-    tipoElezione = value;
-}
 
 std::vector<ListaElettorale> SchedaVoto::getListeElettorali() const
 {
     return listeElettorali;
 }
 
-//void SchedaVoto::setListeElettorali(const std::vector<ListaElettorale> &value)
-//{
-//    listeElettorali = value;
-//}
+
 bool SchedaVoto::addCandidato
 (string matricola, string nome, string cognome,string lista, string data, string luogo)
 {
@@ -189,4 +168,29 @@ void SchedaVoto::soloCandidatiOn()
 void SchedaVoto::soloCandidatiOff()
 {
     this->soloCandidati = false;
+}
+
+std::vector<uint> SchedaVoto::getIdTipiVotantiConsentiti() const
+{
+    return idTipiVotantiConsentiti;
+}
+
+//void SchedaVoto::setIdTipiVotantiConsentiti(const std::vector<uint> &value)
+//{
+//    idTipiVotantiConsentiti = value;
+//}
+
+void SchedaVoto::addIdTipiVotantiConsentiti(uint id)
+{
+    idTipiVotantiConsentiti.push_back(id);
+}
+
+string SchedaVoto::getDescrizioneElezione() const
+{
+    return descrizioneElezione;
+}
+
+void SchedaVoto::setDescrizioneElezione(const string &value)
+{
+    descrizioneElezione = value;
 }

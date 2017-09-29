@@ -58,7 +58,7 @@ background-color: rgb(49, 149, 255);
 </string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_11">
+   <layout class="QVBoxLayout" name="verticalLayout_14">
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="sizePolicy">
@@ -68,7 +68,7 @@ background-color: rgb(49, 149, 255);
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>9</number>
+       <number>5</number>
       </property>
       <widget class="QWidget" name="login_urna_page">
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -808,14 +808,18 @@ background-color: rgb(49, 149, 255);
            </layout>
           </item>
           <item>
-           <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,0">
-            <item row="0" column="1">
-             <widget class="QComboBox" name="comboBox_tipo_elezione"/>
-            </item>
+           <layout class="QFormLayout" name="formLayout_16">
             <item row="0" column="0">
-             <widget class="QLabel" name="label_14">
+             <widget class="QLabel" name="label_descrizioneQuesitoScheda">
               <property name="text">
-               <string>Tipologia Elezione</string>
+               <string>Descrizione Quesito Scheda</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="lineEdit_descrizioneQuesitoScheda">
+              <property name="placeholderText">
+               <string>inserire la descrizione del quesito della scheda</string>
               </property>
              </widget>
             </item>
@@ -868,7 +872,7 @@ background-color: rgb(49, 149, 255);
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
+            <item row="4" column="0">
              <spacer name="verticalSpacer">
               <property name="orientation">
                <enum>Qt::Vertical</enum>
@@ -880,6 +884,16 @@ background-color: rgb(49, 149, 255);
                </size>
               </property>
              </spacer>
+            </item>
+            <item row="3" column="0">
+             <widget class="QListWidget" name="listWidget_tipoVotanti"/>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_selezioneVotanti">
+              <property name="text">
+               <string>Seleziona votanti</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -1546,84 +1560,101 @@ background-color: rgb(49, 149, 255);
        </layout>
       </widget>
       <widget class="QWidget" name="visualizzazione_sessioni_page">
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <layout class="QHBoxLayout" name="horizontalLayout_11">
         <property name="spacing">
-         <number>50</number>
+         <number>0</number>
         </property>
         <property name="leftMargin">
-         <number>50</number>
+         <number>0</number>
         </property>
         <property name="topMargin">
-         <number>50</number>
+         <number>0</number>
         </property>
         <property name="rightMargin">
-         <number>50</number>
+         <number>0</number>
         </property>
         <property name="bottomMargin">
-         <number>50</number>
+         <number>0</number>
         </property>
         <item>
-         <layout class="QFormLayout" name="formLayout_5">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_descProc_s">
-            <property name="text">
-             <string>Descrizione Procedura:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLabel" name="label_descProc_s_content">
-            <property name="text">
-             <string>TextLabel</string>
-            </property>
-           </widget>
-          </item>
+         <layout class="QGridLayout" name="gridLayout_4">
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_idProcedura_s">
+           <layout class="QFormLayout" name="formLayout_5">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_descProc_s">
+              <property name="text">
+               <string>Descrizione Procedura:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="label_descProc_s_content">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_idProcedura_s">
+              <property name="text">
+               <string>id Procedura:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLabel" name="label_idProcedura_s_content">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="2" column="0">
+           <widget class="QTableWidget" name="tableWidget_sessioni">
+            <column>
+             <property name="text">
+              <string>1</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>2</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>3</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>4</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QPushButton" name="pushButton_indietro_toProcedure">
             <property name="text">
-             <string>id Procedura:</string>
+             <string>Indietro</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QLabel" name="label_idProcedura_s_content">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_5">
             <property name="text">
-             <string>TextLabel</string>
+             <string>VISUALIZZAZIONE SESSIONI</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
          </layout>
-        </item>
-        <item>
-         <widget class="QTableWidget" name="tableWidget_sessioni">
-          <column>
-           <property name="text">
-            <string>1</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>2</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>3</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>4</string>
-           </property>
-          </column>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_indietro_toProcedure">
-          <property name="text">
-           <string>Indietro</string>
-          </property>
-         </widget>
         </item>
        </layout>
       </widget>

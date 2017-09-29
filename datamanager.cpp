@@ -7,6 +7,7 @@
 
 #include <istream>
 #include <QDebug>
+#include "openotp_login.h"
 
 DataManager::DataManager(QObject *parent) : QObject(parent)
 {
@@ -15,6 +16,15 @@ DataManager::DataManager(QObject *parent) : QObject(parent)
         connection=driver->connect("localhost:3306","root", "root");
         connection->setAutoCommit(false);
         connection->setSchema("mydb");
+    }catch(SQLException &ex){
+        cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
+    }
+
+    try{
+        driver=get_driver_instance();
+        connectionAnagrafica=driver->connect("localhost:3306","root", "root");
+        connectionAnagrafica->setAutoCommit(false);
+        connectionAnagrafica->setSchema("anagraficaDB");
     }catch(SQLException &ex){
         cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
     }
@@ -32,7 +42,10 @@ DataManager::DataManager(QObject *parent) : QObject(parent)
 
 DataManager::~DataManager()
 {
+    connection->close();
     delete connection;
+    connectionAnagrafica->close();
+    delete connectionAnagrafica;
     //delete driver;
 }
 
@@ -136,15 +149,25 @@ void DataManager::storeScheda(SchedaVoto *scheda)
     pElement->SetText(idProceduraVoto);
     pRoot->InsertEndChild(pElement);
 
-    uint tipoElezione = scheda->getTipoElezione();
-    pElement = xmlDoc.NewElement("tipologiaElezione");
-    pElement->SetText(tipoElezione);
+    string descrizioneElezione = scheda->getDescrizioneElezione();
+    pElement = xmlDoc.NewElement("descrizioneElezione");
+    pElement->SetText(descrizioneElezione.c_str());
     pRoot->InsertEndChild(pElement);
 
     uint numPref = scheda->getNumPreferenze();
     pElement = xmlDoc.NewElement("numeroPreferenze");
     pElement->SetText(numPref);
     pRoot->InsertEndChild(pElement);
+
+    XMLNode * pTipiVotanti = xmlDoc.NewElement("tipiVotanti");
+    pRoot->InsertEndChild(pTipiVotanti);
+    vector <uint> idTipiVotanti = scheda->getIdTipiVotantiConsentiti();
+    for (uint i = 0; i < idTipiVotanti.size(); i++){
+        XMLElement * elementIdTipo = xmlDoc.NewElement("idTipoVotanti");
+        elementIdTipo->SetText(idTipiVotanti.at(i));
+        pTipiVotanti->InsertEndChild(elementIdTipo);
+    }
+
 
     vector <ListaElettorale> listeInserite = scheda->getListeElettorali();
     XMLNode * pListe = xmlDoc.NewElement("liste");
@@ -162,7 +185,7 @@ void DataManager::storeScheda(SchedaVoto *scheda)
         for (uint indexCandidati = 0; indexCandidati < candidatiLista.size(); indexCandidati++){
 
             idCandidato++;
-            pElement = xmlDoc.NewElement("candidato");
+            XMLElement * pElement = xmlDoc.NewElement("candidato");
             pElement->SetAttribute("id",idCandidato);
             pNuovaLista->InsertEndChild(pElement);
 
@@ -889,7 +912,7 @@ void DataManager::getSessioniProceduraFromDB(uint idProcedura)
 
     PreparedStatement * pstmt;
     ResultSet * resultSet;
-    pstmt = connection->prepareStatement("SELECT * FROM Sessioni WHERE idProceduraVoto = ?");
+    pstmt = connection->prepareStatement("SELECT * FROM Sessioni WHERE idProceduraVoto = ? order by data ASC, apertura ASC");
     try{
         pstmt->setUInt(1,idProcedura);
         resultSet = pstmt->executeQuery();
@@ -919,6 +942,36 @@ void DataManager::getSessioniProceduraFromDB(uint idProcedura)
     delete resultSet;
 
     emit readySessioni(sessioni);
+}
+
+void DataManager::getTipiVotanti()
+{
+    vector <TipoVotante> tipiVotanti;
+    PreparedStatement * pstmt;
+    ResultSet * resultSet;
+    pstmt = connectionAnagrafica->prepareStatement("SELECT * FROM TipiVotanti");
+    try{
+        resultSet = pstmt->executeQuery();
+        while(resultSet->next()){
+            TipoVotante t;
+
+            uint id = resultSet->getUInt("idTipoVotanti");
+            t.setId(id);
+
+            string descrizione = resultSet->getString("tipoVotanti");
+            t.setDescrizione(descrizione);
+            tipiVotanti.push_back(t);
+        }
+    }catch(SQLException &ex){
+        cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
+    }
+    pstmt->close();
+    delete pstmt;
+    resultSet->close();
+    delete resultSet;
+
+
+    emit readyTipiVotanti(tipiVotanti);
 }
 
 void DataManager::deleteProceduraVoto(uint idProceduraVoto)
@@ -972,16 +1025,44 @@ void DataManager::getSchedeProceduraFromDB(uint idProcedura)
             cout << "idProcedura: " << idProcedura << endl;
             s.setIdProceduraVoto(idProcedura);
 
-            XMLText* textNodeTipologiaElezione= rootNode->FirstChildElement("tipologiaElezione")->FirstChild()->ToText();
-            uint tipologiaElezione = atoi(textNodeTipologiaElezione->Value());
-            cout << "tipologia elezione: " << tipologiaElezione << endl;
-            s.setTipoElezione(tipologiaElezione);
+            XMLText* textNodeDescrizioneElezione= rootNode->FirstChildElement("descrizioneElezione")->FirstChild()->ToText();
+            string descrizioneElezione = textNodeDescrizioneElezione->Value();
+            cout << "descrizione elezione: " << descrizioneElezione << endl;
+            s.setDescrizioneElezione(descrizioneElezione);
 
             XMLText* textNodeNumeroPreferenze = rootNode->FirstChildElement("numeroPreferenze")->FirstChild()->ToText();
             uint numeroPreferenze = atoi(textNodeNumeroPreferenze->Value());
             cout << "Numero preferenze: " << numeroPreferenze << endl;
             s.setNumPreferenze(numeroPreferenze);
 
+            //parsing degli idTipiVotanti
+            XMLElement * tipiVotantiElement = rootNode->FirstChildElement("tipiVotanti");
+
+            XMLElement * firstIdTipoVotantiElement = tipiVotantiElement->FirstChildElement("idTipoVotanti");
+            XMLElement * lastIdTipoVotantiElement = tipiVotantiElement->LastChildElement("idTipoVotanti");
+
+            XMLElement *idTipoVotantiElement = firstIdTipoVotantiElement;
+            bool lastIdTipoVotanti = false;
+            do{
+
+                XMLText* textNodeIdTipoVotanti = idTipoVotantiElement->FirstChild()->ToText();
+                uint idTipoVotanti = atoi(textNodeIdTipoVotanti->Value());
+                cout << "Id tipo Votanti: " << idTipoVotanti << endl;
+                s.addIdTipiVotantiConsentiti(idTipoVotanti);
+
+
+                if(idTipoVotantiElement == lastIdTipoVotantiElement){
+                    lastIdTipoVotanti = true;
+                }
+                else{
+                    //accediamo alla successiva lista nella scheda di voto
+                    idTipoVotantiElement = idTipoVotantiElement->NextSiblingElement("idTipoVotanti");
+                    cout << "ottengo il puntatore al successivo idTipoVotanti" << endl;
+                }
+            }while(!lastIdTipoVotanti);
+            cout << "non ci sono altri idTipoVotanti" << endl;
+
+            //parsing delle liste
             XMLElement * listeElement = rootNode->FirstChildElement("liste");
 
             XMLElement * firstListaElement = listeElement->FirstChildElement("lista");
@@ -1072,6 +1153,7 @@ void DataManager::getSchedeProceduraFromDB(uint idProcedura)
                 }
             }while(!lastLista);
             cout << "non ci sono altre liste" << endl;
+
             schede.append(s);
         }
     }catch(SQLException &ex){
@@ -1228,10 +1310,11 @@ void DataManager::addPostazioniNoCommit(vector<string> ipPostazioni,string descr
 
 
     for (uint i = 0; i <=3 ; i++){
-        pstmt = connection->prepareStatement("INSERT INTO Postazioni (idSeggio,ipPostazione) VALUES(?,?)");
+        pstmt = connection->prepareStatement("INSERT INTO Postazioni (idPostazione,idSeggio,ipPostazione) VALUES(?,?,?)");
         try{
-            pstmt->setUInt(1,idSeggio);
-            pstmt->setString(2,ipPostazioni.at(i));
+            pstmt->setUInt(1,i);
+            pstmt->setUInt(2,idSeggio);
+            pstmt->setString(3,ipPostazioni.at(i));
             pstmt->executeUpdate();
             //commit rimandata al momento dell'inserimento degli hardware token
 
@@ -1259,8 +1342,10 @@ void DataManager::rollbackSeggio()
 
 void DataManager::commitSeggio()
 {
+    //facciamo la commit di tutte le informazioni del nuovo seggio, memorizzate ma non confermate con la commit
     try{
         connection->commit();
+        cout << "Nuovo Seggio creato" << endl;
     }
     catch(SQLException &ex){
         cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
@@ -1268,16 +1353,16 @@ void DataManager::commitSeggio()
     emit storedSeggio();
 }
 
-void DataManager::testTokenAndStoreNoCommit(uint sn, string user, string pass, uint otp, uint idSeggio)
+void DataManager::testTokenAndStoreNoCommit(string sn, string user, string pass, uint otp, uint idSeggio)
 {
     //controlliamo se il token è già utilizzato per un altro seggio, in questo caso i passaggi successivi vanno saltati
     bool tokenAlredyUsed = true;
 
     PreparedStatement *pstmt;
     ResultSet *resultSet;
-    pstmt = connection->prepareStatement("SELECT idToken FROM Token WHERE idToken = ?");
+    pstmt = connection->prepareStatement("SELECT idToken FROM Token WHERE snToken = ?");
     try{
-        pstmt->setUInt(1,sn);
+        pstmt->setString(1,sn);
         resultSet = pstmt->executeQuery();
         if(!(resultSet->next())){
             tokenAlredyUsed = false;
@@ -1310,9 +1395,9 @@ void DataManager::testTokenAndStoreNoCommit(uint sn, string user, string pass, u
     }
 
     //memorizzazione hardware token
-    pstmt = connection->prepareStatement("INSERT INTO Token (idToken,username,password,idSeggio) VALUES(?,?,?,?)");
+    pstmt = connection->prepareStatement("INSERT INTO Token (snToken,username,password,idSeggio) VALUES(?,?,?,?)");
     try{
-        pstmt->setUInt(1,sn);
+        pstmt->setString(1,sn);
         pstmt->setString(2,user);
         pstmt->setString(3,pass);
         pstmt->setUInt(4,idSeggio);
@@ -1456,7 +1541,7 @@ string DataManager::currentTimeDbFormatted() {
 }
 
 
-void DataManager::validateOTP(string user,string pass,uint otp){
+bool DataManager::validateOTP(string user,string pass,uint otp){
 
    //contattare otpServer per verificare il token rispetto all'account relativo al token associato alla postazione voto
     string url = "https://147.163.26.229:8443/openotp/";
@@ -1475,12 +1560,12 @@ void DataManager::validateOTP(string user,string pass,uint otp){
     std::copy(password.begin(), password.end(), writablePassword);
     writablePassword[password.size()] = '\0'; // don't forget the terminating 0
 
-    string otpStr = /*otp.toStdString();*/otp;
+    string otpStr = /*otp.toStdString();*/to_string(otp);
     char * writableOTP = new char[otpStr.size() + 1];
     std::copy(otpStr.begin(), otpStr.end(), writableOTP);
     writableOTP[otpStr.size()] = '\0'; // don't forget the terminating 0
 
-    bool success= otp_login(writableURL,writableUsername,writablePassword,writableOTP);
+    bool success = otp_login(writableURL,writableUsername,writablePassword,writableOTP);
     delete[] writableURL;
     delete[] writableUsername;
     delete[] writablePassword;
