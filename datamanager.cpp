@@ -430,7 +430,16 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
     //calcoliamo dalla password scelta dall'RP una derivedKey per cifrare la privateKey di RP
     string pass = rp->getPassword();
     cout <<"Password RP: " << pass << endl;
-    string derivedKeyEncoded = deriveKeyFromPass(pass);
+    /*Generate salt */
+    //AutoSeededRandomPool prng;
+    SecByteBlock salt(AES::BLOCKSIZE);
+    rng.GenerateBlock(salt, sizeof(salt));
+    string strSalt;
+    HexEncoder hex(new StringSink(strSalt));
+    hex.Put(salt, salt.size());
+    hex.MessageEnd();
+
+    string derivedKeyEncoded = deriveKeyFromPass(pass,strSalt);
     cout << "derivedKey ottenuta dalla password di RP: " << derivedKeyEncoded << endl;
 
 
@@ -459,7 +468,7 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
     std::stringstream rsaPrivateBlob(encodedPrivateKeyRPCifrata);
 
     pstmt=connection->prepareStatement
-            ("INSERT INTO ResponsabiliProcedimento ( userid, nome, cognome, dataNascita, luogoNascita,publicKey,encryptedPrivateKey ) VALUES (?,?,?,?,?,?,?)");
+            ("INSERT INTO ResponsabiliProcedimento ( userid, nome, cognome, dataNascita, luogoNascita,publicKey,encryptedPrivateKey,salt ) VALUES (?,?,?,?,?,?,?,?)");
     try{
         cout << "Memorizzazione del nuovo RP in corso..." << endl;
         pstmt->setString(1,userid);
@@ -469,6 +478,7 @@ void DataManager::storeRP(ResponsabileProcedimento *rp)
         pstmt->setString(5,rp->getLuogoNascita());
         pstmt->setBlob(6,&rsaPublicBlob);
         pstmt->setBlob(7,&rsaPrivateBlob);
+        pstmt->setString(8,strSalt);
         pstmt->executeUpdate();
         connection->commit();
     }catch(SQLException &ex){
@@ -740,40 +750,39 @@ string DataManager::generaSharedKey()
 }
 
 
-string DataManager::deriveKeyFromPass(string password){
-    // KDF parameters
-    unsigned int iterations = 15000;
-    char purpose = 0; // unused by Crypto++
-
-
-    SecByteBlock derived(AES::MAX_KEYLENGTH);
+string DataManager::deriveKeyFromPass(string password, string salt){
+    string encodedDerivedKey;
     try {
 
+        // KDF parameters
+        unsigned int iterations = 15000;
+        char purpose = 0; // unused by Crypto++
 
+        // 32 bytes of derived material. Used to key the cipher.
+        //   16 bytes are for the key, and 16 bytes are for the iv.
+        SecByteBlock derived(AES::MAX_KEYLENGTH);
 
         // KDF function
-        PKCS5_PBKDF2_HMAC<SHA256> kdf;
-        kdf.DeriveKey(derived.data(), derived.size(), purpose, (byte*)password.data(), password.size(), NULL, 0, iterations);
+        CryptoPP::PKCS5_PBKDF2_HMAC<CryptoPP::SHA256> kdf;
+        kdf.DeriveKey(derived.data(), derived.size(), purpose, (byte*)password.data(), password.size(), (byte *) salt.data(), salt.size(), iterations);
 
+
+
+
+        // Encode derived
+        HexEncoder hex(new StringSink(encodedDerivedKey));
+        hex.Put(derived.data(), derived.size());
+        hex.MessageEnd();
+
+        // Print stuff
+        cout << "pass: " << password << endl;
+        cout << "derived key: " << encodedDerivedKey << endl;
 
     }
     catch(CryptoPP::Exception& ex)
     {
         cerr << ex.what() << endl;
     }
-
-    // Encode derived
-    std::string derivedKey = std::string(reinterpret_cast<const char*>(derived.data()), derived.size());
-    string encodedDerivedKey;
-    StringSource(derivedKey,true,
-                 new HexEncoder(new StringSink(encodedDerivedKey)
-                                )//HexEncoder
-                 );//StringSource
-
-    // Print stuff
-    //cout << "pass: " << password << endl;
-    //cout << "derived key: " << encodedDerivedKey << endl;
-
     return encodedDerivedKey;
 }
 
@@ -1601,7 +1610,7 @@ string DataManager::hashPassword( string plainPass, string salt){
 
     PKCS5_PBKDF2_HMAC<SHA256> pbkdf;
 
-    pbkdf.DeriveKey(result, result.size(),0x00,(byte *) plainPass.data(), plainPass.size(),(byte *) salt.data(), salt.size(),100);
+    pbkdf.DeriveKey(result, result.size(),0x00,(byte *) plainPass.data(), plainPass.size(),(byte *) salt.data(), salt.size(),10000);
 
     //ArraySource resultEncoder(result,result.size(), true, new HexEncoder(new StringSink(hexResult)));
 

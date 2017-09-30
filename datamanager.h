@@ -103,7 +103,7 @@ private:
     string hashPassword(string plainPass, string salt);
     bool verifyUserPass(string userid, string userPass);
     void updateUserPassword(string userid, string nuovaPassword);
-    string deriveKeyFromPass(string password);
+    string deriveKeyFromPass(string password, string salt);
     string AESencryptStdString(string plain, SecByteBlock key, byte* iv);
     string AESdecryptStdString(string encodedCipher, SecByteBlock key, byte *iv);
     string AESencryptStdString(string plain, SecByteBlock key, SecByteBlock iv);
