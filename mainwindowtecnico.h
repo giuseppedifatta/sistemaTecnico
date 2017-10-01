@@ -49,7 +49,7 @@ signals:
     void postazioniToAdd(vector <string> ipPostazioni, string descrizioneSeggio);
     void rollbackNuovoSeggio();
     void commitNuovoSeggio();
-    void testAndRecord(string sn,string user,string pass,uint otp,uint idSeggio);
+    void testAndRecord(string sn,string user,string pass,string otp,uint idSeggio);
     void needTipiVotanti();
 public slots:
     void showViewSceltaOperazione();

@@ -1380,14 +1380,14 @@ void DataManager::commitSeggio()
     emit storedSeggio();
 }
 
-void DataManager::testTokenAndStoreNoCommit(string sn, string user, string pass, uint otp, uint idSeggio)
+void DataManager::testTokenAndStoreNoCommit(string sn, string user, string pass, string otp, uint idSeggio)
 {
     //controlliamo se il token è già utilizzato per un altro seggio, in questo caso i passaggi successivi vanno saltati
     bool tokenAlredyUsed = true;
 
     PreparedStatement *pstmt;
     ResultSet *resultSet;
-    pstmt = connection->prepareStatement("SELECT idToken FROM Token WHERE snToken = ?");
+    pstmt = connection->prepareStatement("SELECT snToken FROM Token WHERE snToken = ?");
     try{
         pstmt->setString(1,sn);
         resultSet = pstmt->executeQuery();
@@ -1637,10 +1637,11 @@ string DataManager::currentTimeDbFormatted() {
 }
 
 
-bool DataManager::validateOTP(string user,string pass,uint otp){
+bool DataManager::validateOTP(string user,string pass,string otpStr){
 
     //contattare otpServer per verificare il token rispetto all'account relativo al token associato alla postazione voto
-    string url = "https://147.163.26.229:8443/openotp/";
+    //string url = "https://147.163.26.229:8443/openotp/";
+    string url = "https://192.168.1.11:8443/openotp/";
     string username = user;
     string password = pass;
 
@@ -1656,7 +1657,7 @@ bool DataManager::validateOTP(string user,string pass,uint otp){
     std::copy(password.begin(), password.end(), writablePassword);
     writablePassword[password.size()] = '\0'; // don't forget the terminating 0
 
-    string otpStr = /*otp.toStdString();*/to_string(otp);
+
     char * writableOTP = new char[otpStr.size() + 1];
     std::copy(otpStr.begin(), otpStr.end(), writableOTP);
     writableOTP[otpStr.size()] = '\0'; // don't forget the terminating 0

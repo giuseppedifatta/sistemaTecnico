@@ -91,7 +91,7 @@ public slots:
     void addPostazioniNoCommit(vector <string> ipPostazioni, string descrizioneSeggio);
     void rollbackSeggio();
     void commitSeggio();
-    void testTokenAndStoreNoCommit(string sn,string user,string pass,uint otp,uint idSeggio);
+    void testTokenAndStoreNoCommit(string sn, string user, string pass, string otp, uint idSeggio);
 private:
 
     Driver *driver;
@@ -110,7 +110,7 @@ private:
     string AESdecryptStdString(string encodedCipher, SecByteBlock key, SecByteBlock iv);
     string generaSharedKey();
     string currentTimeDbFormatted();
-    bool validateOTP(string user,string pass,uint otp);
+    bool validateOTP(string user, string pass, string otpStr);
 };
 
 #endif // DATAMANAGER_H

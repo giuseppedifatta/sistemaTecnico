@@ -5,7 +5,8 @@ SchedaVoto::SchedaVoto()
 {
     modalitaAdd = SchedaVoto::modoAdd::candidato;
     numeroLista = 0;
-    //id della procedura a cui la scheda di voto è associata
+    numPreferenze = 0;
+    idProceduraVoto = 0;
 
 }
 

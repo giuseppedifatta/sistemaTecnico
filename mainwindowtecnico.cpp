@@ -75,7 +75,7 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
     QObject::connect(model,SIGNAL(idSeggioCreating(uint)),this,SLOT(addGeneratoriOTP(uint)),Qt::QueuedConnection);
     QObject::connect(this,SIGNAL(rollbackNuovoSeggio()),model,SLOT(rollbackSeggio()),Qt::QueuedConnection);
     QObject::connect(this,SIGNAL(commitNuovoSeggio()),model,SLOT(commitSeggio()),Qt::QueuedConnection);
-    QObject::connect(this,SIGNAL(testAndRecord(string,string,string,uint,uint)),model,SLOT(testTokenAndStoreNoCommit(string,string,string,uint,uint)),Qt::QueuedConnection);
+    QObject::connect(this,SIGNAL(testAndRecord(string,string,string,string,uint)),model,SLOT(testTokenAndStoreNoCommit(string,string,string,string,uint)),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(abortedSeggio()),this,SLOT(showMessageCreazioneSeggioAnnullata()),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(storedSeggio()),this,SLOT(showMessaggeSeggioCreato()),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(tokenStored(string,string,string,uint)),this,SLOT(addTokenToTable(string,string,string,uint)),Qt::QueuedConnection);
@@ -1842,8 +1842,8 @@ void MainWindowTecnico::on_pushButton_testOTP_clicked()
         return;
     }
     string otpStr = otp.toStdString();
-    emit testAndRecord(strSN,user,pass,atoi(otpStr.c_str()),idNuovoSeggio);
-    ui->formWidget_testHT->clearMask();
+    emit testAndRecord(strSN,user,pass,otpStr,idNuovoSeggio);
+
 }
 
 void MainWindowTecnico::on_pushButton_annullaCreazioneSeggio_clicked()
