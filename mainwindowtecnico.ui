@@ -68,7 +68,7 @@ background-color: rgb(49, 149, 255);
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>9</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="login_urna_page">
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -716,7 +716,7 @@ background-color: rgb(49, 149, 255);
            <item>
             <widget class="QPushButton" name="pushButton_printSessionKeys">
              <property name="text">
-              <string>Stampa Chiavi Prossima Sessione</string>
+              <string>Stampa Chiavi delle Sessioni</string>
              </property>
             </widget>
            </item>
@@ -1504,10 +1504,24 @@ background-color: rgb(49, 149, 255);
                </property>
               </widget>
              </item>
+             <item row="1" column="1">
+              <widget class="QLineEdit" name="lineEdit_usernameHT">
+               <property name="placeholderText">
+                <string>inserire username account dell'hardware token</string>
+               </property>
+              </widget>
+             </item>
              <item row="2" column="0">
               <widget class="QLabel" name="label_passwordHT">
                <property name="text">
                 <string>password</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLineEdit" name="lineEdit_passwordHT">
+               <property name="placeholderText">
+                <string>inserire password account dell'hardware token</string>
                </property>
               </widget>
              </item>
@@ -1522,20 +1536,6 @@ background-color: rgb(49, 149, 255);
               <widget class="QLineEdit" name="lineEdit_OTP">
                <property name="placeholderText">
                 <string>cliccare sul generatore di otp e digitare il codice visualizzato</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QLineEdit" name="lineEdit_passwordHT">
-               <property name="placeholderText">
-                <string>inserire password account dell'hardware token</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QLineEdit" name="lineEdit_usernameHT">
-               <property name="placeholderText">
-                <string>inserire username account dell'hardware token</string>
                </property>
               </widget>
              </item>
