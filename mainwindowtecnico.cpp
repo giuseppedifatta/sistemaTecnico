@@ -463,6 +463,17 @@ void MainWindowTecnico::mostraScheda(){
                                QString::fromStdString(descScheda),ui->listWidget_candidati);
 
     item->setFont(serifFont);
+    vector <uint> idTipiVotanti = schedaCorrente.getIdTipiVotantiConsentiti();
+    QString listTipiVotanti;
+    for (uint i = 0; i< idTipiVotanti.size(); i++){
+        listTipiVotanti = listTipiVotanti + QString::number(idTipiVotanti.at(i));
+        if(i+1 < idTipiVotanti.size() ){
+            listTipiVotanti = listTipiVotanti + ", ";
+        }
+    }
+    item = new QListWidgetItem("Id Tipi Votanti: " + listTipiVotanti,ui->listWidget_candidati);
+
+    item->setFont(serifFont);
     uint numeroPreferenze = schedaCorrente.getNumPreferenze();
     item = new QListWidgetItem("Numero preferenze: " +
                                QString::number(numeroPreferenze),ui->listWidget_candidati);
@@ -697,6 +708,7 @@ void MainWindowTecnico::createScheda(vector<TipoVotante> tipiVotanti){
 
     }
 
+    this->numTipoVotantiChecked = 0;
 
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::creazioneSchede);
 
@@ -849,30 +861,27 @@ void MainWindowTecnico::on_pushButton_conferma_aggiungi_clicked()
 
 void MainWindowTecnico::on_pushButton_completa_scheda_clicked()
 {
-    uint numPref = ui->spinBox_numero_preferenze->text().toUInt();
-    if(numPref == 0){
-        numPref = 1;
+
+    if(nuovaScheda->getCandidati().size()<2){
+        //se non sono stati inseriti almeno due candidati alla scheda di voto
+        QMessageBox::information(this,"Error Message","Inserire almeno due candidati prima di completare la scheda");
+        return;
     }
-    nuovaScheda->setNumPreferenze(numPref);
-    nuovaScheda->setDescrizioneElezione(ui->lineEdit_descrizioneQuesitoScheda->text().toStdString());
+
+    if(ui->lineEdit_descrizioneQuesitoScheda->text()==""){
+        QMessageBox::information(this,"Error Message","Il campo descrizione scheda è obbligatorio");
+        return;
+
+    }
+    else{
+        nuovaScheda->setDescrizioneElezione(ui->lineEdit_descrizioneQuesitoScheda->text().toStdString());
+    }
 
     if(this->numTipoVotantiChecked ==0){
-        QMessageBox::information(this,"Error Message","Selezionate almeno un tipo di votante per la scheda corrente");
+        QMessageBox::information(this,"Error Message","Selezionare almeno un tipo di votante per la scheda corrente");
         return;
     }
     else{
-        //aggiungo alla scheda di voto gli idi dei tipi di votanti che possono compilare questa scheda
-        for(int i = 0; i < ui->listWidget_tipoVotanti->count(); ++i)
-        {
-            QListWidgetItem* item = ui->listWidget_tipoVotanti->item(i);
-            if(item->checkState()==Qt::CheckState::Checked){
-                QVariant var = item->data(Qt::UserRole);
-                nuovaScheda->addIdTipiVotantiConsentiti(var.toUInt());
-            }
-        }
-    }
-    if(nuovaScheda->getCandidati().size()>1){
-        //se sono stati inseriti almeno due candidati alla scheda di voto
         QMessageBox msgBox(this);
         msgBox.setInformativeText("Completare la creazione della scheda?");
         msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
@@ -882,11 +891,26 @@ void MainWindowTecnico::on_pushButton_completa_scheda_clicked()
         if(ret == QMessageBox::Cancel){
             return;
         }
+        //aggiungo alla scheda di voto gli id dei tipi di votanti che possono compilare questa scheda
+        for(int i = 0; i < ui->listWidget_tipoVotanti->count(); ++i)
+        {
+            QListWidgetItem* item = ui->listWidget_tipoVotanti->item(i);
+            if(item->checkState()==Qt::CheckState::Checked){
+                QVariant var = item->data(Qt::UserRole);
+                nuovaScheda->addIdTipiVotantiConsentiti(var.toUInt());
+            }
+        }
+
+        uint numPref = ui->spinBox_numero_preferenze->text().toUInt();
+        if(numPref == 0){
+            numPref = 1;
+        }
+        nuovaScheda->setNumPreferenze(numPref);
+
+
         emit schedaPronta(nuovaScheda);
+
         cout << "emesso il segnale di scheda pronta" << endl;
-    }
-    else{
-        QMessageBox::information(this,"Error Message","Inserire almeno due candidati prima di completare la scheda");
     }
 
 }
@@ -1208,8 +1232,10 @@ void MainWindowTecnico::showMessageCreazioneSeggioAnnullata()
 }
 
 void MainWindowTecnico::addTokenToTable(string sn, string user, string pass, uint idSeggio){
-
-    ui->tableWidget_hardwareToken->insertRow(ui->tableWidget_lista_procedure->rowCount());
+    uint indexNewRow = ui->tableWidget_lista_procedure->rowCount();
+    cout << "indice nuova riga: " << indexNewRow << endl;
+     ui->tableWidget_lista_procedure->insertRow(indexNewRow);
+    ui->tableWidget_hardwareToken->insertRow(indexNewRow);
     int rigaAggiunta = ui->tableWidget_hardwareToken->rowCount()-1;
 
 
@@ -1794,6 +1820,13 @@ void MainWindowTecnico::on_pushButton_backToOperation_clicked()
 
 void MainWindowTecnico::on_pushButton_aggiungiSeggio_clicked()
 {
+    if(ui->lineEdit_denominazioneIndirizzo->text()==""){
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle("Attenzione");
+        msgBox.setInformativeText("Compilare tutti i campi.");
+        msgBox.exec();
+        return;
+    }
 
     QString ipSeggio = ui->comboBox_ipSeggioDisponibili->currentText();
     string ipNuovoSeggio = ipSeggio.toStdString();
@@ -1837,7 +1870,7 @@ void MainWindowTecnico::on_pushButton_testOTP_clicked()
     if (!(re.exactMatch(otp))){
         QMessageBox msgBox(this);
         msgBox.setWindowTitle("Errore");
-        msgBox.setInformativeText("L'otp deve contenere solo caratteri numerici");
+        msgBox.setInformativeText("OTP non valida, sono ammessi solo caratteri numerici");
         msgBox.exec();
         return;
     }

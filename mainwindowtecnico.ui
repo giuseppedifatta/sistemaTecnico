@@ -2,16 +2,34 @@
 <ui version="4.0">
  <class>MainWindowTecnico</class>
  <widget class="QMainWindow" name="MainWindowTecnico">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1201</width>
-    <height>722</height>
+    <width>1360</width>
+    <height>816</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>16777215</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>MainWindowTecnico</string>
+  </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
   </property>
   <property name="styleSheet">
    <string notr="true">QMainWindow {
@@ -23,7 +41,7 @@ background-color:rgb(146, 134, 134);
 font-size: 22px bold sans serif;
 text-align:center;
 vertical-align:middle;
-min-height:60px;
+height:60px;
 color:black;
 }
 .QPushButton:disabled{
@@ -31,14 +49,14 @@ background-color: rgb(49, 149, 255);
 font-size: 22px bold sans serif;
 text-align:center;
 vertical-align:middle;
-min-height:60px;
+height:60px;
 color: rgb(108, 108, 108);
-
 }
 
 .QLabel {
 color: white;
 font-size: 20px bold sans serif;
+height:40px;
 }
 
 .QLineEdit{
@@ -49,125 +67,367 @@ background-color: white;
 .QComboBox{
 font:18px bold sans serif;
 }
+.QMessageBox{
+background-color: rgb(49, 149, 255);
+}
 
 
+.QPushButton {
+background-color:rgb(146, 134, 134);
+font-size: 22px bold sans serif;
+text-align:center;
+vertical-align:middle;
+height:60px;
+color:black;
+}
+.QPushButton:disabled{
+background-color: rgb(49, 149, 255);
+font-size: 22px bold sans serif;
+text-align:center;
+vertical-align:middle;
+height:60px;
+color: rgb(108, 108, 108);
+}
 
+.QLabel {
+color: white;
+font-size: 20px bold sans serif;
+height:40px;
+}
+
+.QLineEdit{
+font:18px bold sans serif;
+background-color: white;
+}
+
+.QComboBox{
+font:18px bold sans serif;
+}
 .QMessageBox{
 background-color: rgb(49, 149, 255);
 }
 </string>
   </property>
+  <property name="animated">
+   <bool>true</bool>
+  </property>
+  <property name="documentMode">
+   <bool>false</bool>
+  </property>
+  <property name="dockNestingEnabled">
+   <bool>false</bool>
+  </property>
+  <property name="unifiedTitleAndToolBarOnMac">
+   <bool>false</bool>
+  </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_14">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>16777215</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_3">
+    <property name="leftMargin">
+     <number>9</number>
+    </property>
+    <property name="topMargin">
+     <number>9</number>
+    </property>
+    <property name="rightMargin">
+     <number>9</number>
+    </property>
+    <property name="bottomMargin">
+     <number>9</number>
+    </property>
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>11</number>
       </property>
-      <widget class="QWidget" name="login_urna_page">
-       <layout class="QVBoxLayout" name="verticalLayout_3">
-        <property name="leftMargin">
-         <number>50</number>
-        </property>
-        <property name="rightMargin">
-         <number>50</number>
-        </property>
-        <property name="bottomMargin">
-         <number>50</number>
-        </property>
+      <widget class="QWidget" name="login_tecnico_page">
+       <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout">
-          <property name="spacing">
-           <number>50</number>
-          </property>
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QLabel" name="label_accessSistemaTecnico">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>SISTEMA TECNICO</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_6">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
           <item>
            <widget class="QPushButton" name="pushButton_login_tecnico">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="text">
              <string>Login Tecnico</string>
             </property>
            </widget>
           </item>
           <item>
+           <spacer name="verticalSpacer_7">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
            <widget class="QPushButton" name="pushButton_change_password">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>60</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="text">
              <string>Modifica Password Tecnico</string>
             </property>
            </widget>
           </item>
+          <item>
+           <spacer name="verticalSpacer_8">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_exit">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Exit</string>
+            </property>
+           </widget>
+          </item>
          </layout>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_exit">
-          <property name="text">
-           <string>Exit</string>
-          </property>
-         </widget>
         </item>
        </layout>
       </widget>
       <widget class="QWidget" name="login_tecnico_password_page">
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <property name="leftMargin">
-         <number>50</number>
+         <number>9</number>
         </property>
         <property name="topMargin">
-         <number>50</number>
+         <number>9</number>
         </property>
         <property name="rightMargin">
-         <number>50</number>
+         <number>9</number>
         </property>
         <property name="bottomMargin">
-         <number>50</number>
+         <number>9</number>
         </property>
         <item>
-         <layout class="QFormLayout" name="formLayout">
-          <property name="leftMargin">
-           <number>50</number>
-          </property>
-          <property name="topMargin">
-           <number>50</number>
-          </property>
-          <property name="rightMargin">
-           <number>50</number>
-          </property>
-          <property name="bottomMargin">
-           <number>50</number>
-          </property>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_password_tecnico">
-            <property name="text">
-             <string>Password Tecnico</string>
+         <layout class="QGridLayout" name="gridLayout_11" rowstretch="0,0,0,0">
+          <item row="3" column="0" colspan="2">
+           <spacer name="verticalSpacer_11">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="Line" name="line_4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="lineEdit_password_tecnico">
-            <property name="placeholderText">
-             <string>Digita password tecnico</string>
+          <item row="0" column="0" colspan="2">
+           <widget class="QLabel" name="label_12">
+            <property name="text">
+             <string>ACCESSO TECNICO</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QLabel" name="label_password_errata">
-            <property name="styleSheet">
-             <string notr="true">color:red;</string>
-            </property>
-            <property name="text">
-             <string>La password digitata non è corretta</string>
-            </property>
-           </widget>
+          <item row="2" column="0" colspan="2">
+           <layout class="QFormLayout" name="formLayout">
+            <item row="5" column="0">
+             <widget class="QLabel" name="label_password_tecnico">
+              <property name="text">
+               <string>Password Tecnico</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1">
+             <widget class="QLineEdit" name="lineEdit_password_tecnico">
+              <property name="placeholderText">
+               <string>Digita password tecnico</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="1">
+             <widget class="QLabel" name="label_password_errata">
+              <property name="styleSheet">
+               <string notr="true">color:red;</string>
+              </property>
+              <property name="text">
+               <string>La password digitata non è corretta</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" colspan="2">
+             <spacer name="verticalSpacer_9">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="1" column="0" colspan="2">
+             <spacer name="verticalSpacer_10">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="2" column="0" colspan="2">
+             <spacer name="verticalSpacer_12">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="3" column="0" colspan="2">
+             <spacer name="verticalSpacer_13">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="4" column="0" colspan="2">
+             <spacer name="verticalSpacer_14">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </item>
          </layout>
         </item>
@@ -197,14 +457,31 @@ background-color: rgb(49, 149, 255);
       <widget class="QWidget" name="modifica_password_tecnico_page">
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <property name="leftMargin">
-         <number>50</number>
+         <number>9</number>
         </property>
         <property name="topMargin">
-         <number>50</number>
+         <number>9</number>
         </property>
         <property name="rightMargin">
-         <number>50</number>
+         <number>9</number>
         </property>
+        <item>
+         <widget class="QLabel" name="label_13">
+          <property name="text">
+           <string>MODIFICA PASSWORD TECNICO</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
         <item>
          <layout class="QFormLayout" name="formLayout_2">
           <property name="horizontalSpacing">
@@ -214,46 +491,53 @@ background-color: rgb(49, 149, 255);
            <number>0</number>
           </property>
           <property name="leftMargin">
-           <number>50</number>
+           <number>0</number>
           </property>
           <property name="topMargin">
-           <number>50</number>
+           <number>0</number>
           </property>
           <property name="rightMargin">
-           <number>50</number>
+           <number>0</number>
           </property>
           <property name="bottomMargin">
-           <number>50</number>
+           <number>0</number>
           </property>
-          <item row="0" column="0">
+          <item row="4" column="0">
            <widget class="QLabel" name="label_new_password">
             <property name="text">
              <string>Nuova password Tecnico</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
+          <item row="4" column="1">
            <widget class="QLineEdit" name="lineEdit_new_password">
             <property name="placeholderText">
              <string>Inserire nuova password</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
+          <item row="5" column="1">
+           <widget class="QLabel" name="label_11">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="0">
            <widget class="QLabel" name="label_repeat_new_password">
             <property name="text">
              <string>Nuova password Tecnico</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
+          <item row="7" column="1">
            <widget class="QLineEdit" name="lineEdit_repeat_new_password">
             <property name="placeholderText">
              <string>Ripetere nuova password</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
+          <item row="8" column="1">
            <widget class="QLabel" name="label_error_repeat_pass">
             <property name="styleSheet">
              <string notr="true">color:red;</string>
@@ -263,35 +547,35 @@ background-color: rgb(49, 149, 255);
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
+          <item row="9" column="1">
            <widget class="QLabel" name="label_9">
             <property name="text">
              <string/>
             </property>
            </widget>
           </item>
-          <item row="5" column="1">
+          <item row="10" column="1">
            <widget class="QLabel" name="label_10">
             <property name="text">
              <string/>
             </property>
            </widget>
           </item>
-          <item row="6" column="0">
+          <item row="12" column="0">
            <widget class="QLabel" name="label_su_password">
             <property name="text">
              <string>Password superuser</string>
             </property>
            </widget>
           </item>
-          <item row="6" column="1">
+          <item row="12" column="1">
            <widget class="QLineEdit" name="lineEdit_su_password">
             <property name="placeholderText">
              <string>Inserire password superuser</string>
             </property>
            </widget>
           </item>
-          <item row="7" column="1">
+          <item row="13" column="1">
            <widget class="QLabel" name="label_error_su_password">
             <property name="styleSheet">
              <string notr="true">color:red;</string>
@@ -301,12 +585,70 @@ background-color: rgb(49, 149, 255);
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QLabel" name="label_11">
-            <property name="text">
-             <string/>
+          <item row="2" column="0" colspan="2">
+           <spacer name="verticalSpacer_15">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
             </property>
-           </widget>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="3" column="0" colspan="2">
+           <spacer name="verticalSpacer_16">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="6" column="0" colspan="2">
+           <spacer name="verticalSpacer_17">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="11" column="0" colspan="2">
+           <spacer name="verticalSpacer_18">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="14" column="0" colspan="2">
+           <spacer name="verticalSpacer_19">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </item>
@@ -334,74 +676,255 @@ background-color: rgb(49, 149, 255);
        </layout>
       </widget>
       <widget class="QWidget" name="scelta_operazione_page">
-       <layout class="QVBoxLayout" name="verticalLayout_6">
-        <property name="leftMargin">
-         <number>50</number>
-        </property>
-        <property name="rightMargin">
-         <number>50</number>
-        </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <layout class="QGridLayout" name="gridLayout" rowstretch="1,1">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>50</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>50</number>
-          </property>
+         <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0">
           <property name="spacing">
-           <number>50</number>
+           <number>6</number>
           </property>
-          <item row="1" column="1">
-           <widget class="QPushButton" name="pushButton_crea_seggio">
-            <property name="text">
-             <string>Crea nuovo Seggio</string>
+          <item>
+           <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0,0,0,0,0,0,0">
+            <property name="horizontalSpacing">
+             <number>50</number>
             </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QPushButton" name="pushButton_visualizza_procedure">
-            <property name="text">
-             <string>Visualizza Procedure di Voto</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QPushButton" name="pushButton_registra_RP">
-            <property name="text">
-             <string>Registra RP</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QPushButton" name="pushButton_crea_procedura">
-            <property name="text">
-             <string>Crea Procedura di Voto</string>
-            </property>
-           </widget>
+            <item row="9" column="0" colspan="2">
+             <widget class="QPushButton" name="pushButton_logout">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Logout</string>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="0" colspan="2">
+             <spacer name="verticalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="0" column="0" colspan="2">
+             <widget class="QLabel" name="label_sceltaOperazione">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>SCELTA OPERAZIONE</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0" colspan="2">
+             <spacer name="verticalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="4" column="0" colspan="2">
+             <spacer name="verticalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="3" column="1">
+             <widget class="QPushButton" name="pushButton_crea_seggio">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Gestisci Seggi</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1">
+             <widget class="QPushButton" name="pushButton_visualizza_procedure">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Visualizza Procedure di Voto</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QPushButton" name="pushButton_crea_procedura">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Crea Procedura di Voto</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QPushButton" name="pushButton_registra_RP">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Registra RP</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" colspan="2">
+             <widget class="Line" name="line_3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_logout">
-          <property name="text">
-           <string>Logout</string>
-          </property>
-         </widget>
         </item>
        </layout>
       </widget>
       <widget class="QWidget" name="creazione_procedura_page">
        <layout class="QVBoxLayout" name="verticalLayout_7">
         <property name="spacing">
-         <number>15</number>
+         <number>6</number>
         </property>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_14">
+          <item>
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>CREAZIONE PROCEDURA</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line_5">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_25">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
         <item>
          <layout class="QFormLayout" name="formLayout_3">
           <property name="sizeConstraint">
@@ -413,24 +936,30 @@ background-color: rgb(49, 149, 255);
           <property name="rowWrapPolicy">
            <enum>QFormLayout::DontWrapRows</enum>
           </property>
-          <item row="0" column="0">
+          <property name="labelAlignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
+          <property name="formAlignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+          </property>
+          <item row="1" column="0">
            <widget class="QLabel" name="label_descrizione_procedura">
             <property name="text">
              <string>Descrizione Procedura</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
+          <item row="1" column="1">
            <widget class="QLineEdit" name="lineEdit_descrizione_procedura"/>
           </item>
-          <item row="1" column="0">
+          <item row="2" column="0">
            <widget class="QLabel" name="label_numero_schede">
             <property name="text">
              <string>Numero schede</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="2" column="1">
            <widget class="QSpinBox" name="spinBox_numero_schede">
             <property name="maximumSize">
              <size>
@@ -450,6 +979,19 @@ background-color: rgb(49, 149, 255);
            </widget>
           </item>
          </layout>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_26">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
         </item>
         <item>
          <layout class="QGridLayout" name="gridLayout_2">
@@ -504,23 +1046,35 @@ background-color: rgb(49, 149, 255);
          </layout>
         </item>
         <item>
+         <spacer name="verticalSpacer_27">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="4" column="0" colspan="2">
-           <layout class="QFormLayout" name="formLayout_12">
-            <property name="rowWrapPolicy">
-             <enum>QFormLayout::WrapAllRows</enum>
+          <item row="1" column="2">
+           <widget class="QTimeEdit" name="timeEdit_chiusura_sessione">
+            <property name="buttonSymbols">
+             <enum>QAbstractSpinBox::UpDownArrows</enum>
             </property>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_sessioni_inserite">
-              <property name="text">
-               <string>Sessioni inserite</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QComboBox" name="comboBox_sessioni_inserite"/>
-            </item>
-           </layout>
+            <property name="showGroupSeparator" stdset="0">
+             <bool>true</bool>
+            </property>
+            <property name="calendarPopup">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QTimeEdit" name="timeEdit_apertura_sessione"/>
           </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_data_sessione">
@@ -529,10 +1083,27 @@ background-color: rgb(49, 149, 255);
             </property>
            </widget>
           </item>
-          <item row="4" column="2">
-           <widget class="QPushButton" name="pushButton_elimina_sessione">
+          <item row="0" column="2">
+           <widget class="QLabel" name="label_ora_chiusura">
             <property name="text">
-             <string>Elimina sessione</string>
+             <string>Ora chiusura seggi</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="label_ora_apertura">
+            <property name="text">
+             <string>Ora apertura seggi</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QDateEdit" name="dateEdit_data_sessione">
+            <property name="displayFormat">
+             <string>dd/MM/yyyy</string>
+            </property>
+            <property name="calendarPopup">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -549,78 +1120,94 @@ background-color: rgb(49, 149, 255);
             </property>
            </widget>
           </item>
-          <item row="1" column="2">
-           <widget class="QTimeEdit" name="timeEdit_chiusura_sessione">
-            <property name="buttonSymbols">
-             <enum>QAbstractSpinBox::UpDownArrows</enum>
+          <item row="3" column="2" rowspan="2">
+           <widget class="QPushButton" name="pushButton_elimina_sessione">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
             </property>
-            <property name="showGroupSeparator" stdset="0">
-             <bool>true</bool>
-            </property>
-            <property name="calendarPopup">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLabel" name="label_ora_apertura">
             <property name="text">
-             <string>Ora apertura seggi</string>
+             <string>Elimina sessione</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="label_ora_chiusura">
-            <property name="text">
-             <string>Ora chiusura seggi</string>
+          <item row="3" column="0" rowspan="2" colspan="2">
+           <layout class="QFormLayout" name="formLayout_12">
+            <property name="rowWrapPolicy">
+             <enum>QFormLayout::WrapAllRows</enum>
             </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QDateEdit" name="dateEdit_data_sessione">
-            <property name="displayFormat">
-             <string>dd/MM/yyyy</string>
-            </property>
-            <property name="calendarPopup">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QTimeEdit" name="timeEdit_apertura_sessione"/>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_sessioni_inserite">
+              <property name="text">
+               <string>Sessioni inserite</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QComboBox" name="comboBox_sessioni_inserite"/>
+            </item>
+           </layout>
           </item>
          </layout>
         </item>
         <item>
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Seleziona uno dei responsabili di procedimento nell'elenco sottostante</string>
+         <spacer name="verticalSpacer_28">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
           </property>
-         </widget>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
         </item>
         <item>
          <layout class="QFormLayout" name="formLayout_4">
           <property name="sizeConstraint">
            <enum>QLayout::SetMinimumSize</enum>
           </property>
-          <item row="0" column="0">
+          <item row="1" column="0">
            <widget class="QLabel" name="label_RP">
             <property name="text">
              <string>Responsabile Procedimento</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
+          <item row="1" column="1">
            <widget class="QComboBox" name="comboBox_idRP"/>
           </item>
-          <item row="1" column="1">
+          <item row="2" column="1">
            <widget class="QPushButton" name="pushButton_visualizzaInfoRP">
             <property name="text">
              <string>Visualizza generalità</string>
             </property>
            </widget>
           </item>
+          <item row="0" column="0" colspan="2">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Seleziona uno dei responsabili di procedimento nell'elenco sottostante</string>
+            </property>
+           </widget>
+          </item>
          </layout>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_29">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -647,6 +1234,23 @@ background-color: rgb(49, 149, 255);
       </widget>
       <widget class="QWidget" name="visualizzazione_procedure_page">
        <layout class="QVBoxLayout" name="verticalLayout_8">
+        <item>
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>VISUALIZZAZIONE PROCEDURE</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_6">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
         <item>
          <widget class="QTableWidget" name="tableWidget_lista_procedure">
           <property name="rowCount">
@@ -746,6 +1350,27 @@ background-color: rgb(49, 149, 255);
         <property name="bottomMargin">
          <number>20</number>
         </property>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_15">
+          <item>
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>CREAZIONE SCHEDA DI VOTO</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line_7">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_9">
           <property name="spacing">
@@ -850,7 +1475,7 @@ background-color: rgb(49, 149, 255);
             <item row="0" column="0">
              <widget class="QPushButton" name="pushButton_aggiungi_candidato">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -1042,6 +1667,12 @@ background-color: rgb(49, 149, 255);
              <layout class="QHBoxLayout" name="horizontalLayout_8">
               <item>
                <widget class="QPushButton" name="pushButton_annulla_aggiungi">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
                 <property name="text">
                  <string>Annulla</string>
                 </property>
@@ -1049,6 +1680,12 @@ background-color: rgb(49, 149, 255);
               </item>
               <item>
                <widget class="QPushButton" name="pushButton_conferma_aggiungi">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
                 <property name="text">
                  <string>Conferma</string>
                 </property>
@@ -1086,6 +1723,12 @@ background-color: rgb(49, 149, 255);
           </property>
           <item row="0" column="1">
            <widget class="QPushButton" name="pushButton_rimuovi_candidato">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="text">
              <string>Rimuovi candidato</string>
             </property>
@@ -1110,6 +1753,12 @@ background-color: rgb(49, 149, 255);
           </item>
           <item row="1" column="1">
            <widget class="QPushButton" name="pushButton_rimuovi_gruppo">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="text">
              <string>Rimuovi Lista</string>
             </property>
@@ -1158,9 +1807,27 @@ background-color: rgb(49, 149, 255);
        </layout>
        <zorder></zorder>
        <zorder></zorder>
+       <zorder>line_7</zorder>
       </widget>
       <widget class="QWidget" name="registrazione_RP_page">
        <layout class="QVBoxLayout" name="verticalLayout_10">
+        <item>
+         <widget class="QLabel" name="label_14">
+          <property name="text">
+           <string>REGISTRAZIONE RESPONSABILE DI PROCEDIMENTO</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_8">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
         <item>
          <layout class="QFormLayout" name="formLayout_9">
           <property name="verticalSpacing">
@@ -1286,6 +1953,19 @@ background-color: rgb(49, 149, 255);
             </property>
            </widget>
           </item>
+          <item row="8" column="0" colspan="2">
+           <spacer name="verticalSpacer_22">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
          </layout>
         </item>
         <item>
@@ -1312,20 +1992,38 @@ background-color: rgb(49, 149, 255);
        </layout>
       </widget>
       <widget class="QWidget" name="creazione_seggio_page">
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <layout class="QHBoxLayout" name="horizontalLayout_16">
         <item>
-         <layout class="QGridLayout" name="gridLayout_8" rowstretch="0,1,0,1,0">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_creazioneSeggio">
+         <layout class="QGridLayout" name="gridLayout_8" rowstretch="0,0,0,0,0,0,0,0,0">
+          <item row="8" column="0">
+           <widget class="QPushButton" name="pushButton_backToOperation">
             <property name="text">
-             <string>CREAZIONE SEGGIO</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
+             <string>Indietro</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
+          <item row="6" column="0">
+           <layout class="QFormLayout" name="formLayout_15">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_selezionaSeggio">
+              <property name="text">
+               <string>Seleziona Seggio da eliminare</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="comboBox_selezionaSeggioDaRimuovere"/>
+            </item>
+            <item row="1" column="1">
+             <widget class="QPushButton" name="pushButton_eliminaSeggio">
+              <property name="text">
+               <string>Elimina Seggio</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="2" column="0">
            <layout class="QFormLayout" name="formLayout_13">
             <item row="0" column="0">
              <widget class="QLabel" name="label_sedeSeggio">
@@ -1360,7 +2058,37 @@ background-color: rgb(49, 149, 255);
             </item>
            </layout>
           </item>
-          <item row="2" column="0">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_creazioneSeggio">
+            <property name="text">
+             <string>CREAZIONE SEGGIO</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="Line" name="line_10">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="0">
+           <spacer name="verticalSpacer_23">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="4" column="0">
            <widget class="QLabel" name="label_rimozioneSeggio">
             <property name="text">
              <string>RIMOZIONE SEGGIO</string>
@@ -1370,33 +2098,25 @@ background-color: rgb(49, 149, 255);
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <layout class="QFormLayout" name="formLayout_15">
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_selezionaSeggio">
-              <property name="text">
-               <string>Seleziona Seggio da eliminare</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QComboBox" name="comboBox_selezionaSeggioDaRimuovere"/>
-            </item>
-            <item row="1" column="1">
-             <widget class="QPushButton" name="pushButton_eliminaSeggio">
-              <property name="text">
-               <string>Elimina Seggio</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="4" column="0">
-           <widget class="QPushButton" name="pushButton_backToOperation">
-            <property name="text">
-             <string>Indietro</string>
+          <item row="1" column="0">
+           <widget class="Line" name="line_9">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
             </property>
            </widget>
+          </item>
+          <item row="3" column="0">
+           <spacer name="verticalSpacer_24">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </item>
@@ -1405,76 +2125,8 @@ background-color: rgb(49, 149, 255);
       <widget class="QWidget" name="aggiunta_token_seggio_page">
        <layout class="QVBoxLayout" name="verticalLayout_13">
         <item>
-         <layout class="QGridLayout" name="gridLayout_9" rowstretch="0,0,1,1,0">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>TEST E AGGIUNTA DEGLI HARDWARE TOKEN</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QTableWidget" name="tableWidget_hardwareToken">
-            <column>
-             <property name="text">
-              <string>New Column</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>New Column</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>New Column</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>New Column</string>
-             </property>
-            </column>
-           </widget>
-          </item>
+         <layout class="QGridLayout" name="gridLayout_9" rowstretch="0,0,0,0,0,0">
           <item row="4" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_13">
-            <property name="spacing">
-             <number>50</number>
-            </property>
-            <property name="leftMargin">
-             <number>50</number>
-            </property>
-            <property name="rightMargin">
-             <number>50</number>
-            </property>
-            <item>
-             <widget class="QPushButton" name="pushButton_annullaCreazioneSeggio">
-              <property name="text">
-               <string>Annulla Creazione Seggio</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButton_completaCreazioneSeggio">
-              <property name="text">
-               <string>Completa Creazione Seggio</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>ATTENZIONE!!! E' necessario aggiungere 5 hardware token per completare la creazione del seggio.</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
            <widget class="QWidget" name="formWidget_testHT" native="true">
             <layout class="QFormLayout" name="formLayout_14">
              <property name="leftMargin">
@@ -1555,6 +2207,81 @@ background-color: rgb(49, 149, 255);
             </layout>
            </widget>
           </item>
+          <item row="3" column="0">
+           <widget class="QTableWidget" name="tableWidget_hardwareToken">
+            <column>
+             <property name="text">
+              <string>New Column</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>New Column</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>New Column</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>New Column</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_13">
+            <property name="spacing">
+             <number>50</number>
+            </property>
+            <property name="leftMargin">
+             <number>50</number>
+            </property>
+            <property name="rightMargin">
+             <number>50</number>
+            </property>
+            <item>
+             <widget class="QPushButton" name="pushButton_annullaCreazioneSeggio">
+              <property name="text">
+               <string>Annulla Creazione Seggio</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_completaCreazioneSeggio">
+              <property name="text">
+               <string>Completa Creazione Seggio</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>TEST E AGGIUNTA DEGLI HARDWARE TOKEN</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>ATTENZIONE!!! E' necessario aggiungere 5 hardware token per completare la creazione del seggio.</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="Line" name="line_11">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>
@@ -1581,7 +2308,7 @@ background-color: rgb(49, 149, 255);
           <property name="bottomMargin">
            <number>0</number>
           </property>
-          <item row="1" column="0">
+          <item row="3" column="0">
            <layout class="QFormLayout" name="formLayout_5">
             <item row="0" column="0">
              <widget class="QLabel" name="label_descProc_s">
@@ -1613,7 +2340,24 @@ background-color: rgb(49, 149, 255);
             </item>
            </layout>
           </item>
-          <item row="2" column="0">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>VISUALIZZAZIONE SESSIONI</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QPushButton" name="pushButton_indietro_toProcedure">
+            <property name="text">
+             <string>Indietro</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
            <widget class="QTableWidget" name="tableWidget_sessioni">
             <column>
              <property name="text">
@@ -1637,22 +2381,38 @@ background-color: rgb(49, 149, 255);
             </column>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QPushButton" name="pushButton_indietro_toProcedure">
-            <property name="text">
-             <string>Indietro</string>
+          <item row="2" column="0">
+           <spacer name="verticalSpacer_20">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="1" column="0">
+           <widget class="Line" name="line_12">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_5">
-            <property name="text">
-             <string>VISUALIZZAZIONE SESSIONI</string>
+          <item row="5" column="0">
+           <spacer name="verticalSpacer_21">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
             </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
             </property>
-           </widget>
+           </spacer>
           </item>
          </layout>
         </item>
@@ -1661,19 +2421,25 @@ background-color: rgb(49, 149, 255);
       <widget class="QWidget" name="visualizzazione_schede_page">
        <layout class="QVBoxLayout" name="verticalLayout_9">
         <item>
-         <layout class="QGridLayout" name="gridLayout_6" rowstretch="0,1,0,0">
+         <layout class="QGridLayout" name="gridLayout_6" rowstretch="0,1,0,0,0,0">
           <property name="bottomMargin">
            <number>10</number>
           </property>
-          <item row="3" column="0">
-           <widget class="QPushButton" name="pushButton_backToProcedure">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>Torna alla visualizzazione delle procedure</string>
+             <string>VISUALIZZAZIONE SCHEDE PROCEDURA: </string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
+          <item row="4" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_12">
+            <property name="spacing">
+             <number>50</number>
+            </property>
             <item>
              <widget class="QPushButton" name="pushButton_precedente">
               <property name="text">
@@ -1690,18 +2456,38 @@ background-color: rgb(49, 149, 255);
             </item>
            </layout>
           </item>
-          <item row="1" column="0">
-           <widget class="QListWidget" name="listWidget_candidati"/>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_2">
+          <item row="5" column="0">
+           <widget class="QPushButton" name="pushButton_backToProcedure">
             <property name="text">
-             <string>VISUALIZZAZIONE SCHEDE PROCEDURA: </string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
+             <string>Torna alla visualizzazione delle procedure</string>
             </property>
            </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="Line" name="line_13">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <layout class="QVBoxLayout" name="verticalLayout_17">
+            <property name="leftMargin">
+             <number>50</number>
+            </property>
+            <property name="topMargin">
+             <number>50</number>
+            </property>
+            <property name="rightMargin">
+             <number>50</number>
+            </property>
+            <property name="bottomMargin">
+             <number>50</number>
+            </property>
+            <item>
+             <widget class="QListWidget" name="listWidget_candidati"/>
+            </item>
+           </layout>
           </item>
          </layout>
         </item>
@@ -1711,7 +2497,6 @@ background-color: rgb(49, 149, 255);
     </item>
    </layout>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

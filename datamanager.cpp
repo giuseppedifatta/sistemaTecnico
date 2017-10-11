@@ -1337,11 +1337,10 @@ void DataManager::addPostazioniNoCommit(vector<string> ipPostazioni,string descr
 
 
     for (uint i = 0; i <=3 ; i++){
-        pstmt = connection->prepareStatement("INSERT INTO Postazioni (idPostazione,idSeggio,ipPostazione) VALUES(?,?,?)");
+        pstmt = connection->prepareStatement("INSERT INTO Postazioni (idSeggio,ipPostazione) VALUES(?,?)");
         try{
-            pstmt->setUInt(1,i);
-            pstmt->setUInt(2,idSeggio);
-            pstmt->setString(3,ipPostazioni.at(i));
+            pstmt->setUInt(1,idSeggio);
+            pstmt->setString(2,ipPostazioni.at(i));
             pstmt->executeUpdate();
             //commit rimandata al momento dell'inserimento degli hardware token
 
@@ -1583,7 +1582,7 @@ void DataManager::storeProcedura(ProceduraVoto *procedura)
         for (uint p = 0; p < idPostazioni.size();p++ ){
 
             try{
-                sharedKey = generaSharedKey();
+                sharedKey = this->generaSharedKey();
                 pstmt->setUInt(1,idPostazioni.at(p));
                 pstmt->setUInt(2,idSessioni.at(s));
                 pstmt->setString(3,sharedKey);
@@ -1641,7 +1640,7 @@ bool DataManager::validateOTP(string user,string pass,string otpStr){
 
     //contattare otpServer per verificare il token rispetto all'account relativo al token associato alla postazione voto
     //string url = "https://147.163.26.229:8443/openotp/";
-    string url = "https://192.168.1.11:8443/openotp/";
+    string url = "https://192.168.1.10:8443/openotp/";
     string username = user;
     string password = pass;
 
