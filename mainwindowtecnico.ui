@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1360</width>
-    <height>816</height>
+    <width>1280</width>
+    <height>720</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -133,19 +133,7 @@ background-color: rgb(49, 149, 255);
      <height>16777215</height>
     </size>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout_3">
-    <property name="leftMargin">
-     <number>9</number>
-    </property>
-    <property name="topMargin">
-     <number>9</number>
-    </property>
-    <property name="rightMargin">
-     <number>9</number>
-    </property>
-    <property name="bottomMargin">
-     <number>9</number>
-    </property>
+   <layout class="QVBoxLayout" name="verticalLayout_5">
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="sizePolicy">
@@ -155,10 +143,10 @@ background-color: rgb(49, 149, 255);
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>11</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="login_tecnico_page">
-       <layout class="QHBoxLayout" name="horizontalLayout">
+       <layout class="QHBoxLayout" name="horizontalLayout_17">
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
@@ -455,16 +443,7 @@ background-color: rgb(49, 149, 255);
        </layout>
       </widget>
       <widget class="QWidget" name="modifica_password_tecnico_page">
-       <layout class="QVBoxLayout" name="verticalLayout_5">
-        <property name="leftMargin">
-         <number>9</number>
-        </property>
-        <property name="topMargin">
-         <number>9</number>
-        </property>
-        <property name="rightMargin">
-         <number>9</number>
-        </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
          <widget class="QLabel" name="label_13">
           <property name="text">
@@ -502,6 +481,19 @@ background-color: rgb(49, 149, 255);
           <property name="bottomMargin">
            <number>0</number>
           </property>
+          <item row="2" column="0" colspan="2">
+           <spacer name="verticalSpacer_16">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
           <item row="4" column="0">
            <widget class="QLabel" name="label_new_password">
             <property name="text">
@@ -516,12 +508,18 @@ background-color: rgb(49, 149, 255);
             </property>
            </widget>
           </item>
-          <item row="5" column="1">
-           <widget class="QLabel" name="label_11">
-            <property name="text">
-             <string/>
+          <item row="6" column="0" colspan="2">
+           <spacer name="verticalSpacer_17">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
             </property>
-           </widget>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
           </item>
           <item row="7" column="0">
            <widget class="QLabel" name="label_repeat_new_password">
@@ -547,84 +545,7 @@ background-color: rgb(49, 149, 255);
             </property>
            </widget>
           </item>
-          <item row="9" column="1">
-           <widget class="QLabel" name="label_9">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="1">
-           <widget class="QLabel" name="label_10">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="12" column="0">
-           <widget class="QLabel" name="label_su_password">
-            <property name="text">
-             <string>Password superuser</string>
-            </property>
-           </widget>
-          </item>
-          <item row="12" column="1">
-           <widget class="QLineEdit" name="lineEdit_su_password">
-            <property name="placeholderText">
-             <string>Inserire password superuser</string>
-            </property>
-           </widget>
-          </item>
-          <item row="13" column="1">
-           <widget class="QLabel" name="label_error_su_password">
-            <property name="styleSheet">
-             <string notr="true">color:red;</string>
-            </property>
-            <property name="text">
-             <string>La password del superuser non è esatta</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0" colspan="2">
-           <spacer name="verticalSpacer_15">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="3" column="0" colspan="2">
-           <spacer name="verticalSpacer_16">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="6" column="0" colspan="2">
-           <spacer name="verticalSpacer_17">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="11" column="0" colspan="2">
+          <item row="9" column="0" colspan="2">
            <spacer name="verticalSpacer_18">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -637,7 +558,31 @@ background-color: rgb(49, 149, 255);
             </property>
            </spacer>
           </item>
-          <item row="14" column="0" colspan="2">
+          <item row="10" column="0">
+           <widget class="QLabel" name="label_su_password">
+            <property name="text">
+             <string>Password superuser</string>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="1">
+           <widget class="QLineEdit" name="lineEdit_su_password">
+            <property name="placeholderText">
+             <string>Inserire password superuser</string>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="1">
+           <widget class="QLabel" name="label_error_su_password">
+            <property name="styleSheet">
+             <string notr="true">color:red;</string>
+            </property>
+            <property name="text">
+             <string>La password del superuser non è esatta</string>
+            </property>
+           </widget>
+          </item>
+          <item row="12" column="0" colspan="2">
            <spacer name="verticalSpacer_19">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -650,26 +595,26 @@ background-color: rgb(49, 149, 255);
             </property>
            </spacer>
           </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <property name="spacing">
-           <number>50</number>
-          </property>
-          <item>
-           <widget class="QPushButton" name="pushButton_back_to_login_urna_2">
-            <property name="text">
-             <string>Indietro</string>
+          <item row="13" column="0" colspan="2">
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <property name="spacing">
+             <number>50</number>
             </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButton_confirm_new_password">
-            <property name="text">
-             <string>Conferma</string>
-            </property>
-           </widget>
+            <item>
+             <widget class="QPushButton" name="pushButton_back_to_login_urna_2">
+              <property name="text">
+               <string>Indietro</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_confirm_new_password">
+              <property name="text">
+               <string>Conferma</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </item>
@@ -911,19 +856,6 @@ background-color: rgb(49, 149, 255);
            <enum>Qt::Horizontal</enum>
           </property>
          </widget>
-        </item>
-        <item>
-         <spacer name="verticalSpacer_25">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
         </item>
         <item>
          <layout class="QFormLayout" name="formLayout_3">
@@ -1806,7 +1738,6 @@ background-color: rgb(49, 149, 255);
         </item>
        </layout>
        <zorder></zorder>
-       <zorder></zorder>
        <zorder>line_7</zorder>
       </widget>
       <widget class="QWidget" name="registrazione_RP_page">
@@ -2493,6 +2424,7 @@ background-color: rgb(49, 149, 255);
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="page"/>
      </widget>
     </item>
    </layout>
