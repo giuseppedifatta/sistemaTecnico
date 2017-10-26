@@ -1109,7 +1109,7 @@ void MainWindowTecnico::on_pushButton_memorizza_periodo_procedura_clicked()
             }
         }
 
-        //TODO conferma che per questo range di date non siano già presenti delle procedure
+        //conferma che per questo range di date non siano già presenti delle procedure
         emit checkRangeProcedura(inizio,termine);
 
 
@@ -1232,9 +1232,9 @@ void MainWindowTecnico::showMessageCreazioneSeggioAnnullata()
 }
 
 void MainWindowTecnico::addTokenToTable(string sn, string user, string pass, uint idSeggio){
-    uint indexNewRow = ui->tableWidget_lista_procedure->rowCount();
+    uint numRow = ui->tableWidget_hardwareToken->rowCount();
+    uint indexNewRow = numRow;
     cout << "indice nuova riga: " << indexNewRow << endl;
-     ui->tableWidget_lista_procedure->insertRow(indexNewRow);
     ui->tableWidget_hardwareToken->insertRow(indexNewRow);
     int rigaAggiunta = ui->tableWidget_hardwareToken->rowCount()-1;
 
