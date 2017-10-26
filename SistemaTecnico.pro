@@ -56,17 +56,8 @@ else:unix: LIBS += -L$$PWD/../../../../usr/lib/i386-linux-gnu/ -ltinyxml2
 INCLUDEPATH += $$PWD/../../../../usr/lib/i386-linux-gnu
 DEPENDPATH += $$PWD/../../../../usr/lib/i386-linux-gnu
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../usr/lib/i386-linux-gnu/release/ -lcryptopp
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../usr/lib/i386-linux-gnu/debug/ -lcryptopp
-else:unix: LIBS += -L$$PWD/../../../../usr/lib/i386-linux-gnu/ -lcryptopp
 
-INCLUDEPATH += $$PWD/../../../../usr/include/cryptopp
-DEPENDPATH += $$PWD/../../../../usr/include/cryptopp
-
-win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../../../usr/lib/i386-linux-gnu/release/libcryptopp.a
-else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../../../usr/lib/i386-linux-gnu/debug/libcryptopp.a
-else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../../../usr/lib/i386-linux-gnu/release/cryptopp.lib
-else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../../../usr/lib/i386-linux-gnu/debug/cryptopp.lib
-else:unix: PRE_TARGETDEPS += $$PWD/../../../../usr/lib/i386-linux-gnu/libcryptopp.a
 
 unix|win32: LIBS += -lopenotp
+
+unix|win32: LIBS += -lcryptopp
