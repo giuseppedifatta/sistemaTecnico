@@ -9,6 +9,7 @@
 #include <QDebug>
 #include "openotp_login.h"
 
+
 DataManager::DataManager(QObject *parent) : QObject(parent)
 {
     try{
@@ -1302,14 +1303,15 @@ void DataManager::deleteSeggio(uint idSeggio)
     getInfoSeggi();
 }
 
-void DataManager::addPostazioniNoCommit(vector<string> ipPostazioni,string descrizioneSeggio)
+void DataManager::addPostazioniNoCommit(uint idSeggio, vector<string> ipPostazioni, string descrizioneSeggio)
 {
     PreparedStatement *pstmt;
     string ipSeggio = ipPostazioni.at(0);
-    pstmt = connection->prepareStatement("INSERT INTO Seggi (ipSeggio,sede) VALUES(?,?)");
+    pstmt = connection->prepareStatement("INSERT INTO Seggi (ipSeggio,sede,idSeggio) VALUES(?,?,?)");
     try{
         pstmt->setString(1,ipSeggio);
         pstmt->setString(2,descrizioneSeggio);
+        pstmt->setUInt(3,idSeggio);
         pstmt->executeUpdate();
         //commit rimandata al momento dell'inserimento degli hardware token
 
@@ -1319,21 +1321,22 @@ void DataManager::addPostazioniNoCommit(vector<string> ipPostazioni,string descr
     pstmt->close();
     delete pstmt;
 
-    pstmt = connection->prepareStatement("SELECT LAST_INSERT_ID() AS idSeggio");
-    ResultSet *resultSet;
-    uint idSeggio;
-    try{
-        resultSet = pstmt->executeQuery();
-        resultSet->next();//accediamo al primo e unico valore del resultSet
-        idSeggio = resultSet->getUInt("idSeggio");
-        cout << "id Seggio: " << idSeggio << endl;
-    }catch(SQLException &ex){
-        cerr << "Exception occurred: "<< ex.getErrorCode()<<endl;
-    }
-    pstmt->close();
-    resultSet->close();
-    delete pstmt;
-    delete resultSet;
+//    //se vogliamo un idSeggio di tipo AUTO INCREMENT, decommentare la sezione per ottenere l'id del seggio appena aggiunto
+//    pstmt = connection->prepareStatement("SELECT LAST_INSERT_ID() AS idSeggio");
+//    ResultSet *resultSet;
+//    uint idSeggio;
+//    try{
+//        resultSet = pstmt->executeQuery();
+//        resultSet->next();//accediamo al primo e unico valore del resultSet
+//        idSeggio = resultSet->getUInt("idSeggio");
+//        cout << "id Seggio: " << idSeggio << endl;
+//    }catch(SQLException &ex){
+//        cerr << "Exception occurred: "<< ex.getErrorCode()<<endl;
+//    }
+//    pstmt->close();
+//    resultSet->close();
+//    delete pstmt;
+//    delete resultSet;
 
 
     for (uint i = 0; i <=3 ; i++){
@@ -1669,4 +1672,58 @@ bool DataManager::validateOTP(string user,string pass,string otpStr){
 
     return success;
 
+}
+
+
+void DataManager::getSessionKeys(uint idProcedura){
+    PreparedStatement * pstmt;
+    ResultSet *resultSet;
+    vector<ChiaveSessione> sessionKeys;
+
+    string stmt = "SELECT p.ipPostazione , p.idSeggio, p.Sede, sk.sharedKey, sk.idSessione, sk.`data`, sk.apertura, sk.chiusura "
+                  "FROM (SELECT pp.idSeggio, pp.idPostazione, pp.ipPostazione, Seggi.Sede "
+                        "FROM Seggi INNER JOIN Postazioni pp ON pp.idSeggio=Seggi.idSeggio) p "
+                        "INNER JOIN(SELECT  cs.idSessione, cs.sharedKey, cs.idPostazione, s.`data`, s.apertura, s.chiusura	"
+                        "FROM ChiaviSessione cs	INNER JOIN (SELECT idSessione, `Sessioni`.`data`, apertura,chiusura  "
+                                                            "FROM Sessioni WHERE idProceduraVoto =  ?) s "
+                  "ON cs.idSessione = s.idSessione) sk ON p.idPostazione = sk.idPostazione ORDER BY idSeggio, idSessione, p.idPostazione";
+    pstmt = connection->prepareStatement(stmt);
+    try{
+        pstmt->setUInt(1,idProcedura);
+        resultSet = pstmt->executeQuery();
+        while(resultSet->next()){
+            ChiaveSessione cs;
+            string ipPostazione = resultSet->getString("ipPostazione");
+            cs.setIpPostazione(ipPostazione);
+            uint idSeggio = resultSet->getUInt("idSeggio");
+            cs.setIdSeggio(idSeggio);
+            string sedeSeggio = resultSet->getString("sede");
+            cs.setSedeSeggio(sedeSeggio);
+            string sharedKey = resultSet->getString("sharedKey");
+            cs.setSharedKey(sharedKey);
+
+            SessioneVoto sv;
+            QString qsData = QString::fromStdString(resultSet->getString("data")); //format is: yyyy-MM-dd
+            QDate data = QDate::fromString(qsData,"yyyy-MM-dd");
+            sv.setData(data.toString("dd/MM/yyyy").toStdString());
+
+            QString qsApertura = QString::fromStdString(resultSet->getString("apertura")); //format is: yyyy-MM-dd
+            QTime tApertura = QTime::fromString(qsApertura,"hh:mm:ss");
+            sv.setOraApertura(tApertura.toString("hh:mm").toStdString());
+
+            QString qsChiusura = QString::fromStdString(resultSet->getString("chiusura")); //format is: yyyy-MM-dd
+            QTime tChiusura = QTime::fromString(qsChiusura,"hh:mm:ss");
+            sv.setOraChiusura(tChiusura.toString("hh:mm").toStdString());
+
+            sv.setIdSessione(resultSet->getUInt("idSessione"));
+            cs.setSessioneVoto(sv);
+
+            sessionKeys.push_back(cs);
+
+        }
+    }catch(SQLException &ex){
+        cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
+    }
+
+    emit readyChiaviSessione(sessionKeys);
 }

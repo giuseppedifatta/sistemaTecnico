@@ -22,7 +22,7 @@
 #include "responsabileprocedimento.h"
 #include "infoseggio.h"
 #include "tipovotante.h"
-
+#include "chiavesessione.h"
 using namespace std;
 
 namespace Ui {
@@ -46,11 +46,12 @@ signals:
     void checkRangeProcedura(QDateTime inizio, QDateTime fine);
     void needInfoSeggi();
     void seggioToDelete(uint idSeggio);
-    void postazioniToAdd(vector <string> ipPostazioni, string descrizioneSeggio);
+    void postazioniToAdd(uint idSeggio, vector <string> ipPostazioni, string descrizioneSeggio);
     void rollbackNuovoSeggio();
     void commitNuovoSeggio();
     void testAndRecord(string sn,string user,string pass,string otp,uint idSeggio);
     void needTipiVotanti();
+    void needSessionKeys(uint idProcedura);
 public slots:
     void showViewSceltaOperazione();
     void passwordErrorMessage();
@@ -73,6 +74,7 @@ public slots:
     void showMessageTokenNotAvailable();
     void showMessageTestTokenFail();
     void createScheda(vector<TipoVotante> tipiVotanti);
+    void printSessionKeys(vector<ChiaveSessione> sessionKeys);
 public:
     explicit MainWindowTecnico(QWidget *parent = 0);
     ~MainWindowTecnico();

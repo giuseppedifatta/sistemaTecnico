@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     listaelettorale.cpp \
     infoseggio.cpp \
     openotp_login.cpp \
-    tipovotante.cpp
+    tipovotante.cpp \
+    chiavesessione.cpp
 
 HEADERS  += mainwindowtecnico.h \
     datamanager.h \
@@ -37,7 +38,8 @@ HEADERS  += mainwindowtecnico.h \
     listaelettorale.h \
     infoseggio.h \
     openotp_login.h \
-    tipovotante.h
+    tipovotante.h \
+    chiavesessione.h
 
 FORMS += \
     mainwindowtecnico.ui

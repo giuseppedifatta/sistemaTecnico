@@ -16,6 +16,7 @@
 #include "infoseggio.h"
 #include "openotp_login.h"
 #include "tipovotante.h"
+#include "chiavesessione.h"
 
 
 #include <cryptopp/pwdbased.h>
@@ -73,6 +74,7 @@ signals:
     void tokenStored(string sn, string user, string pass, uint idSeggio);
     void tokenNotAvailable();
     void testTokenFail();
+    void readyChiaviSessione(vector <ChiaveSessione> sessionKeys);
 public slots:
     void checkPassTecnico(QString pass);
     void tryChangeTecnicoPass(QString su_pass, QString newTecnicoPas);
@@ -88,10 +90,11 @@ public slots:
     void checkAvailabilityProceduraRange(QDateTime inizio,QDateTime termine);
     void getInfoSeggi();
     void deleteSeggio(uint idSeggio);
-    void addPostazioniNoCommit(vector <string> ipPostazioni, string descrizioneSeggio);
+    void addPostazioniNoCommit(uint idSeggio, vector <string> ipPostazioni, string descrizioneSeggio);
     void rollbackSeggio();
     void commitSeggio();
     void testTokenAndStoreNoCommit(string sn, string user, string pass, string otp, uint idSeggio);
+    void getSessionKeys(uint idProcedura);
 private:
 
     Driver *driver;

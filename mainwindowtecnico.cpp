@@ -10,6 +10,11 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
     ui(new Ui::MainWindowTecnico)
 {
     ui->setupUi(this);
+
+    setWindowFlags(Qt::FramelessWindowHint);
+
+    setWindowTitle("Voto digitale UNIPA");
+
     ui->stackedWidget->setCurrentIndex(InterfacceTecnico::loginUrna);
     this->setTables();
 
@@ -71,7 +76,7 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
 
     qRegisterMetaType< vector <string> >("vector <string>");
     qRegisterMetaType<string>("string");
-    QObject::connect(this, SIGNAL(postazioniToAdd(vector <string>,string)),model,SLOT(addPostazioniNoCommit(vector<string>,string)),Qt::QueuedConnection);
+    QObject::connect(this, SIGNAL(postazioniToAdd(uint, vector <string>,string)),model,SLOT(addPostazioniNoCommit(uint, vector<string>,string)),Qt::QueuedConnection);
     QObject::connect(model,SIGNAL(idSeggioCreating(uint)),this,SLOT(addGeneratoriOTP(uint)),Qt::QueuedConnection);
     QObject::connect(this,SIGNAL(rollbackNuovoSeggio()),model,SLOT(rollbackSeggio()),Qt::QueuedConnection);
     QObject::connect(this,SIGNAL(commitNuovoSeggio()),model,SLOT(commitSeggio()),Qt::QueuedConnection);
@@ -85,8 +90,11 @@ MainWindowTecnico::MainWindowTecnico(QWidget *parent) :
     qRegisterMetaType<vector <TipoVotante> >("vector <TipoVotante>");
     QObject::connect(model,SIGNAL(readyTipiVotanti(vector<TipoVotante>)),this,SLOT(createScheda(vector<TipoVotante>)),Qt::QueuedConnection);
     QObject::connect(this,SIGNAL(needTipiVotanti()),model,SLOT(getTipiVotanti()),Qt::QueuedConnection);
-}
 
+    qRegisterMetaType<vector <ChiaveSessione> >("vector <ChiaveSessione>");
+    QObject::connect(this,SIGNAL(needSessionKeys(uint)),model,SLOT(getSessionKeys(uint)),Qt::QueuedConnection);
+    QObject::connect(model,SIGNAL(readyChiaviSessione(vector<ChiaveSessione>)),this,SLOT(printSessionKeys(vector<ChiaveSessione>)),Qt::QueuedConnection);
+}
 
 MainWindowTecnico::~MainWindowTecnico()
 {
@@ -1766,9 +1774,15 @@ void MainWindowTecnico::on_pushButton_precedente_clicked()
 void MainWindowTecnico::on_pushButton_printSessionKeys_clicked()
 {
     //TODO richiedere al model i dati sulle chiavi di sessione per le postazioni, divise per seggio
+    emit needSessionKeys(idProceduraSelezionata);
+
+}
+
+void MainWindowTecnico::printSessionKeys(vector<ChiaveSessione> sessionKeys){
     QPrinter printer;
     printer.setPrinterName("desired printer name");
     QPrintDialog dialog(&printer, this);
+    dialog.setWindowTitle("Stampa chiavi di sessione");
     if(dialog.exec()==QDialog::Rejected){
         return;
     }else{
@@ -1776,15 +1790,73 @@ void MainWindowTecnico::on_pushButton_printSessionKeys_clicked()
         QPainter painter;
         if (! painter.begin(&printer)) { // failed to open file
             qWarning("failed to open file, is it writable?");
+            //TODO message box
+            painter.end();
+            return;
+        }
+        uint idSeggioCurrent = 0;
+        uint riga = 1;
+        uint idCurrentSession = 0;
+        bool firstSeggio = true;
+        for (uint i = 0; i < sessionKeys.size(); i++){
+            ChiaveSessione cs = sessionKeys.at(i);
+
+            //stampa delle informazioni del Seggio
+            uint idSeggio = cs.getIdSeggio();
+            if(idSeggio != idSeggioCurrent){
+                idSeggioCurrent = idSeggio;
+                riga = 1; //reset a 1 del puntatore di riga per la nuova pagina
+                idCurrentSession = 0; //reset a 0 dell'idSessione, se stiamo stampando le chiavi di un nuovo Seggio;
+                //stampa una nuova pagina
+                if (!firstSeggio && !printer.newPage()) {
+                    qWarning("failed in flushing page to disk, disk full?");
+                    //TODO message box
+                    painter.end();
+                    return;
+                }
+                firstSeggio = false;
+                string sedeSeggio = cs.getSedeSeggio();
+                painter.drawText(100, 15*riga,
+                                 QString::fromStdString("Seggio " + to_string(idSeggio) + ", " + sedeSeggio));
+                riga++;
+            }
+
+            //stampa delle informazioni di Sessione
+            SessioneVoto sv = cs.getSessioneVoto();
+            uint idSessione = sv.getIdSessione();
+            if(idSessione != idCurrentSession){
+                riga++;
+                idCurrentSession = idSessione;
+                string data = sv.getData();
+                string oraApertura = sv.getOraApertura();
+                string oraChiusura = sv.getOraChiusura();
+                string sessione = "Sessione del " + data + ", inizio sessione: " + oraApertura + ", fine sessione: " + oraChiusura;
+                painter.drawText(50,15*riga,QString::fromStdString(sessione));
+                riga++;
+                riga++;
+            }
+            string sharedKey = cs.getSharedKey();
+
+            string ip = cs.getIpPostazione();
+            int byte1, byte2, byte3, byte4;
+            char dot;
+            istringstream s(ip);  // input stream that now contains the ip address string
+
+            s >> byte1 >> dot >> byte2 >> dot >> byte3 >> dot >> byte4 >> dot;
+            uint id = byte4%4;
+            if(id == 0){
+                string rigaSK = "Chiave del seggio: " + sharedKey;
+                painter.drawText(10,15 * riga, QString::fromStdString(rigaSK));
+                riga++;
+            }
+            else{
+                string rigaSK = "Chiave della postazione voto " + to_string(id) + ": " + sharedKey;
+                painter.drawText(10,15 * riga, QString::fromStdString(rigaSK));
+                riga++;
+            }
 
         }
-        painter.drawText(10, 10, "Test");
-        painter.drawText(10, 10, "Test 2"); //la seconda draw text sovrascrive la prima...
-        if (! printer.newPage()) {
-            qWarning("failed in flushing page to disk, disk full?");
 
-        }
-        painter.drawText(10, 10, "Test 2");
         painter.end();
     }
 }
@@ -1836,6 +1908,7 @@ void MainWindowTecnico::on_pushButton_aggiungiSeggio_clicked()
     istringstream s(ipNuovoSeggio);  // input stream that now contains the ip address string
 
     s >> byte1 >> dot >> byte2 >> dot >> byte3 >> dot >> byte4 >> dot;
+    uint idSeggio = byte4/4;
 
     vector <string> ipPostazioni;
     ipPostazioni.push_back(ipNuovoSeggio);
@@ -1847,7 +1920,7 @@ void MainWindowTecnico::on_pushButton_aggiungiSeggio_clicked()
     }
     QString desc = ui->lineEdit_denominazioneIndirizzo->text();
     string descrizioneSeggio = desc.toStdString();
-    emit postazioniToAdd(ipPostazioni, descrizioneSeggio);
+    emit postazioniToAdd(idSeggio, ipPostazioni, descrizioneSeggio);
 }
 
 void MainWindowTecnico::on_pushButton_testOTP_clicked()
