@@ -8,24 +8,33 @@
 #include <istream>
 #include <QDebug>
 #include "openotp_login.h"
+#include "conf.h"
 
 
 DataManager::DataManager(QObject *parent) : QObject(parent)
 {
     try{
         driver=get_driver_instance();
-        connection=driver->connect("localhost:3306","root", "root");
+        string ip_port = getConfig("pathDBmydb");
+        string userMydb = getConfig("userDBmydb");
+        string passMydb = getConfig("passDBmydb");
+        string nameMydb = getConfig("nameDBmydb");
+        connection = driver->connect(ip_port,userMydb, passMydb);
         connection->setAutoCommit(false);
-        connection->setSchema("mydb");
+        connection->setSchema(nameMydb);
     }catch(SQLException &ex){
         cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
     }
 
     try{
         driver=get_driver_instance();
-        connectionAnagrafica=driver->connect("localhost:3306","root", "root");
+        string ip_port = getConfig("pathDBanagrafica");
+        string userAnagrafica = getConfig("userDBanagrafica");
+        string passAnagrafica = getConfig("passDBanagrafica");
+        string nameAnagrafica = getConfig("nameDBanagrafica");
+        connectionAnagrafica=driver->connect(ip_port,userAnagrafica, passAnagrafica);
         connectionAnagrafica->setAutoCommit(false);
-        connectionAnagrafica->setSchema("anagraficaDB");
+        connectionAnagrafica->setSchema(nameAnagrafica);
     }catch(SQLException &ex){
         cerr << "Exception occurred: "<<ex.getErrorCode()<<endl;
     }
@@ -1321,22 +1330,22 @@ void DataManager::addPostazioniNoCommit(uint idSeggio, vector<string> ipPostazio
     pstmt->close();
     delete pstmt;
 
-//    //se vogliamo un idSeggio di tipo AUTO INCREMENT, decommentare la sezione per ottenere l'id del seggio appena aggiunto
-//    pstmt = connection->prepareStatement("SELECT LAST_INSERT_ID() AS idSeggio");
-//    ResultSet *resultSet;
-//    uint idSeggio;
-//    try{
-//        resultSet = pstmt->executeQuery();
-//        resultSet->next();//accediamo al primo e unico valore del resultSet
-//        idSeggio = resultSet->getUInt("idSeggio");
-//        cout << "id Seggio: " << idSeggio << endl;
-//    }catch(SQLException &ex){
-//        cerr << "Exception occurred: "<< ex.getErrorCode()<<endl;
-//    }
-//    pstmt->close();
-//    resultSet->close();
-//    delete pstmt;
-//    delete resultSet;
+    //    //se vogliamo un idSeggio di tipo AUTO INCREMENT, decommentare la sezione per ottenere l'id del seggio appena aggiunto
+    //    pstmt = connection->prepareStatement("SELECT LAST_INSERT_ID() AS idSeggio");
+    //    ResultSet *resultSet;
+    //    uint idSeggio;
+    //    try{
+    //        resultSet = pstmt->executeQuery();
+    //        resultSet->next();//accediamo al primo e unico valore del resultSet
+    //        idSeggio = resultSet->getUInt("idSeggio");
+    //        cout << "id Seggio: " << idSeggio << endl;
+    //    }catch(SQLException &ex){
+    //        cerr << "Exception occurred: "<< ex.getErrorCode()<<endl;
+    //    }
+    //    pstmt->close();
+    //    resultSet->close();
+    //    delete pstmt;
+    //    delete resultSet;
 
 
     for (uint i = 0; i <=3 ; i++){
@@ -1643,7 +1652,7 @@ bool DataManager::validateOTP(string user,string pass,string otpStr){
 
     //contattare otpServer per verificare il token rispetto all'account relativo al token associato alla postazione voto
     //string url = "https://147.163.26.229:8443/openotp/";
-    string url = "https://192.168.1.10:8443/openotp/";
+    string url = getConfig("serviceOTP");
     string username = user;
     string password = pass;
 
@@ -1682,10 +1691,10 @@ void DataManager::getSessionKeys(uint idProcedura){
 
     string stmt = "SELECT p.ipPostazione , p.idSeggio, p.Sede, sk.sharedKey, sk.idSessione, sk.`data`, sk.apertura, sk.chiusura "
                   "FROM (SELECT pp.idSeggio, pp.idPostazione, pp.ipPostazione, Seggi.Sede "
-                        "FROM Seggi INNER JOIN Postazioni pp ON pp.idSeggio=Seggi.idSeggio) p "
-                        "INNER JOIN(SELECT  cs.idSessione, cs.sharedKey, cs.idPostazione, s.`data`, s.apertura, s.chiusura	"
-                        "FROM ChiaviSessione cs	INNER JOIN (SELECT idSessione, `Sessioni`.`data`, apertura,chiusura  "
-                                                            "FROM Sessioni WHERE idProceduraVoto =  ?) s "
+                  "FROM Seggi INNER JOIN Postazioni pp ON pp.idSeggio=Seggi.idSeggio) p "
+                  "INNER JOIN(SELECT  cs.idSessione, cs.sharedKey, cs.idPostazione, s.`data`, s.apertura, s.chiusura	"
+                  "FROM ChiaviSessione cs	INNER JOIN (SELECT idSessione, `Sessioni`.`data`, apertura,chiusura  "
+                  "FROM Sessioni WHERE idProceduraVoto =  ?) s "
                   "ON cs.idSessione = s.idSessione) sk ON p.idPostazione = sk.idPostazione ORDER BY idSeggio, idSessione, p.idPostazione";
     pstmt = connection->prepareStatement(stmt);
     try{

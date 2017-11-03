@@ -1,0 +1,11 @@
+#file di configurazione del sistema Tecnico, inserire le impostazioni di configurazione una per riga, separando voce e valore con uno spazio o un altro simbolo di un solo carattere alfanumerico
+
+nameDBanagrafica anagraficaDB
+pathDBanagrafica localhost:3306
+userDBanagrafica root
+passDBanagrafica root
+
+nameDBmydb mydb
+pathDBmydb localhost:3306
+userDBmydb root
+passDBmydb root

@@ -25,7 +25,8 @@ SOURCES += main.cpp\
     infoseggio.cpp \
     openotp_login.cpp \
     tipovotante.cpp \
-    chiavesessione.cpp
+    chiavesessione.cpp \
+    conf.cpp
 
 HEADERS  += mainwindowtecnico.h \
     datamanager.h \
@@ -39,7 +40,8 @@ HEADERS  += mainwindowtecnico.h \
     infoseggio.h \
     openotp_login.h \
     tipovotante.h \
-    chiavesessione.h
+    chiavesessione.h \
+    conf.h
 
 FORMS += \
     mainwindowtecnico.ui
