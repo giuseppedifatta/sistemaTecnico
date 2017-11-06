@@ -9,3 +9,5 @@ nameDBmydb mydb
 pathDBmydb localhost:3306
 userDBmydb root
 passDBmydb root
+
+serviceOTP https://192.168.1.10:8443/openotp/
